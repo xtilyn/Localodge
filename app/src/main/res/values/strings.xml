@@ -1,0 +1,41 @@
+<resources>
+				<string name="app_name">Localodge</string>
+				<string name="title_activity_dashboard">DashboardActivity</string>
+				<string name="navigation_drawer_open">Open navigation drawer</string>
+				<string name="navigation_drawer_close">Close navigation drawer</string>
+				<string name="nav_header_title">Android Studio</string>
+				<string name="nav_header_subtitle">android.studio@android.com</string>
+				<string name="nav_header_desc">Navigation header</string>
+				<string name="action_settings">Settings</string>
+
+				<string name="menu_home">Home</string>
+				<string name="menu_gallery">Gallery</string>
+				<string name="menu_slideshow">Slideshow</string>
+				<string name="menu_tools">Tools</string>
+				<string name="menu_share">Share</string>
+				<string name="menu_send">Send</string>
+
+				<!-- TODO: Remove or change this placeholder text -->
+				<string name="hello_blank_fragment">Hello blank fragment</string>
+				<string name="email">Email</string>
+				<string name="password">Password</string>
+				<string name="username">Username</string>
+				<string name="create_an_account">Create an account</string>
+				<string name="localodge">Localodge</string>
+				<string name="register">Register</string>
+				<string name="localodge_subtitle">See what\'s trending in your area</string>
+				<string name="sign_in">Sign In</string>
+				<string name="invalid_email">Please enter a valid email</string>
+				<string name="invalid_password">Your password is too short</string>
+				<string name="email_confirmation_sent">We\'ve sent you a confirmation email. Please check your inbox.</string>
+				<string name="invalid_credentials">The email and/or password you have provided does not match.</string>
+				<string name="generic_error_message">Something went wrong. Please try again later.</string>
+				<string name="user_disabled_error">This account has been disabled.</string>
+				<string name="user_not_found_error">Email not registered. Please create a new account.</string>
+				<string name="email_already_in_use_error">This email is already in use. Please use a different email.</string>
+				<string name="email_required">Please enter your email</string>
+				<string name="password_required">Please enter your password.</string>
+				<string name="username_required">Please enter your username</string>
+				<string name="username_too_short">Username must be greater than 3 characters.</string>
+				<string name="email_not_verified">This email is not yet verified. Please check your inbox.</string>
+</resources>

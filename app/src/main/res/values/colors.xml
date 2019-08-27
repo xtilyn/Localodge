@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#e47a2e</color>
+    <color name="colorPrimaryDark">#e47a2e</color>
+    <color name="colorAccent">#ffbe61</color>
+    <color name="colorAccent73">#73ffbe61</color>
+    
+    <color name="paleDogwood8C">#8CEDCDC2</color>
+    <color name="paleDogwood">#EDCDC2</color>
+    <color name="hazelnut">#CFB095</color>
+    <color name="hazelnut73">#73CFB095</color>
+    <color name="dustyCedar">#AD5D5D</color>
+</resources>
