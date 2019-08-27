@@ -71,4 +71,6 @@ class LoginViewModel (application: Application) : AndroidViewModel(application) 
     fun signOut() = repo.signOut()
 
     fun sendEmailVerification(): Completable = repo.sendEmailVerification()
+
+    fun sendPasswordResetEmail(email: String): Completable = repo.sendPasswordResetEmail(email)
 }

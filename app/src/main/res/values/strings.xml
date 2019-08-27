@@ -38,4 +38,8 @@
 				<string name="username_required">Please enter your username</string>
 				<string name="username_too_short">Username must be greater than 3 characters.</string>
 				<string name="email_not_verified">This email is not yet verified. Please check your inbox.</string>
+				<string name="forgot_password">Forgot password</string>
+				<string name="continue_text">Continue</string>
+				<string name="password_reset_failed">Could not send password reset email. Please try again later.</string>
+				<string name="password_reset_sent">Password reset email was sent to your email. Please check your inbox</string>
 </resources>

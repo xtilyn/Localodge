@@ -4,6 +4,7 @@ package com.devssocial.localodge.ui.login.fragments
 import android.os.Bundle
 import android.transition.ChangeBounds
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import com.devssocial.localodge.R
 import com.devssocial.localodge.extensions.isEmail
 import com.devssocial.localodge.ui.login.view_model.LoginViewModel
@@ -46,6 +48,9 @@ class SignInFragment : Fragment() {
                     signInRequested()
                 }
             }
+            R.id.forgot_password -> {
+               findNavController().navigate(R.id.action_signInFragment_to_forgotPasswordFragment)
+            }
         }
     }
 
@@ -69,6 +74,7 @@ class SignInFragment : Fragment() {
         // setup widgets
         register_button?.setOnClickListener(signInFragmentClickListener)
         sign_in_button?.setOnClickListener(signInFragmentClickListener)
+        forgot_password?.setOnClickListener(signInFragmentClickListener)
     }
 
     override fun onStart() {
@@ -263,6 +269,7 @@ class SignInFragment : Fragment() {
     }
 
     private fun handleError(error: Throwable) {
+        Log.e(this::javaClass.name, error.message!!, error)
         val message = loginViewModel.getErrorMessage(error)
         showError(message)
         showProgress(false)

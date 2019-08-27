@@ -63,4 +63,8 @@ class LoginRepository {
         )
         return RxFirebaseFirestore.set(ref, newUserDoc)
     }
+
+    fun sendPasswordResetEmail(email: String): Completable {
+        return RxFirebaseAuth.sendPasswordResetEmail(mAuth, email)
+    }
 }
