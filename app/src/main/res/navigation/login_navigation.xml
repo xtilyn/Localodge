@@ -8,7 +8,7 @@
 
 				<fragment
 												android:id="@+id/signInFragment"
-												android:name="com.devssocial.localodge.ui.login.fragments.SignInFragment"
+												android:name="com.devssocial.localodge.ui.login.ui.SignInFragment"
 												android:label="fragment_intro"
 												tools:layout="@layout/fragment_sign_in"
 												>
@@ -23,7 +23,7 @@
 				</fragment>
 				<fragment
 												android:id="@+id/forgotPasswordFragment"
-												android:name="com.devssocial.localodge.ui.login.fragments.ForgotPasswordFragment"
+												android:name="com.devssocial.localodge.ui.login.ui.ForgotPasswordFragment"
 												android:label="fragment_sign_in"
 												tools:layout="@layout/fragment_forgot_password"
 												/>

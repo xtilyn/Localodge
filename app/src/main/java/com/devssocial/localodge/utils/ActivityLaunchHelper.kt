@@ -3,8 +3,8 @@ package com.devssocial.localodge.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import com.devssocial.localodge.ui.dashboard.DashboardActivity
-import com.devssocial.localodge.ui.login.LoginActivity
+import com.devssocial.localodge.ui.dashboard.ui.DashboardActivity
+import com.devssocial.localodge.ui.login.ui.LoginActivity
 
 class ActivityLaunchHelper {
 

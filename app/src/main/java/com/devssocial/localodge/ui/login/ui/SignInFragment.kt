@@ -1,4 +1,4 @@
-package com.devssocial.localodge.ui.login.fragments
+package com.devssocial.localodge.ui.login.ui
 
 
 import android.os.Bundle
@@ -89,6 +89,11 @@ class SignInFragment : Fragment() {
                     toggleRegister(false)
                 }
         )
+    }
+
+    override fun onStop() {
+        super.onStop()
+        disposables.clear()
     }
 
     private fun toggleRegister(show: Boolean) {

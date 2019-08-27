@@ -1,4 +1,4 @@
-package com.devssocial.localodge.ui.login
+package com.devssocial.localodge.ui.login.ui
 
 import android.content.Context
 import android.os.Bundle

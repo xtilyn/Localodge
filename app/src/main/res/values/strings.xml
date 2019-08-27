@@ -1,6 +1,6 @@
 <resources>
 				<string name="app_name">Localodge</string>
-				<string name="title_activity_dashboard">DashboardActivity</string>
+				<string name="title_activity_dashboard">Home</string>
 				<string name="navigation_drawer_open">Open navigation drawer</string>
 				<string name="navigation_drawer_close">Close navigation drawer</string>
 				<string name="nav_header_title">Android Studio</string>
@@ -42,4 +42,5 @@
 				<string name="continue_text">Continue</string>
 				<string name="password_reset_failed">Could not send password reset email. Please try again later.</string>
 				<string name="password_reset_sent">Password reset email was sent to your email. Please check your inbox</string>
+				<string name="create_a_post">Create a post</string>
 </resources>

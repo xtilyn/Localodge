@@ -4,6 +4,9 @@ package com.devssocial.localodge
 const val AVATARS = "avatars"
 const val USERS = "users"
 
+// RxJava error message
+const val NO_VALUE = "No value"
+
 // Firebase error codes
 const val ERROR_USER_DISABLED = "ERROR_USER_DISABLED"
 const val ERROR_USER_NOT_FOUND = "ERROR_USER_NOT_FOUND"

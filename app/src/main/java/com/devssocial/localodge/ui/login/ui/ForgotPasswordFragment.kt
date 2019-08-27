@@ -1,4 +1,4 @@
-package com.devssocial.localodge.ui.login.fragments
+package com.devssocial.localodge.ui.login.ui
 
 
 import android.os.Bundle
@@ -67,6 +67,11 @@ class ForgotPasswordFragment : Fragment() {
         // setup widgets
         back_button?.setOnClickListener(clickListener)
         send_email_verification_button?.setOnClickListener(clickListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        disposables.clear()
     }
 
     private fun sendPasswordResetEmail(email: String) {

@@ -5,7 +5,7 @@
 																																																			android:layout_width="match_parent"
 																																																			android:layout_height="match_parent"
 																																																			android:background="@drawable/city"
-																																																			tools:context=".ui.login.fragments.SignInFragment"
+																																																			tools:context=".ui.login.ui.SignInFragment"
 																																																			android:id="@+id/sign_in_root_layout"
 								>
 
