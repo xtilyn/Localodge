@@ -274,7 +274,7 @@ class SignInFragment : Fragment() {
     }
 
     private fun handleError(error: Throwable) {
-        Log.e(this::javaClass.name, error.message!!, error)
+        Log.e(this::class.java.simpleName, error.message!!, error)
         val message = loginViewModel.getErrorMessage(error)
         showError(message)
         showProgress(false)

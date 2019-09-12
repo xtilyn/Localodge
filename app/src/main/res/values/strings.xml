@@ -43,4 +43,10 @@
 				<string name="password_reset_failed">Could not send password reset email. Please try again later.</string>
 				<string name="password_reset_sent">Password reset email was sent to your email. Please check your inbox</string>
 				<string name="create_a_post">Create a post</string>
+				<string name="location_retrieval_failed">Failed to retrieve your location.</string>
+				<string name="request_location">Location is required to use this app. Turn on location?</string>
+				<string name="location_denied">Location is required to use this app.</string>
+				<string name="post_description">Post description</string>
+				<string name="post">Post</string>
+				<string name="enter_description">Enter description:</string>
 </resources>

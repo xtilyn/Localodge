@@ -82,7 +82,7 @@ class ForgotPasswordFragment : Fragment() {
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
                     onError = {
-                        Log.e(this::javaClass.name, it.message!!, it)
+                        Log.e(this::class.java.name, it.message!!, it)
                         if (it is FirebaseAuthInvalidUserException) {
                             onPasswordResetSent()
                             return@subscribeBy
