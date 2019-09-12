@@ -11,23 +11,5 @@ import io.reactivex.Single
 
 class DashboardRepository {
 
-    private val firestore = FirebaseFirestore.getInstance()
-    private val mAuth = FirebaseAuth.getInstance()
 
-    fun getCurrentUser(): FirebaseUser? = mAuth.currentUser
-
-    fun getUserData(userId: String): Single<User> {
-        val ref = firestore
-            .collection(USERS)
-            .document(userId)
-
-        return RxFirebaseFirestore.data(ref)
-            .flatMap {
-                if (it.value().exists()) {
-                    Single.just(it.value().toObject(User::class.java))
-                } else {
-                    Single.error(Exception(NO_VALUE))
-                }
-            }
-    }
 }

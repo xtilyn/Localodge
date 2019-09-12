@@ -2,9 +2,10 @@ package com.devssocial.localodge.ui.user_profile
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.devssocial.localodge.LocalodgeActivity
 import com.devssocial.localodge.R
 
-class UserProfileActivity : AppCompatActivity() {
+class UserProfileActivity : LocalodgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
