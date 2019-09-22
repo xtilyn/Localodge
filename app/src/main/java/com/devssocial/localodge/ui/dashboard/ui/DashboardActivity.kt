@@ -1,27 +1,16 @@
 package com.devssocial.localodge.ui.dashboard.ui
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProviders
 import com.devssocial.localodge.LocalodgeActivity
 import com.devssocial.localodge.R
 import com.devssocial.localodge.models.User
-import com.devssocial.localodge.ui.dashboard.ui.DashboardFragment.Companion.REQUEST_CHECK_SETTINGS
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
-import com.devssocial.localodge.utils.ActivityLaunchHelper
-import com.google.firebase.auth.FirebaseAuth
-import io.github.inflationx.viewpump.ViewPumpContextWrapper
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import pub.devrel.easypermissions.EasyPermissions
 import java.util.concurrent.TimeUnit
 
 class DashboardActivity : LocalodgeActivity() {
@@ -62,7 +51,11 @@ class DashboardActivity : LocalodgeActivity() {
                             }
                         },
                         { error ->
-                            handleError(TAG, error, resources.getString(R.string.generic_error_message))
+                            handleError(
+                                TAG,
+                                error,
+                                resources.getString(R.string.generic_error_message)
+                            )
                         }
                     )
             )

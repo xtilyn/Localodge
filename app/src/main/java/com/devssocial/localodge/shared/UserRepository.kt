@@ -16,6 +16,10 @@ class UserRepository {
 
     fun getCurrentUser(): FirebaseUser? = mAuth.currentUser
 
+    fun logOut() {
+        // TODO CONTINUE HERE LOGOUT USER
+    }
+
     fun getUserData(userId: String): Single<User> {
         val ref = firestore
             .collection(USERS)

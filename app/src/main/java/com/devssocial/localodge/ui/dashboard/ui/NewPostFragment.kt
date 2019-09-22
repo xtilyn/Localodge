@@ -30,7 +30,7 @@ class NewPostFragment : Fragment() {
                 activity?.onBackPressed()
             }
             R.id.post_button -> {
-
+                onPostButtonClick()
             }
             R.id.take_photo -> {
 
@@ -90,17 +90,15 @@ class NewPostFragment : Fragment() {
         })
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        // TODO CONTINUE HERE GRAB USER DATA
-//        disposables.add(
-//
-//        )
-    }
-
     override fun onStop() {
         super.onStop()
         disposables.clear()
+    }
+
+    private fun onPostButtonClick() {
+        // TODO CONTINUE HERE GRAB USER DATA from shared pref and make a new post
+//        disposables.add(
+//
+//        )
     }
 }

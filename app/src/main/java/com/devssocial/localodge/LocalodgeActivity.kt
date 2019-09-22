@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.devssocial.localodge.shared.UserRepository
 import com.devssocial.localodge.utils.ActivityLaunchHelper
 import com.google.firebase.auth.FirebaseAuth
 import es.dmoral.toasty.Toasty
@@ -16,6 +17,8 @@ import io.github.inflationx.viewpump.ViewPumpContextWrapper
  */
 @SuppressLint("Registered")
 open class LocalodgeActivity : AppCompatActivity() {
+
+    private val userRepo: UserRepository = UserRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +34,10 @@ open class LocalodgeActivity : AppCompatActivity() {
     private fun checkAuthState() {
         // Check to make sure the user is logged in. Otherwise, proceed to Login
         val mAuth = FirebaseAuth.getInstance()
-        if (mAuth.currentUser == null) ActivityLaunchHelper.goToLogin(this)
+        if (mAuth.currentUser == null) {
+            userRepo.logOut()
+            ActivityLaunchHelper.goToLogin(this)
+        }
     }
 
     fun handleError(TAG: String, error: Throwable?, msgToUser: String) {
