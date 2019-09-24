@@ -1,6 +1,7 @@
 package com.devssocial.localodge.ui.dashboard.ui
 
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,8 +13,10 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
+import com.devssocial.localodge.LOCALODGE_SHARED_PREF
 
 import com.devssocial.localodge.R
+import com.devssocial.localodge.USERNAME
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.KeyboardUtils
 import io.reactivex.disposables.CompositeDisposable
@@ -24,7 +27,7 @@ class NewPostFragment : Fragment() {
     private lateinit var dashboardViewModel: DashboardViewModel
     private val disposables = CompositeDisposable()
 
-    private val newPostClickListener = View.OnClickListener {  view ->
+    private val newPostClickListener = View.OnClickListener { view ->
         when (view.id) {
             R.id.back_button -> {
                 activity?.onBackPressed()
@@ -71,7 +74,7 @@ class NewPostFragment : Fragment() {
         take_photo.setOnClickListener(newPostClickListener)
         promote_post.setOnClickListener(newPostClickListener)
 
-        post_description_edit_text.addTextChangedListener(object: TextWatcher {
+        post_description_edit_text.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -96,7 +99,14 @@ class NewPostFragment : Fragment() {
     }
 
     private fun onPostButtonClick() {
-        // TODO CONTINUE HERE GRAB USER DATA from shared pref and make a new post
+        // TODO CONTINUE HERE
+        // todo set location in geofirestore:
+//        val collectionRef = FirebaseFirestore.getInstance().collection("my-collection")
+//        val geoFirestore = GeoFirestore(collectionRef)
+//        geoFirestore.setLocation("que8B9fxxjcvbC81h32VRjeBSUW2", GeoPoint(37.7853889, -122.4056973)) { exception ->
+//            if (exception != null)
+//                Log.d(TAG, "Location saved on server successfully!")
+//        }
 //        disposables.add(
 //
 //        )

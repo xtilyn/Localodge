@@ -30,6 +30,7 @@ import com.algolia.search.saas.Index
 import com.bumptech.glide.Glide
 import com.devssocial.localodge.*
 import com.devssocial.localodge.R
+import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
@@ -43,7 +44,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.app_bar_dashboard.*
+import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import org.json.JSONObject
 import pub.devrel.easypermissions.AfterPermissionGranted
@@ -52,9 +53,10 @@ import pub.devrel.easypermissions.EasyPermissions
 class DashboardFragment :
     Fragment(),
     NavigationView.OnNavigationItemSelectedListener,
-    EasyPermissions.PermissionCallbacks{
+    EasyPermissions.PermissionCallbacks {
 
     companion object {
+        private const val TAG = "DashboardFragment"
         const val REQUEST_LOCATION_PERMISSION = 1
         const val REQUEST_CHECK_SETTINGS = 2
         const val NEARBY_RADIUS = 1000000 // 100km
@@ -66,9 +68,6 @@ class DashboardFragment :
 
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
-    private lateinit var client: Client
-    private lateinit var postsIndex: Index
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -156,7 +155,11 @@ class DashboardFragment :
         getLocation()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         // Forward results to EasyPermissions
@@ -191,9 +194,10 @@ class DashboardFragment :
 
     private fun getLocation() {
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             fusedLocationClient.lastLocation
-                .addOnSuccessListener { location : Location? ->
+                .addOnSuccessListener { location: Location? ->
                     if (location == null) checkLocationSettings()
                     else {
                         this@DashboardFragment.userLocation = location
@@ -208,7 +212,7 @@ class DashboardFragment :
     private fun checkLocationSettings() {
         LocationRequest.create()?.apply {
             priority = LocationRequest.PRIORITY_LOW_POWER
-        }?.let{ locationRequest ->
+        }?.let { locationRequest ->
             val builder = LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest)
 
@@ -220,14 +224,16 @@ class DashboardFragment :
             }
 
             task.addOnFailureListener { exception ->
-                if (exception is ResolvableApiException){
+                if (exception is ResolvableApiException) {
                     // Location settings are not satisfied, but this can be fixed
                     // by showing the user a dialog.
                     try {
                         // Show the dialog by calling startResolutionForResult(),
                         // and check the result in onActivityResult().
-                        exception.startResolutionForResult(activity!!,
-                            REQUEST_CHECK_SETTINGS)
+                        exception.startResolutionForResult(
+                            activity!!,
+                            REQUEST_CHECK_SETTINGS
+                        )
                     } catch (sendEx: IntentSender.SendIntentException) {
                         // Ignore the error.
                     }
@@ -237,12 +243,11 @@ class DashboardFragment :
     }
 
     @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
-     fun requestLocationPermission() {
+    fun requestLocationPermission() {
         val perms = Manifest.permission.ACCESS_FINE_LOCATION
         if (EasyPermissions.hasPermissions(context!!, perms)) {
             getLocation()
-        }
-        else {
+        } else {
             EasyPermissions.requestPermissions(
                 this,
                 resources.getString(R.string.request_location),
@@ -317,10 +322,23 @@ class DashboardFragment :
 
     private fun loadDashboardData() {
         Log.d(this::class.java.simpleName, "user location: $userLocation")
-
-        client = Client(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY)
-        postsIndex = client.getIndex(POSTS_INDEX)
-
-        // TODO CONTINUE HERE, CLOUD FUNCTIONS + ALGOLIA
+        if (userLocation == null) return
+        disposables.add(
+            dashboardViewModel.loadDataAroundLocation(userLocation!!)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = { error ->
+                        (activity as LocalodgeActivity).logAndShowError(
+                            TAG,
+                            error,
+                            resources.getString(R.string.error_retrieving_data)
+                        )
+                    },
+                    onSuccess = { posts: ArrayList<Post> ->
+                        // TODO CONTINUE HERE POPULATE RECYCLERVIEW
+                    }
+                )
+        )
     }
 }

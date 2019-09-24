@@ -49,4 +49,5 @@
 				<string name="post_description">Post description</string>
 				<string name="post">Post</string>
 				<string name="enter_description">Enter description:</string>
+				<string name="error_retrieving_data">Could not retrieve data. Please try again later.</string>
 </resources>

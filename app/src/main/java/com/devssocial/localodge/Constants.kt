@@ -2,6 +2,8 @@ package com.devssocial.localodge
 
 // SHARED PREF
 const val LOCALODGE_SHARED_PREF = "com.localodge.shared_pref"
+const val USER_PROFILE_URL = "userProfileUrl"
+const val USERNAME = "username"
 
 // ALGOLIA API
 const val ALGOLIA_APP_ID = "L4UXH3U7Y3"
@@ -13,6 +15,7 @@ const val POSTS_INDEX = "posts"
 // firestore collections
 const val AVATARS = "avatars"
 const val USERS = "users"
+const val CITIES = "cities"
 
 // RxJava error message
 const val NO_VALUE = "No value"

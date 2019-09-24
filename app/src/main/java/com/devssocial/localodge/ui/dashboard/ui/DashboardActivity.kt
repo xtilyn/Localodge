@@ -1,17 +1,16 @@
 package com.devssocial.localodge.ui.dashboard.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProviders
-import com.devssocial.localodge.LocalodgeActivity
-import com.devssocial.localodge.R
+import com.devssocial.localodge.*
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
-import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 
 class DashboardActivity : LocalodgeActivity() {
 
@@ -47,11 +46,36 @@ class DashboardActivity : LocalodgeActivity() {
     }
 
     private fun getCurrentUserData(onSuccess: (User) -> Unit) {
-        // TODO CONTINUE HERE
+        val userId = dashboardViewModel.getCurrentUser()?.uid ?: return
+        disposables.add(
+            dashboardViewModel.getUserData(userId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = { error ->
+                        logAndShowError(
+                            TAG,
+                            error,
+                            resources.getString(R.string.generic_error_message)
+                        )
+                    },
+                    onSuccess = { user: User ->
+                        onSuccess(user)
+                    }
+                )
+        )
     }
 
     private fun saveToSharedPref(user: User) {
-
+        val sharedPref = getSharedPreferences(
+            LOCALODGE_SHARED_PREF,
+            Context.MODE_PRIVATE
+        ) ?: return
+        with(sharedPref.edit()) {
+            putString(USERNAME, user.username)
+            putString(USER_PROFILE_URL, user.profilePicUrl)
+            apply()
+        }
     }
 
 }
