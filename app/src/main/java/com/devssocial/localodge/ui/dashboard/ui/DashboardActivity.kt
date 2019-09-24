@@ -36,33 +36,8 @@ class DashboardActivity : LocalodgeActivity() {
     override fun onStart() {
         super.onStart()
 
-        // get user data from firestore and update SharedPreferences
-        if (dashboardViewModel.getCurrentUser() == null) {
-            // wait until LocalodgeActivity's checkAuthState() method is called and finished
-            disposables.add(
-                Completable
-                    .timer(4, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        {
-                            getCurrentUserData { user: User ->
-                                saveToSharedPref(user)
-                            }
-                        },
-                        { error ->
-                            handleError(
-                                TAG,
-                                error,
-                                resources.getString(R.string.generic_error_message)
-                            )
-                        }
-                    )
-            )
-        } else {
-            getCurrentUserData { user: User ->
-                saveToSharedPref(user)
-            }
+        getCurrentUserData { user: User ->
+            saveToSharedPref(user)
         }
     }
 

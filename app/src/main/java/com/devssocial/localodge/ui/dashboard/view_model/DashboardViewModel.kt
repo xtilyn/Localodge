@@ -13,7 +13,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     // repositories
     private val repo = DashboardRepository()
-    private val userRepo = UserRepository()
+    private val userRepo = UserRepository(application.baseContext)
 
     var onBackPressed = BehaviorSubject.create<Boolean>()
     var isDrawerOpen = false

@@ -1,5 +1,8 @@
 package com.devssocial.localodge
 
+// SHARED PREF
+const val LOCALODGE_SHARED_PREF = "com.localodge.shared_pref"
+
 // ALGOLIA API
 const val ALGOLIA_APP_ID = "L4UXH3U7Y3"
 const val ALGOLIA_SEARCH_API_KEY = "80571fb1652061854afb2cce4db3b1ae"

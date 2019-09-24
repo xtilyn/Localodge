@@ -1,5 +1,7 @@
 package com.devssocial.localodge.shared
 
+import android.content.Context
+import android.content.Intent
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.NO_VALUE
 import com.devssocial.localodge.USERS
@@ -9,15 +11,26 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import io.reactivex.Single
 
-class UserRepository {
+class UserRepository(private val context: Context) {
+
+    companion object {
+        const val AUTH_BROADCAST = "com.devssocial.localodge.auth_broadcast"
+    }
 
     private val firestore = FirebaseFirestore.getInstance()
     private val mAuth = FirebaseAuth.getInstance()
 
-    fun getCurrentUser(): FirebaseUser? = mAuth.currentUser
-
-    fun logOut() {
-        // TODO CONTINUE HERE LOGOUT USER
+    fun getCurrentUser(): FirebaseUser? {
+        val user = mAuth.currentUser
+        if (user == null) {
+            // send broadcast to LocalodgeActivity
+            context.sendBroadcast(
+                Intent().apply {
+                    this.action = AUTH_BROADCAST
+                }
+            )
+        }
+        return user
     }
 
     fun getUserData(userId: String): Single<User> {
