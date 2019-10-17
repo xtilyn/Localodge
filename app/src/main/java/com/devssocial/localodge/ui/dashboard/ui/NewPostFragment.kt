@@ -93,6 +93,12 @@ class NewPostFragment : Fragment() {
         })
     }
 
+    override fun onStart() {
+        super.onStart()
+        // TODO load user profile pic and username in their corresponding widgets
+        // grab from shared pref. If failed/empty, grab from firebase
+    }
+
     override fun onStop() {
         super.onStop()
         disposables.clear()
@@ -100,8 +106,8 @@ class NewPostFragment : Fragment() {
 
     private fun onPostButtonClick() {
         // TODO CONTINUE HERE
-        // todo set location in geofirestore:
-//        val collectionRef = FirebaseFirestore.getInstance().collection("my-collection")
+        // todo set location in geofirestore
+//        val collectionRef = FirebaseFirestore.getInstance().collection(POSTS)
 //        val geoFirestore = GeoFirestore(collectionRef)
 //        geoFirestore.setLocation("que8B9fxxjcvbC81h32VRjeBSUW2", GeoPoint(37.7853889, -122.4056973)) { exception ->
 //            if (exception != null)

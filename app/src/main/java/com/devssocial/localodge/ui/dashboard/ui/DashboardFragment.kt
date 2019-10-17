@@ -32,6 +32,7 @@ import com.devssocial.localodge.*
 import com.devssocial.localodge.R
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.User
+import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
 import com.google.android.gms.common.api.ResolvableApiException
@@ -39,6 +40,7 @@ import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.firestore.DocumentSnapshot
 import es.dmoral.toasty.Toasty
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -46,6 +48,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
+import org.imperiumlabs.geofirestore.GeoFirestore
 import org.json.JSONObject
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -120,6 +123,8 @@ class DashboardFragment :
 
         )
         toggle.syncState()
+
+        // TODO SETUP RECYCLERVIEW
 
         nav_view.setNavigationItemSelectedListener(this)
     }
@@ -323,22 +328,31 @@ class DashboardFragment :
     private fun loadDashboardData() {
         Log.d(this::class.java.simpleName, "user location: $userLocation")
         if (userLocation == null) return
-        disposables.add(
-            dashboardViewModel.loadDataAroundLocation(userLocation!!)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onError = { error ->
+        dashboardViewModel.loadDataAroundLocation(
+            userLocation!!,
+            object : GeoFirestore.SingleGeoQueryDataEventCallback {
+                override fun onComplete(
+                    documentSnapshots: List<DocumentSnapshot>?,
+                    exception: Exception?
+                ) {
+                    if (exception != null) {
                         (activity as LocalodgeActivity).logAndShowError(
                             TAG,
-                            error,
+                            exception,
                             resources.getString(R.string.error_retrieving_data)
                         )
-                    },
-                    onSuccess = { posts: ArrayList<Post> ->
-                        // TODO CONTINUE HERE POPULATE RECYCLERVIEW
+                    } else {
+                        val unorderedPosts = documentSnapshots?.map {
+                            it.toObject(Post::class.java) ?: return
+                        } ?: return
+                        lateinit var orderedPosts: ArrayList<Post>
+                        synchronized(this) {
+                            orderedPosts = PostsUtil.orderPosts(unorderedPosts) as ArrayList<Post>
+                        }
+                        postsAdapter.updateList(orderedPosts)
                     }
-                )
-        )
+                }
+            })
     }
+
 }

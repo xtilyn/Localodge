@@ -16,6 +16,7 @@ const val POSTS_INDEX = "posts"
 const val AVATARS = "avatars"
 const val USERS = "users"
 const val CITIES = "cities"
+const val POSTS = "posts"
 
 // RxJava error message
 const val NO_VALUE = "No value"

@@ -10,6 +10,7 @@ import com.devssocial.localodge.ui.dashboard.repo.DashboardRepository
 import com.google.firebase.auth.FirebaseUser
 import io.reactivex.Single
 import io.reactivex.subjects.BehaviorSubject
+import org.imperiumlabs.geofirestore.GeoFirestore
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -25,6 +26,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun getUserData(userId: String): Single<User> = userRepo.getUserData(userId)
 
-    fun loadDataAroundLocation(userLocation: Location): Single<ArrayList<Post>> =
-        repo.loadDataAroundLocation(userLocation, context)
+    fun loadDataAroundLocation(
+        userLocation: Location,
+        callback: GeoFirestore.SingleGeoQueryDataEventCallback
+    ) {
+        repo.loadDataAroundLocation(userLocation, callback)
+    }
 }

@@ -10,5 +10,6 @@ data class Post (
     var photoUrl: String? = null,
     var videoUrl: String? = null,
     @ServerTimestamp var createdDate: Timestamp? = null,
-    var _geoloc: Location = Location()
+    var _geoloc: Location = Location(),
+    var rating: Int = 0 // range: [0,5]
 )
