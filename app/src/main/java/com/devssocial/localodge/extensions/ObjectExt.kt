@@ -2,6 +2,7 @@ package com.devssocial.localodge.extensions
 
 import android.util.Log
 import kotlin.reflect.KMutableProperty
+import kotlin.reflect.full.declaredMemberProperties
 
 /**
  * Map properties of object to the specified object instance

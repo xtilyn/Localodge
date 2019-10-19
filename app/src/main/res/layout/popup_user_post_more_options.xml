@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+								xmlns:app="http://schemas.android.com/apk/res-auto"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								app:cardCornerRadius="12dp"
+								app:cardBackgroundColor="@android:color/white"
+								>
+
+				<LinearLayout
+												android:layout_width="match_parent"
+												android:layout_height="match_parent"
+												android:orientation="vertical">
+
+								<Button
+																android:id="@+id/popup_user_post_report_post"
+																android:layout_width="match_parent"
+																android:layout_height="wrap_content"
+																android:text="Report post"
+																style="@style/Widget.AppCompat.Button.Borderless"
+																/>
+
+								<Button
+																android:id="@+id/popup_user_post_report_user"
+																android:layout_width="match_parent"
+																android:layout_height="wrap_content"
+																android:text="Report user"
+																style="@style/Widget.AppCompat.Button.Borderless"
+																/>
+
+								<Button
+																android:id="@+id/popup_user_post_hide"
+																android:layout_width="match_parent"
+																android:layout_height="wrap_content"
+																android:text="Hide"
+																style="@style/Widget.AppCompat.Button.Borderless"
+																/>
+
+				</LinearLayout>
+
+</androidx.cardview.widget.CardView>

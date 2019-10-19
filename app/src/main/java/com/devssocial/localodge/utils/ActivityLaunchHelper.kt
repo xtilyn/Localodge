@@ -5,26 +5,47 @@ import android.content.Context
 import android.content.Intent
 import com.devssocial.localodge.ui.dashboard.ui.DashboardActivity
 import com.devssocial.localodge.ui.login.ui.LoginActivity
+import com.devssocial.localodge.ui.post_detail.PostDetailActivity
+import com.devssocial.localodge.ui.user_profile.UserProfileActivity
 
 class ActivityLaunchHelper {
 
     companion object {
 
-        fun goToUserProfile(context: Context? = null) {
-            // TODO
+        // INTENT KEYS
+        private const val CONTENT_ID = "userId"
+
+        fun goToUserProfile(activity: Activity?, userId: String) {
+            goToSimpleActivity(activity, userId, UserProfileActivity::class.java)
         }
 
-        fun goToLogin(activity: Activity? = null) {
+        fun goToLogin(activity: Activity?) {
             val intent = Intent(activity, LoginActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             activity?.startActivity(intent)
             activity?.finish()
         }
 
-        fun goToDashboard(activity: Activity? = null) {
+        fun goToDashboard(activity: Activity?) {
             val intent = Intent(activity, DashboardActivity::class.java)
             activity?.startActivity(intent)
             activity?.finish()
+        }
+
+        fun goToPostDetail(activity: Activity?, postId: String) {
+            goToSimpleActivity(activity, postId, PostDetailActivity::class.java)
+        }
+
+        private fun goToSimpleActivity(
+            activity: Activity?,
+            contentId: String,
+            jClass: Class<*>,
+            finishAfter: Boolean = false
+        ) {
+            val intent = Intent(activity, jClass)
+            intent.putExtra(CONTENT_ID, contentId)
+            activity?.startActivity(intent)
+            if (finishAfter) activity?.finish()
         }
 
     }

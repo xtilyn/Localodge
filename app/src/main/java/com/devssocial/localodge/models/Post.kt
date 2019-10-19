@@ -24,7 +24,7 @@ data class PostViewItem(
     @ServerTimestamp var createdDate: Timestamp? = null,
     var _geoloc: Location = Location(),
     var rating: Int = 0, // range: [0,5]
-    var likes: Set<String> = hashSetOf(),
+    var likes: HashSet<String> = hashSetOf(),
 
     // adapter fields
     var posterUsername: String = "",

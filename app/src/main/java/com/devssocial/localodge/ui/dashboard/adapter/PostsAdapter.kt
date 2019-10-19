@@ -7,14 +7,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.devssocial.localodge.R
 import com.devssocial.localodge.callbacks.ListItemListener
+import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.extensions.instaVisible
 import com.devssocial.localodge.models.PostViewItem
 import kotlinx.android.synthetic.main.list_item_user_post.view.*
 
-class PostsAdapter(private val data: ArrayList<PostViewItem>, private val listener: ListItemListener) :
+class PostsAdapter(val data: ArrayList<PostViewItem>, private val listener: ListItemListener) :
     RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
 
-    inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+        View.OnClickListener {
 
         override fun onClick(v: View?) {
             v?.let { listener.onItemClick(v, adapterPosition) }
@@ -55,6 +57,28 @@ class PostsAdapter(private val data: ArrayList<PostViewItem>, private val listen
             itemView.user_post_more_options.setOnClickListener(this)
         }
 
+        fun toggleLike() {
+            val currDrawable =
+                itemView.user_post_like?.compoundDrawables?.get(0)?.constantState ?: return
+            val starOutline =
+                itemView.context.resources.getDrawable(R.drawable.ic_star_border, null)
+                    .constantState
+            if (currDrawable == starOutline) {
+                itemView.user_post_like?.setCompoundDrawables(
+                    itemView.context.resources.getDrawable(R.drawable.ic_star_filled, null),
+                    null,
+                    null,
+                    null
+                )
+            } else {
+                itemView.user_post_like?.setCompoundDrawables(
+                    itemView.context.resources.getDrawable(R.drawable.ic_star_border, null),
+                    null,
+                    null,
+                    null
+                )
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -70,6 +94,22 @@ class PostsAdapter(private val data: ArrayList<PostViewItem>, private val listen
         holder.bindItem(current)
     }
 
+    override fun onBindViewHolder(
+        holder: PostViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isNotEmpty()) {
+            when (payloads[0]) {
+                AdapterPayload.LIKED_OR_UNLIKED_POST -> {
+                    holder.toggleLike()
+                }
+            }
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
     fun updateList(newData: ArrayList<PostViewItem>) {
         val oldSize = data.size
         data.clear()
@@ -80,7 +120,7 @@ class PostsAdapter(private val data: ArrayList<PostViewItem>, private val listen
 
     fun appendToList(moreData: ArrayList<PostViewItem>) {
         val lastItemIndex = data.size - 1
-        data.addAll( moreData)
+        data.addAll(moreData)
         notifyItemRangeInserted(lastItemIndex, moreData.size)
     }
 

@@ -13,10 +13,13 @@ const val ALGOLIA_SEARCH_API_KEY = "80571fb1652061854afb2cce4db3b1ae"
 const val POSTS_INDEX = "posts"
 
 // firestore collections
-const val AVATARS = "avatars"
-const val USERS = "users"
-const val CITIES = "cities"
-const val POSTS = "posts"
+const val COLLECTION_AVATARS = "avatars"
+const val COLLECTION_USERS = "users"
+const val COLLECTION_CITIES = "cities"
+const val COLLECTION_POSTS = "posts"
+
+// firestore fields
+const val FIELD_LIKES = "likes"
 
 // RxJava error message
 const val NO_VALUE = "No value"

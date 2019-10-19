@@ -2,9 +2,7 @@ package com.devssocial.localodge.ui.dashboard.ui
 
 
 import android.Manifest
-import android.app.Activity
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
@@ -14,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -26,12 +25,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.algolia.search.saas.Client
-import com.algolia.search.saas.Index
 import com.bumptech.glide.Glide
 import com.devssocial.localodge.*
 import com.devssocial.localodge.R
 import com.devssocial.localodge.callbacks.ListItemListener
+import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.PostViewItem
@@ -54,7 +52,6 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import org.imperiumlabs.geofirestore.GeoFirestore
-import org.json.JSONObject
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 
@@ -207,7 +204,31 @@ class DashboardFragment :
     }
 
     override fun onItemClick(view: View, position: Int) {
-        // TODO CONTINUE HERE
+        val current = postsAdapter.data[position]
+        when (view.id) {
+            R.id.user_post_username, R.id.user_post_profile_pic -> {
+                ActivityLaunchHelper.goToUserProfile(activity, current.posterUserId)
+            }
+            R.id.user_post_more_options -> {
+                val popupView = LayoutInflater.from(context).inflate(R.layout.popup_user_post_more_options, null)
+                val popup = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+                popup.showAsDropDown(view)
+            }
+            R.id.user_post_media_content_container, R.id.user_post_comment -> {
+                ActivityLaunchHelper.goToPostDetail(activity, current.objectID)
+            }
+            R.id.user_post_like -> {
+                if (current.likes.contains(dashboardViewModel.userRepo.getCurrentUser()?.uid)) {
+                    unlikePost(current) {
+                        postsAdapter.notifyItemChanged(position, AdapterPayload.LIKED_OR_UNLIKED_POST)
+                    }
+                } else {
+                    likePost(current) {
+                        postsAdapter.notifyItemChanged(position, AdapterPayload.LIKED_OR_UNLIKED_POST)
+                    }
+                }
+            }
+        }
     }
 
     private fun getLocation() {
@@ -276,13 +297,14 @@ class DashboardFragment :
     }
 
     private fun retrieveCurrentUserData() {
-        val user = dashboardViewModel.getCurrentUser()
-        if (dashboardViewModel.getCurrentUser() == null) {
+        val user = dashboardViewModel.userRepo.getCurrentUser()
+        if (dashboardViewModel.userRepo.getCurrentUser() == null) {
             ActivityLaunchHelper.goToLogin(activity)
             return
         }
         disposables.addAll(
             dashboardViewModel
+                .userRepo
                 .getUserData(user!!.uid)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -341,7 +363,7 @@ class DashboardFragment :
     private fun loadDashboardData() {
         Log.d(this::class.java.simpleName, "user location: $userLocation")
         if (userLocation == null) return
-        dashboardViewModel.loadDataAroundLocation(
+        dashboardViewModel.postsRepo.loadDataAroundLocation(
             userLocation!!,
             object : GeoFirestore.SingleGeoQueryDataEventCallback {
                 override fun onComplete(
@@ -368,6 +390,39 @@ class DashboardFragment :
                     }
                 }
             })
+    }
+
+    private fun unlikePost(post: PostViewItem, onComplete: () -> Unit) {
+        val currUserId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
+        post.likes.remove(currUserId)
+        updateLikes(post.objectID, post.likes, onComplete)
+    }
+
+    private fun likePost(post: PostViewItem, onComplete: () -> Unit) {
+        val currUserId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
+        post.likes.add(currUserId)
+        updateLikes(post.objectID, post.likes, onComplete)
+    }
+
+    private fun updateLikes(postId: String, newLikes: HashSet<String>, onComplete: () -> Unit) {
+        disposables.add(
+            dashboardViewModel.postsRepo
+                .updateLikes(postId, newLikes)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        (activity as LocalodgeActivity).logAndShowError(
+                            TAG,
+                            it,
+                            resources.getString(R.string.generic_error_message)
+                        )
+                    },
+                    onComplete = {
+                        onComplete()
+                    }
+                )
+        )
     }
 
 }
