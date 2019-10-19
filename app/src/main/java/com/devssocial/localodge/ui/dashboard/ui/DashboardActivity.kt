@@ -46,9 +46,9 @@ class DashboardActivity : LocalodgeActivity() {
     }
 
     private fun getCurrentUserData(onSuccess: (User) -> Unit) {
-        val userId = dashboardViewModel.getCurrentUser()?.uid ?: return
+        val userId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
         disposables.add(
-            dashboardViewModel.getUserData(userId)
+            dashboardViewModel.userRepo.getUserData(userId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(

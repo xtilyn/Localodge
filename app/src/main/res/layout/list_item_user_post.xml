@@ -60,8 +60,22 @@
 																android:layout_marginStart="8dp"
 																android:text="timestamp"
 																app:layout_constraintBottom_toBottomOf="@id/user_post_profile_pic"
+																app:layout_constraintStart_toEndOf="@id/user_post_promoted_text"
+																app:layout_constraintTop_toBottomOf="@+id/user_post_username"
+																/>
+
+								<TextView
+																android:id="@+id/user_post_promoted_text"
+																android:layout_width="wrap_content"
+																android:layout_height="wrap_content"
+																android:text="PROMOTED"
+																android:textColor="@android:color/holo_green_dark"
+																android:textStyle="bold"
+																android:layout_marginStart="8dp"
+																app:layout_constraintBottom_toBottomOf="@id/user_post_profile_pic"
 																app:layout_constraintStart_toEndOf="@id/user_post_profile_pic"
 																app:layout_constraintTop_toBottomOf="@+id/user_post_username"
+																android:visibility="gone"
 																/>
 
 								<ImageButton

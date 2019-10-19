@@ -40,7 +40,7 @@ open class LocalodgeActivity : AppCompatActivity() {
         super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase))
     }
 
-    private fun logOut() {
+    fun logOut() {
         val sharedPref = getSharedPreferences(LOCALODGE_SHARED_PREF, Context.MODE_PRIVATE) ?: return
         sharedPref.edit().clear().apply()
         FirebaseAuth.getInstance().signOut()

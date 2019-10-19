@@ -51,4 +51,8 @@
 				<string name="enter_description">Enter description:</string>
 				<string name="error_retrieving_data">Could not retrieve data. Please try again later.</string>
 				<string name="user_post_comments">%s Comments</string>
+				<string name="sign_out">Sign Out</string>
+				<string name="send_feedback">Send Feedback</string>
+				<string name="sign_out_confirmation">Are you sure you want to sign out?</string>
+				<string name="cancel">Cancel</string>
 </resources>

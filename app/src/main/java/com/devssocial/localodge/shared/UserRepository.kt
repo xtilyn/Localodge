@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.NO_VALUE
-import com.devssocial.localodge.USERS
+import com.devssocial.localodge.COLLECTION_USERS
 import com.devssocial.localodge.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -35,7 +35,7 @@ class UserRepository(private val context: Context) {
 
     fun getUserData(userId: String): Single<User> {
         val ref = firestore
-            .collection(USERS)
+            .collection(COLLECTION_USERS)
             .document(userId)
 
         return RxFirebaseFirestore.data(ref)

@@ -24,4 +24,24 @@
 												app:headerLayout="@layout/nav_header_dashboard"
 												app:menu="@menu/activity_dashboard_drawer"/>
 
+				<FrameLayout
+												android:id="@+id/loading_overlay"
+												android:layout_width="match_parent"
+												android:layout_height="match_parent"
+												android:elevation="22dp"
+												android:background="#80ffffff"
+												android:visibility="gone"
+												>
+
+								<com.github.ybq.android.spinkit.SpinKitView
+																xmlns:app="http://schemas.android.com/apk/res-auto"
+																android:id="@+id/spin_kit"
+																style="@style/SpinKitView.Large.CubeGrid"
+																android:layout_width="wrap_content"
+																android:layout_height="wrap_content"
+																android:layout_gravity="center"
+																app:SpinKit_Color="@color/colorAccent"/>
+
+				</FrameLayout>
+
 </androidx.drawerlayout.widget.DrawerLayout>

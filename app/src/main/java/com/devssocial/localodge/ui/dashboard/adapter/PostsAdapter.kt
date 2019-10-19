@@ -8,6 +8,7 @@ import com.bumptech.glide.Glide
 import com.devssocial.localodge.R
 import com.devssocial.localodge.callbacks.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
+import com.devssocial.localodge.extensions.instaGone
 import com.devssocial.localodge.extensions.instaVisible
 import com.devssocial.localodge.models.PostViewItem
 import kotlinx.android.synthetic.main.list_item_user_post.view.*
@@ -47,6 +48,12 @@ class PostsAdapter(val data: ArrayList<PostViewItem>, private val listener: List
             itemView.user_post_username.text = item.posterUsername
             itemView.user_post_comment.text = itemView.context
                 .resources.getString(R.string.user_post_comments, item.comments.size.toString())
+
+            if (item.rating > 0) {
+                itemView.user_post_promoted_text.instaVisible()
+            } else {
+                itemView.user_post_promoted_text.instaGone()
+            }
 
             // listeners
             itemView.user_post_profile_pic.setOnClickListener(this)

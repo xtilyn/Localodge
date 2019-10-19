@@ -38,6 +38,7 @@ import com.devssocial.localodge.ui.dashboard.adapter.PostsAdapter
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
+import com.devssocial.localodge.utils.DialogHelper
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
@@ -180,23 +181,29 @@ class DashboardFragment :
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_home -> {
-                // Handle the camera action
-            }
-            R.id.nav_gallery -> {
-
-            }
-            R.id.nav_slideshow -> {
-
-            }
-            R.id.nav_tools -> {
-
-            }
             R.id.nav_share -> {
-
+                // TODO
             }
-            R.id.nav_send -> {
-
+            R.id.nav_send_feedback -> {
+                // TODO CONTINUE HERE show dialog
+            }
+            R.id.nav_sign_out -> {
+                if (context == null) return true
+                DialogHelper.showConfirmActionDialog(
+                    context = context!!,
+                    message = resources.getString(R.string.sign_out_confirmation),
+                    positiveButtonText = resources.getString(R.string.sign_out),
+                    positiveButtonCallback = {
+                        drawer_layout.closeDrawer(nav_view, true)
+                        it.dismiss()
+                        showProgress(true)
+                        (activity as LocalodgeActivity).logOut()
+                    },
+                    negativeButtonText = resources.getString(R.string.cancel),
+                    negativeButtonCallback = {
+                        it.dismiss()
+                    }
+                )
             }
         }
         drawer_layout?.closeDrawer(GravityCompat.START)
@@ -425,4 +432,11 @@ class DashboardFragment :
         )
     }
 
+    private fun showProgress(show: Boolean) {
+        if (show) {
+            loading_overlay.visibility = View.VISIBLE
+        } else {
+            loading_overlay.visibility = View.GONE
+        }
+    }
 }

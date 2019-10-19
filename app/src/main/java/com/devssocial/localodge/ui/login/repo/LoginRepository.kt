@@ -3,7 +3,7 @@ package com.devssocial.localodge.ui.login.repo
 import com.androidhuman.rxfirebase2.auth.RxFirebaseAuth
 import com.androidhuman.rxfirebase2.auth.RxFirebaseUser
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
-import com.devssocial.localodge.USERS
+import com.devssocial.localodge.COLLECTION_USERS
 import com.devssocial.localodge.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -53,7 +53,7 @@ class LoginRepository {
         email: String
     ): Completable {
         val ref = firestore
-            .collection(USERS)
+            .collection(COLLECTION_USERS)
             .document(userId)
 
         val newUserDoc = User(
