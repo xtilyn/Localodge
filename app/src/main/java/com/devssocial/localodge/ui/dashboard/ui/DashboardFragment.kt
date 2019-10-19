@@ -25,13 +25,18 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.algolia.search.saas.Client
 import com.algolia.search.saas.Index
 import com.bumptech.glide.Glide
 import com.devssocial.localodge.*
 import com.devssocial.localodge.R
+import com.devssocial.localodge.callbacks.ListItemListener
+import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.models.Post
+import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.models.User
+import com.devssocial.localodge.ui.dashboard.adapter.PostsAdapter
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
@@ -56,7 +61,7 @@ import pub.devrel.easypermissions.EasyPermissions
 class DashboardFragment :
     Fragment(),
     NavigationView.OnNavigationItemSelectedListener,
-    EasyPermissions.PermissionCallbacks {
+    EasyPermissions.PermissionCallbacks, ListItemListener {
 
     companion object {
         private const val TAG = "DashboardFragment"
@@ -71,6 +76,7 @@ class DashboardFragment :
 
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var postsAdapter: PostsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,7 +130,10 @@ class DashboardFragment :
         )
         toggle.syncState()
 
-        // TODO SETUP RECYCLERVIEW
+        // recycler view
+        postsAdapter = PostsAdapter(arrayListOf(), this@DashboardFragment)
+        dashboard_recyclerview?.adapter = postsAdapter
+        dashboard_recyclerview?.layoutManager = LinearLayoutManager(context)
 
         nav_view.setNavigationItemSelectedListener(this)
     }
@@ -195,6 +204,10 @@ class DashboardFragment :
         }
         drawer_layout?.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onItemClick(view: View, position: Int) {
+        // TODO CONTINUE HERE
     }
 
     private fun getLocation() {
@@ -345,9 +358,11 @@ class DashboardFragment :
                         val unorderedPosts = documentSnapshots?.map {
                             it.toObject(Post::class.java) ?: return
                         } ?: return
-                        lateinit var orderedPosts: ArrayList<Post>
+                        lateinit var orderedPosts: ArrayList<PostViewItem>
                         synchronized(this) {
-                            orderedPosts = PostsUtil.orderPosts(unorderedPosts) as ArrayList<Post>
+                            orderedPosts = PostsUtil.orderPosts(unorderedPosts).map {
+                                post: Post -> post.mapProperties(PostViewItem())
+                            } as ArrayList<PostViewItem>
                         }
                         postsAdapter.updateList(orderedPosts)
                     }

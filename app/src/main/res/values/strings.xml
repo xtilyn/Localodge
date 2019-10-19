@@ -50,4 +50,5 @@
 				<string name="post">Post</string>
 				<string name="enter_description">Enter description:</string>
 				<string name="error_retrieving_data">Could not retrieve data. Please try again later.</string>
+				<string name="user_post_comments">%s Comments</string>
 </resources>

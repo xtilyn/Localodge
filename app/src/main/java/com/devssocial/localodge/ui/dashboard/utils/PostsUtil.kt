@@ -5,8 +5,8 @@ import com.devssocial.localodge.models.Post
 object PostsUtil {
 
     /**
-     * Orders specified posts collection by promoted rating in
-     * descending order.
+     * Should order specified posts based on priorities:
+     * rating (descending) > likesCount (descending) > timestamp (descending)
      * @param posts to order
      */
     fun orderPosts(posts: List<Post>): List<Post> {
@@ -16,8 +16,18 @@ object PostsUtil {
         val ratingComparator = Comparator<Post> { post1, post2 ->
             post2.rating.compareTo(post1.rating)
         }
+        val likesCountComparator = Comparator<Post> { post1, post2 ->
+            post2.likes.size.compareTo(post1.likes.size)
+        }
+        val timestampComparator = Comparator<Post> { post1, post2 ->
+            post2.createdDate?.compareTo(post1.createdDate) ?: 0
+        }
 
-        return copy.sortedWith(ratingComparator)
+        return copy.sortedWith(ComplexComparator(
+            ratingComparator,
+            likesCountComparator,
+            timestampComparator
+        ))
     }
 
 }
