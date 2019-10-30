@@ -8,8 +8,10 @@ import com.devssocial.localodge.daos.PostDao
 import com.devssocial.localodge.daos.UserDao
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.User
+import com.devssocial.localodge.room_models.PostRoom
+import com.devssocial.localodge.room_models.UserRoom
 
-@Database(entities = [Post::class, User::class], version = 1)
+@Database(entities = [PostRoom::class, UserRoom::class], version = 1)
 public abstract class LocalodgeRoomDatabase : RoomDatabase() {
 
     abstract fun postDao(): PostDao

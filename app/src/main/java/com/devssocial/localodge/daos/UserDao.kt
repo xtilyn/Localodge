@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.devssocial.localodge.models.User
+import com.devssocial.localodge.room_models.UserRoom
 import io.reactivex.Completable
 import io.reactivex.Single
 
@@ -12,12 +13,12 @@ import io.reactivex.Single
 interface UserDao {
 
     @Query("SELECT * from user")
-    fun getAlphabetizedWords(): Single<List<User>>
+    fun getAlphabetizedWords(): Single<List<UserRoom>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(user: User): Completable
+    fun insert(user: UserRoom): Completable
 
     @Query("DELETE FROM user")
-    suspend fun deleteAll(): Completable
+    fun deleteAll(): Completable
 
 }

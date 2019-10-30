@@ -394,6 +394,7 @@ class DashboardFragment :
                             } as ArrayList<PostViewItem>
                         }
                         postsAdapter.updateList(orderedPosts)
+                        // TODO CONTINUE HERE SAVE INITIAL DATA TO ROOM
                     }
                 }
             })

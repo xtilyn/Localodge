@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.devssocial.localodge.models.Post
+import com.devssocial.localodge.room_models.PostRoom
 import io.reactivex.Completable
 import io.reactivex.Single
 
@@ -12,12 +13,12 @@ import io.reactivex.Single
 interface PostDao {
 
     @Query("SELECT * from posts")
-    fun getAlphabetizedWords(): Single<List<Post>>
+    fun getAlphabetizedWords(): Single<List<PostRoom>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(post: Post): Completable
+    fun insert(post: PostRoom): Completable
 
     @Query("DELETE FROM posts")
-    suspend fun deleteAll(): Completable
+    fun deleteAll(): Completable
 
 }
