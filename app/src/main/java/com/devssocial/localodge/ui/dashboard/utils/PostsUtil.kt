@@ -20,7 +20,7 @@ object PostsUtil {
             post2.likes.size.compareTo(post1.likes.size)
         }
         val timestampComparator = Comparator<Post> { post1, post2 ->
-            post2.createdDate?.compareTo(post1.createdDate) ?: 0
+            post2.createdDate?.compareTo(post1.createdDate ?: return@Comparator 0) ?: 0
         }
 
         return copy.sortedWith(ComplexComparator(
