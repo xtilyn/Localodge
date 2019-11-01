@@ -1,12 +1,10 @@
 package com.devssocial.localodge.utils
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import com.devssocial.localodge.ui.dashboard.ui.DashboardActivity
 import com.devssocial.localodge.ui.login.ui.LoginActivity
 import com.devssocial.localodge.ui.post_detail.PostDetailActivity
-import com.devssocial.localodge.ui.user_profile.UserProfileActivity
 
 class ActivityLaunchHelper {
 
@@ -14,10 +12,6 @@ class ActivityLaunchHelper {
 
         // INTENT KEYS
         private const val CONTENT_ID = "userId"
-
-        fun goToUserProfile(activity: Activity?, userId: String) {
-            goToSimpleActivity(activity, userId, UserProfileActivity::class.java)
-        }
 
         fun goToLogin(activity: Activity?) {
             val intent = Intent(activity, LoginActivity::class.java)

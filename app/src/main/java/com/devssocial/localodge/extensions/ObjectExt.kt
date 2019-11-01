@@ -1,6 +1,10 @@
 package com.devssocial.localodge.extensions
 
 import android.util.Log
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.declaredMemberProperties
 
@@ -54,4 +58,16 @@ fun Any.toMap(): Map<String, Any> {
         }
     }
     return result
+}
+
+fun Any.waitWithCondition(
+    lock: ReentrantLock,
+    condition: Condition,
+    shouldStopWaiting: AtomicBoolean
+) {
+    lock.withLock {
+        while (!shouldStopWaiting.get()) {
+            condition.await()
+        }
+    }
 }

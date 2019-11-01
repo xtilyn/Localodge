@@ -2,11 +2,14 @@ package com.devssocial.localodge.ui.dashboard.ui
 
 
 import android.Manifest
+import android.app.Activity
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -39,6 +42,8 @@ import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
 import com.devssocial.localodge.utils.DialogHelper
+import com.devssocial.localodge.utils.KeyboardUtils
+import com.devssocial.localodge.utils.PhotoPicker
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
@@ -51,7 +56,9 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_dashboard.*
+import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
+import kotlinx.android.synthetic.main.nav_header_dashboard.view.*
 import org.imperiumlabs.geofirestore.GeoFirestore
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -67,6 +74,8 @@ class DashboardFragment :
         const val REQUEST_CHECK_SETTINGS = 2
         const val NEARBY_RADIUS = 1000000 // 100km
         const val HITS_PER_PAGE = 10
+
+        const val GALLERY_INTENT = 213432
     }
 
     private val disposables = CompositeDisposable()
@@ -139,6 +148,9 @@ class DashboardFragment :
     override fun onStart() {
         super.onStart()
 
+        if (context != null && view != null)
+            KeyboardUtils.hideKeyboard(context!!, view!!)
+
         // observe activity's onBackPressed event
         disposables.add(
             dashboardViewModel.onBackPressed
@@ -165,6 +177,18 @@ class DashboardFragment :
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         getLocation()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == GALLERY_INTENT && resultCode == Activity.RESULT_OK) {
+            //data.getData returns the content URI for the selected Image
+            val selectedImage = data?.data ?: return
+//            imageView.setImageURI(selectedImage)
+            // TODO CONTINUE HERE
+
+        }
+
     }
 
     override fun onRequestPermissionsResult(
@@ -213,12 +237,15 @@ class DashboardFragment :
     override fun onItemClick(view: View, position: Int) {
         val current = postsAdapter.data[position]
         when (view.id) {
-            R.id.user_post_username, R.id.user_post_profile_pic -> {
-                ActivityLaunchHelper.goToUserProfile(activity, current.posterUserId)
-            }
             R.id.user_post_more_options -> {
-                val popupView = LayoutInflater.from(context).inflate(R.layout.popup_user_post_more_options, null)
-                val popup = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+                val popupView = LayoutInflater.from(context)
+                    .inflate(R.layout.popup_user_post_more_options, null)
+                val popup = PopupWindow(
+                    popupView,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    true
+                )
                 popup.showAsDropDown(view)
             }
             R.id.user_post_media_content_container, R.id.user_post_comment -> {
@@ -227,11 +254,17 @@ class DashboardFragment :
             R.id.user_post_like -> {
                 if (current.likes.contains(dashboardViewModel.userRepo.getCurrentUser()?.uid)) {
                     unlikePost(current) {
-                        postsAdapter.notifyItemChanged(position, AdapterPayload.LIKED_OR_UNLIKED_POST)
+                        postsAdapter.notifyItemChanged(
+                            position,
+                            AdapterPayload.LIKED_OR_UNLIKED_POST
+                        )
                     }
                 } else {
                     likePost(current) {
-                        postsAdapter.notifyItemChanged(position, AdapterPayload.LIKED_OR_UNLIKED_POST)
+                        postsAdapter.notifyItemChanged(
+                            position,
+                            AdapterPayload.LIKED_OR_UNLIKED_POST
+                        )
                     }
                 }
             }
@@ -330,12 +363,30 @@ class DashboardFragment :
         if (context == null) return
         val headerView = nav_view.getHeaderView(0)
         val usernameFormat = "@${user.username}"
-        headerView.findViewById<TextView>(R.id.username_text_view).text = usernameFormat
+        headerView.username_text_view.text = usernameFormat
 
         if (user.profilePicUrl.isNotEmpty()) {
             Glide.with(this)
                 .load(user.profilePicUrl)
-                .into(headerView.findViewById(R.id.user_profile_pic_image_view))
+                .into(headerView.user_profile_pic_image_view)
+        }
+
+        headerView.user_profile_pic_image_view.setOnClickListener {
+            if (context == null) return@setOnClickListener
+            val dh = DialogHelper(context!!)
+            dh.createDialog(R.layout.dialog_choose_photo)
+            dh.dialogView.close_dialog?.setOnClickListener {
+                dh.dialog.dismiss()
+            }
+            dh.dialogView.take_photo?.setOnClickListener {
+                // TODO take photo intent
+                dh.dialog.dismiss()
+            }
+            dh.dialogView.choose_photo?.setOnClickListener {
+                PhotoPicker.pickFromGallery(activity, GALLERY_INTENT)
+                dh.dialog.dismiss()
+            }
+            dh.dialog.show()
         }
     }
 
@@ -389,8 +440,8 @@ class DashboardFragment :
                         } ?: return
                         lateinit var orderedPosts: ArrayList<PostViewItem>
                         synchronized(this) {
-                            orderedPosts = PostsUtil.orderPosts(unorderedPosts).map {
-                                post: Post -> post.mapProperties(PostViewItem())
+                            orderedPosts = PostsUtil.orderPosts(unorderedPosts).map { post: Post ->
+                                post.mapProperties(PostViewItem())
                             } as ArrayList<PostViewItem>
                         }
                         postsAdapter.updateList(orderedPosts)

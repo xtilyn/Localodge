@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+								xmlns:app="http://schemas.android.com/apk/res-auto"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:background="@drawable/dialog_bg_light_gray"
+								android:paddingBottom="28dp"
+								>
+
+				<ImageButton
+												android:id="@+id/close_dialog"
+												android:layout_width="50dp"
+												android:layout_height="50dp"
+												android:background="@drawable/circle_color_primary"
+												android:padding="8dp"
+												android:scaleType="fitXY"
+												android:src="@drawable/ic_clear_white_24dp"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintTop_toTopOf="parent"
+												android:layout_marginEnd="8dp"
+												android:layout_marginTop="8dp"
+												android:contentDescription="@string/close_dialog"
+												/>
+
+				<Button
+												android:id="@+id/take_photo"
+												android:layout_width="0dp"
+												android:layout_height="wrap_content"
+												style="@style/Widget.AppCompat.Button.Borderless"
+												android:text="Take Photo"
+												android:textAllCaps="false"
+												android:textAppearance="@style/TextAppearance.AppCompat.Large"
+												android:drawableStart="@drawable/ic_photo_camera"
+												android:drawablePadding="8dp"
+												android:gravity="center"
+												android:background="@drawable/button_default_white"
+												app:layout_constraintTop_toBottomOf="@id/close_dialog"
+												app:layout_constraintStart_toStartOf="@id/choose_photo"
+												app:layout_constraintEnd_toEndOf="@id/choose_photo"
+												android:paddingStart="38dp"
+												android:paddingEnd="38dp"
+												android:textColor="@color/matteBlack"
+												android:layout_marginTop="12dp"
+												/>
+
+				<Button
+												android:id="@+id/choose_photo"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												style="@style/Widget.AppCompat.Button.Borderless"
+												android:text="Choose Photo"
+												android:textAllCaps="false"
+												android:textAppearance="@style/TextAppearance.AppCompat.Large"
+												android:drawableStart="@drawable/ic_image"
+												android:drawablePadding="8dp"
+												android:gravity="center"
+												android:background="@drawable/button_default_white"
+												app:layout_constraintTop_toBottomOf="@id/take_photo"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintEnd_toEndOf="parent"
+												android:paddingStart="38dp"
+												android:paddingEnd="38dp"
+												android:layout_marginTop="12dp"
+												android:textColor="@color/matteBlack"
+												android:layout_marginEnd="28dp"
+												android:layout_marginStart="28dp"
+												/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
