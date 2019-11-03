@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -258,7 +259,13 @@ class DashboardFragment :
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_share -> {
-                // TODO
+                activity?.let{
+                    ShareCompat.IntentBuilder.from(it)
+                        .setType("text/plain")
+                        .setChooserTitle("Chooser title")
+                        .setText("http://play.google.com/store/apps/details?id=" + it.packageName)
+                        .startChooser()
+                }
             }
             R.id.nav_send_feedback -> {
                 context?.let {
