@@ -127,4 +127,6 @@ dependencies {
     kapt 'androidx.room:room-compiler:2.2.1'
     implementation 'androidx.room:room-rxjava2:2.2.1'
 
+    // image picker
+    implementation 'com.github.esafirm.android-image-picker:imagepicker:2.2.0'
 }

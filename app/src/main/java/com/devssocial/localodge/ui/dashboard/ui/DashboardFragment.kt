@@ -7,16 +7,15 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -44,6 +43,9 @@ import com.devssocial.localodge.utils.ActivityLaunchHelper
 import com.devssocial.localodge.utils.DialogHelper
 import com.devssocial.localodge.utils.KeyboardUtils
 import com.devssocial.localodge.utils.PhotoPicker
+import com.esafirm.imagepicker.features.ImagePicker
+import com.esafirm.imagepicker.features.ReturnMode
+import com.esafirm.imagepicker.model.Image
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
@@ -51,10 +53,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.firestore.DocumentSnapshot
 import es.dmoral.toasty.Toasty
+import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
@@ -74,8 +78,8 @@ class DashboardFragment :
         const val REQUEST_CHECK_SETTINGS = 2
         const val NEARBY_RADIUS = 1000000 // 100km
         const val HITS_PER_PAGE = 10
-
         const val GALLERY_INTENT = 213432
+        private const val RC_CAMERA = 3000
     }
 
     private val disposables = CompositeDisposable()
@@ -180,15 +184,51 @@ class DashboardFragment :
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == GALLERY_INTENT && resultCode == Activity.RESULT_OK) {
-            //data.getData returns the content URI for the selected Image
-            val selectedImage = data?.data ?: return
-//            imageView.setImageURI(selectedImage)
-            // TODO CONTINUE HERE
+        if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
+            val images = ImagePicker.getImages(data) as ArrayList<Image>
 
+            val progressSubject = BehaviorSubject.create<Double>()
+            showUploadProgress(progressSubject)
+
+            var photoUrl = ""
+            disposables.add(
+                dashboardViewModel.userRepo
+                    .updateProfilePicInStorage(images[0].path)
+                    .doOnNext {
+                        progressSubject.onNext(it.first)
+                        photoUrl = if (it.second.isNotEmpty()) it.second else ""
+                    }.flatMapCompletable {
+                        if (photoUrl.isNotEmpty()) {
+                            dashboardViewModel.userRepo.updateProfilePicInFirestore(
+                                dashboardViewModel.userRepo.getCurrentUserId()
+                                    ?: return@flatMapCompletable Completable.complete()
+                            )
+                                .andThen(Completable.defer {
+                                    dashboardViewModel.userRepo.userDao
+
+                                    // TODO CONTINUE HERE: SAVE TO FIREBASE, THEN SAVE TO ROOM
+                                })
+                        } else {
+                            Completable.complete()
+                        }
+                    }.doOnComplete {
+                        progressSubject.onNext(100.0)
+                        val headerView = nav_view.getHeaderView(0)
+                        Glide.with(this)
+                            .load(images[0].path)
+                            .into(headerView.user_profile_pic_image_view)
+                    }
+                    .doOnError {
+                        Log.e(TAG, it.message, it)
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe()
+            )
+
+            return
         }
-
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onRequestPermissionsResult(
@@ -197,6 +237,12 @@ class DashboardFragment :
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == RC_CAMERA) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                captureImage()
+            }
+        }
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
@@ -379,15 +425,19 @@ class DashboardFragment :
                 dh.dialog.dismiss()
             }
             dh.dialogView.take_photo?.setOnClickListener {
-                // TODO take photo intent
+                captureImage()
                 dh.dialog.dismiss()
             }
             dh.dialogView.choose_photo?.setOnClickListener {
-                PhotoPicker.pickFromGallery(activity, GALLERY_INTENT)
+                PhotoPicker.pickFromGallery(this)
                 dh.dialog.dismiss()
             }
             dh.dialog.show()
         }
+    }
+
+    private fun captureImage() {
+        ImagePicker.cameraOnly().start(this)
     }
 
     private fun showLocationNotFoundDialog() {
