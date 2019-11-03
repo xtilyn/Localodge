@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -22,17 +23,25 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
 import com.devssocial.localodge.*
 import com.devssocial.localodge.R
+import com.bumptech.glide.request.target.Target
 import com.devssocial.localodge.callbacks.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
+import com.devssocial.localodge.extensions.gone
 import com.devssocial.localodge.extensions.mapProperties
+import com.devssocial.localodge.extensions.onLoadEnded
+import com.devssocial.localodge.extensions.visible
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.models.User
@@ -187,42 +196,45 @@ class DashboardFragment :
         if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
             val images = ImagePicker.getImages(data) as ArrayList<Image>
 
-            val progressSubject = BehaviorSubject.create<Double>()
-            showUploadProgress(progressSubject)
-
+            showProfilePicProgress(true)
             var photoUrl = ""
             disposables.add(
                 dashboardViewModel.userRepo
                     .updateProfilePicInStorage(images[0].path)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
                     .doOnNext {
-                        progressSubject.onNext(it.first)
                         photoUrl = if (it.second.isNotEmpty()) it.second else ""
                     }.flatMapCompletable {
                         if (photoUrl.isNotEmpty()) {
-                            dashboardViewModel.userRepo.updateProfilePicInFirestore(
-                                dashboardViewModel.userRepo.getCurrentUserId()
-                                    ?: return@flatMapCompletable Completable.complete()
-                            )
+                            dashboardViewModel
+                                .userRepo
+                                .updateProfilePicInFirestore(photoUrl)
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeOn(Schedulers.io())
                                 .andThen(Completable.defer {
                                     dashboardViewModel.userRepo.userDao
-
-                                    // TODO CONTINUE HERE: SAVE TO FIREBASE, THEN SAVE TO ROOM
+                                        .updateProfilePic(
+                                            dashboardViewModel.userRepo.getCurrentUserId()
+                                                ?: return@defer Completable.complete(),
+                                            photoUrl
+                                        )
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribeOn(Schedulers.io())
                                 })
                         } else {
                             Completable.complete()
                         }
                     }.doOnComplete {
-                        progressSubject.onNext(100.0)
                         val headerView = nav_view.getHeaderView(0)
                         Glide.with(this)
                             .load(images[0].path)
+                            .onLoadEnded { showProfilePicProgress(false) }
                             .into(headerView.user_profile_pic_image_view)
                     }
                     .doOnError {
                         Log.e(TAG, it.message, it)
                     }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
                     .subscribe()
             )
 
@@ -412,8 +424,10 @@ class DashboardFragment :
         headerView.username_text_view.text = usernameFormat
 
         if (user.profilePicUrl.isNotEmpty()) {
+            showProfilePicProgress(true)
             Glide.with(this)
                 .load(user.profilePicUrl)
+                .onLoadEnded { showProfilePicProgress(false) }
                 .into(headerView.user_profile_pic_image_view)
         }
 
@@ -534,11 +548,20 @@ class DashboardFragment :
         )
     }
 
+    private fun showProfilePicProgress(show: Boolean) {
+        val headerView = nav_view.getHeaderView(0)
+        if (show) {
+            headerView.upload_progress.visible()
+        } else {
+            headerView.upload_progress.gone()
+        }
+    }
+
     private fun showProgress(show: Boolean) {
         if (show) {
-            loading_overlay.visibility = View.VISIBLE
+            loading_overlay.visible()
         } else {
-            loading_overlay.visibility = View.GONE
+            loading_overlay.gone()
         }
     }
 }

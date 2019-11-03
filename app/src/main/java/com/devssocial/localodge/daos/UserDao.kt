@@ -12,8 +12,11 @@ import io.reactivex.Single
 @Dao
 interface UserDao {
 
-    @Query("SELECT * from user")
-    fun getAlphabetizedWords(): Single<List<UserRoom>>
+    @Query("SELECT * from user WHERE userId = :userId")
+    fun getUser(userId: String): Single<UserRoom>
+
+    @Query("UPDATE user SET profilePicUrl = :url WHERE userId = :userId")
+    fun updateProfilePic(userId: String, url: String): Completable
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(user: UserRoom): Completable

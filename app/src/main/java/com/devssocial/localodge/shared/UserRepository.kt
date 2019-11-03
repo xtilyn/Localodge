@@ -6,6 +6,7 @@ import android.util.Log
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.NO_VALUE
 import com.devssocial.localodge.COLLECTION_USERS
+import com.devssocial.localodge.LocalodgeRoomDatabase
 import com.devssocial.localodge.daos.UserDao_Impl
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.utils.FirebasePathProvider
@@ -30,7 +31,7 @@ class UserRepository(private val context: Context) {
     private var storage = FirebaseStorage.getInstance()
     private val mAuth = FirebaseAuth.getInstance()
 
-    // TODO CONTINUE HERE INITIALIZE ROOM USER DAO
+    val userDao = LocalodgeRoomDatabase.getDatabase(context).userDao()
 
     fun getCurrentUser(): FirebaseUser? {
         val user = mAuth.currentUser
