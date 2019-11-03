@@ -47,6 +47,7 @@ class DialogHelper(private val context: Context) {
             dialogView.dialogPositiveButton.setOnClickListener { positiveButtonCallback(dialog) }
             dialogView.dialogNegativeButton.setOnClickListener { negativeButtonCallback(dialog) }
 
+            dialog.window?.attributes?.windowAnimations = R.style.DefaultDialogAnimation
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
             dialog.show()
         }
@@ -55,11 +56,23 @@ class DialogHelper(private val context: Context) {
     lateinit var dialogView: View
     lateinit var dialog: AlertDialog
 
-    fun createDialog(resourceId: Int) {
+    fun createDialog(resourceId: Int, style: Int? = null) {
         dialog = AlertDialog.Builder(context).create()
         dialogView = LayoutInflater.from(context).inflate(resourceId, null)
         dialog.setView(dialogView)
+        if (style != null) {
+            dialog.window?.attributes?.windowAnimations = style
+        }
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
+    fun setCancelable(cancelable: Boolean) {
+        if (cancelable) {
+            dialog.setCancelable(true)
+            dialog.setCanceledOnTouchOutside(true)
+        } else {
+            dialog.setCancelable(false)
+            dialog.setCanceledOnTouchOutside(false)
+        }
+    }
 }

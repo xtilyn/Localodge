@@ -2,13 +2,10 @@ package com.devssocial.localodge.ui.dashboard.ui
 
 
 import android.Manifest
-import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -23,25 +20,21 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
 import com.devssocial.localodge.*
 import com.devssocial.localodge.R
-import com.bumptech.glide.request.target.Target
 import com.devssocial.localodge.callbacks.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.extensions.gone
 import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.extensions.onLoadEnded
 import com.devssocial.localodge.extensions.visible
+import com.devssocial.localodge.models.Feedback
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.models.User
@@ -53,7 +46,6 @@ import com.devssocial.localodge.utils.DialogHelper
 import com.devssocial.localodge.utils.KeyboardUtils
 import com.devssocial.localodge.utils.PhotoPicker
 import com.esafirm.imagepicker.features.ImagePicker
-import com.esafirm.imagepicker.features.ReturnMode
 import com.esafirm.imagepicker.model.Image
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -67,9 +59,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
+import kotlinx.android.synthetic.main.dialog_choose_photo.view.close_dialog
+import kotlinx.android.synthetic.main.dialog_send_feedback.*
+import kotlinx.android.synthetic.main.dialog_send_feedback.view.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.nav_header_dashboard.view.*
 import org.imperiumlabs.geofirestore.GeoFirestore
@@ -267,7 +261,46 @@ class DashboardFragment :
                 // TODO
             }
             R.id.nav_send_feedback -> {
-                // TODO CONTINUE HERE show dialog
+                context?.let {
+                    val helper = DialogHelper(it)
+                    helper.createDialog(
+                        R.layout.dialog_send_feedback,
+                        R.style.DefaultDialogAnimation
+                    )
+                    helper.dialogView.send_feedback_button.setOnClickListener {
+                        val comment = helper.dialogView.review_edittext.text
+                        if (comment.isEmpty()) {
+                            helper.dialogView.review_edittext.error =
+                                resources.getString(R.string.feedback_required)
+                            return@setOnClickListener
+                        }
+                        val ratingPercent = helper.dialogView.rating_bar.rating / 5 * 100
+
+                        helper.setCancelable(false)
+                        context?.let { c ->
+                            KeyboardUtils.hideKeyboard(
+                                c,
+                                helper.dialogView.review_edittext
+                            )
+                        }
+                        helper.dialogView.send_feedback_button.gone()
+                        helper.dialogView.send_feedback_progress.visible()
+                        sendFeedback(ratingPercent, comment.toString()) {
+                            context?.let { c ->
+                                Toasty.success(
+                                    c,
+                                    resources.getString(R.string.feedback_send)
+                                ).show()
+                            }
+                            helper.dialog.dismiss()
+                        }
+                    }
+                    helper.dialogView.close_dialog.setOnClickListener {
+                        helper.dialog.dismiss()
+                    }
+
+                    helper.dialog.show()
+                }
             }
             R.id.nav_sign_out -> {
                 if (context == null) return true
@@ -434,7 +467,7 @@ class DashboardFragment :
         headerView.user_profile_pic_image_view.setOnClickListener {
             if (context == null) return@setOnClickListener
             val dh = DialogHelper(context!!)
-            dh.createDialog(R.layout.dialog_choose_photo)
+            dh.createDialog(R.layout.dialog_choose_photo, R.style.DefaultDialogAnimation)
             dh.dialogView.close_dialog?.setOnClickListener {
                 dh.dialog.dismiss()
             }
@@ -466,6 +499,36 @@ class DashboardFragment :
         dialog.show()
     }
 
+    private fun sendFeedback(
+        ratingPercent: Float,
+        feedbackComment: String,
+        onComplete: () -> Unit
+    ) {
+        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
+        disposables.add(
+            dashboardViewModel.localodgeRepo
+                .sendFeedback(
+                    userId,
+                    Feedback(
+                        userId = userId,
+                        ratingPercent = ratingPercent,
+                        comment = feedbackComment
+                    )
+                )
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        Log.e(TAG, it.message, it)
+                        showError(resources.getString(R.string.send_feedback_failed))
+                    },
+                    onComplete = {
+                        onComplete()
+                    }
+                )
+        )
+    }
+
     private fun handleError(error: Throwable) {
         if (error.message == NO_VALUE) {
             ActivityLaunchHelper.goToLogin(activity!!)
@@ -485,6 +548,7 @@ class DashboardFragment :
     private fun loadDashboardData() {
         Log.d(this::class.java.simpleName, "user location: $userLocation")
         if (userLocation == null) return
+        // TODO CONTINUE HERE, EXPAND SEARCH IF NO POSTS FOUND
         dashboardViewModel.postsRepo.loadDataAroundLocation(
             userLocation!!,
             object : GeoFirestore.SingleGeoQueryDataEventCallback {
