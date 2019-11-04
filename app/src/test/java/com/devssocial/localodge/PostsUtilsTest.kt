@@ -1,6 +1,7 @@
 package com.devssocial.localodge
 
 import com.devssocial.localodge.models.Post
+import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.google.firebase.Timestamp
 import org.junit.Test
@@ -16,22 +17,22 @@ class PostsUtilsTest {
     fun ordersPostsCorrectly() {
         val post1 = Post(
             rating = 5,
-            likes = hashMapOf("haha" to true),
+            likes = setOf("haha"),
             createdDate = Timestamp(Date(System.currentTimeMillis()))
         )
         val post2 = Post(
             rating = 1,
-            likes = hashMapOf("haha" to true, "hoho" to true),
+            likes = setOf("haha", "hoho"),
             createdDate = Timestamp(Date(System.currentTimeMillis()))
         )
         val post3 = Post(
             rating = 1,
-            likes = hashMapOf("haha" to true),
+            likes = setOf("haha"),
             createdDate = Timestamp(Date(System.currentTimeMillis()))
         )
         val post4 = Post(
             rating = 1,
-            likes = hashMapOf("haha" to true),
+            likes = setOf("haha"),
             createdDate = Timestamp(Date(System.currentTimeMillis() - 100))
         )
         val unorderedPosts = arrayListOf(
@@ -45,6 +46,32 @@ class PostsUtilsTest {
                 orderedPosts[1] == post2 &&
                 orderedPosts[2] == post3 &&
                 orderedPosts[3] == post4
+        )
+    }
+
+    @Test
+    fun shouldConstructPagesCorrectly() {
+        // TODO CONTINUE HERE make this pass
+        val sampleData = arrayListOf(
+            PostViewItem(objectID = "1"),
+            PostViewItem(objectID = "2"),
+            PostViewItem(objectID = "3"),
+            PostViewItem(objectID = "4"),
+            PostViewItem(objectID = "5")
+        )
+
+        val map = PostsUtil.constructMapBasedOnHitsPerPage(
+            2,
+            sampleData
+        )
+
+        println(map)
+        assert(
+            map[0]?.get(0)?.objectID  == "1" &&
+            map[0]?.get(1)?.objectID  == "2" &&
+            map[1]?.get(0)?.objectID  == "3" &&
+            map[1]?.get(1)?.objectID  == "4" &&
+            map[2]?.get(0)?.objectID  == "5"
         )
     }
 }

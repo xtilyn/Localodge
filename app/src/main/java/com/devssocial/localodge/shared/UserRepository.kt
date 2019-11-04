@@ -7,7 +7,6 @@ import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.NO_VALUE
 import com.devssocial.localodge.COLLECTION_USERS
 import com.devssocial.localodge.LocalodgeRoomDatabase
-import com.devssocial.localodge.daos.UserDao_Impl
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.utils.FirebasePathProvider
 import com.google.firebase.auth.FirebaseAuth

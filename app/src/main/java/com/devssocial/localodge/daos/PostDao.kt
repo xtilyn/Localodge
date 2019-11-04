@@ -13,10 +13,10 @@ import io.reactivex.Single
 interface PostDao {
 
     @Query("SELECT * from posts")
-    fun getAlphabetizedWords(): Single<List<PostRoom>>
+    fun getPosts(): Single<List<PostRoom>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(post: PostRoom): Completable
+    fun insertAll(posts: List<PostRoom>): Completable
 
     @Query("DELETE FROM posts")
     fun deleteAll(): Completable

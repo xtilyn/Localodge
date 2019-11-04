@@ -61,4 +61,5 @@
 				<string name="send_feedback_failed">Could not send feedback. Please try again later.</string>
 				<string name="feedback_required">Please provide your feedback</string>
 				<string name="feedback_send">Feedback sent.</string>
+				<string name="could_not_get_location">Something went wrong while retrieving your location.</string>
 </resources>
