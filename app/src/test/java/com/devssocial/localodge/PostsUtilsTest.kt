@@ -51,7 +51,6 @@ class PostsUtilsTest {
 
     @Test
     fun shouldConstructPagesCorrectly() {
-        // TODO CONTINUE HERE make this pass
         val sampleData = arrayListOf(
             PostViewItem(objectID = "1"),
             PostViewItem(objectID = "2"),

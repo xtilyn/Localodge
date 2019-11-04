@@ -49,12 +49,11 @@ object PostsUtil {
         var currStartInclusive = 0
         var currEndExclusive = hitsPerPage
         repeat(pagesTotal) {
-            result[currentPage] = if (currEndExclusive >= n) {
+            result[currentPage] = ArrayList(if (currEndExclusive >= n) {
                 data.subList(currStartInclusive, n)
             } else {
                 data.subList(currStartInclusive, currEndExclusive)
-            } as ArrayList<PostViewItem>
-            // TODO CONTINUE HERE CAST EXCEPTION
+            })
 
             currentPage++
             currStartInclusive = currEndExclusive
