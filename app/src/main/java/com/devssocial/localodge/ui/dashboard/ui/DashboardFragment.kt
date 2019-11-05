@@ -107,7 +107,7 @@ class DashboardFragment :
 
         dashboardViewModel = ViewModelProviders.of(activity!!)[DashboardViewModel::class.java]
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-        postsProvider = PostsProvider(disposables, dashboardViewModel.postsRepo)
+        postsProvider = PostsProvider(disposables, dashboardViewModel.postsRepo, dashboardViewModel.userRepo)
     }
 
     override fun onCreateView(
