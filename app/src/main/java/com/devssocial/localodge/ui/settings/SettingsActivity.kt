@@ -1,11 +1,12 @@
 package com.devssocial.localodge.ui.settings
 
+import android.graphics.Color
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
+import com.devssocial.localodge.LocalodgeActivity
 import com.devssocial.localodge.R
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : LocalodgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,6 +16,8 @@ class SettingsActivity : AppCompatActivity() {
             .replace(R.id.settings, SettingsFragment())
             .commit()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        window.statusBarColor = Color.WHITE
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {

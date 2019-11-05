@@ -238,9 +238,9 @@
 																android:id="@+id/continue_text_view"
 																android:layout_width="match_parent"
 																android:layout_height="match_parent"
-																android:text="Continue without logging in"
+																android:text="@string/continue_without_logging_in"
 																android:gravity="center"
-																android:textColor="@color/matteBlack"
+																android:textColor="#838383"
 																android:textSize="18sp"
 																fontPath="fonts/Montserrat-SemiBold.ttf"
 																/>

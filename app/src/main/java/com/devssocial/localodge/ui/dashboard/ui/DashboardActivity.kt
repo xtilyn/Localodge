@@ -34,9 +34,6 @@ class DashboardActivity : LocalodgeActivity() {
         setContentView(R.layout.activity_dashboard)
 
         dashboardViewModel = ViewModelProviders.of(this)[DashboardViewModel::class.java]
-
-        // status bar config
-        window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
