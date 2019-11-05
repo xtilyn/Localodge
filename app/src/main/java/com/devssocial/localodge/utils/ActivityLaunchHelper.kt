@@ -5,6 +5,7 @@ import android.content.Intent
 import com.devssocial.localodge.ui.dashboard.ui.DashboardActivity
 import com.devssocial.localodge.ui.login.ui.LoginActivity
 import com.devssocial.localodge.ui.post_detail.PostDetailActivity
+import com.devssocial.localodge.ui.settings.SettingsActivity
 
 class ActivityLaunchHelper {
 
@@ -30,14 +31,18 @@ class ActivityLaunchHelper {
             goToSimpleActivity(activity, postId, PostDetailActivity::class.java)
         }
 
+        fun goToSettings(activity: Activity?) {
+            goToSimpleActivity(activity, null, SettingsActivity::class.java)
+        }
+
         private fun goToSimpleActivity(
             activity: Activity?,
-            contentId: String,
+            contentId: String? = null,
             jClass: Class<*>,
             finishAfter: Boolean = false
         ) {
             val intent = Intent(activity, jClass)
-            intent.putExtra(CONTENT_ID, contentId)
+            contentId?.let { intent.putExtra(CONTENT_ID, it) }
             activity?.startActivity(intent)
             if (finishAfter) activity?.finish()
         }

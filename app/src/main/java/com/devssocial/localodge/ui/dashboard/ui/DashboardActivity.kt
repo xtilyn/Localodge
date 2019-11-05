@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.lifecycle.ViewModelProviders
 import com.devssocial.localodge.*
@@ -11,6 +12,7 @@ import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.room_models.UserRoom
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
+import com.devssocial.localodge.utils.ActivityLaunchHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -38,9 +40,18 @@ class DashboardActivity : LocalodgeActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater = getMenuInflater()
-        inflater.inflate(R.menu.main, menu)
-        // TODO CONTINUE HERE INFLATE MENU
+        menuInflater.inflate(R.menu.menu_dashboard_toolbar, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId) {
+            R.id.menu_settings -> {
+                ActivityLaunchHelper.goToSettings(this)
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onStart() {

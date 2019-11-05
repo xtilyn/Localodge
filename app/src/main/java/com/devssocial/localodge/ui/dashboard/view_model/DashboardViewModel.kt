@@ -11,7 +11,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     // repositories
     private val context = application.baseContext
-    val postsRepo = PostsRepository()
+    val postsRepo = PostsRepository(context)
     val userRepo = UserRepository(context)
     val localodgeRepo = LocalodgeRepository()
 

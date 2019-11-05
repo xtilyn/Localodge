@@ -1,6 +1,8 @@
 package com.devssocial.localodge.ui.dashboard.utils
 
 import com.devssocial.localodge.models.Post
+import com.devssocial.localodge.models.PostViewItem
+import kotlin.math.ceil
 
 object PostsUtil {
 
@@ -28,6 +30,36 @@ object PostsUtil {
             likesCountComparator,
             timestampComparator
         ))
+    }
+
+    /**
+     * Constructs HashMap<page: Int, hits: List> for pagination
+     *  where key = current page and value = data associated with current page.
+     *  @param hitsPerPage number of items to display in a single page
+     *  @param data data to paginate
+     */
+    fun constructMapBasedOnHitsPerPage(
+        hitsPerPage: Int,
+        data: List<PostViewItem>
+    ): HashMap<Int, ArrayList<PostViewItem>> {
+        val n = data.size
+        val result = hashMapOf<Int, ArrayList<PostViewItem>>()
+        var currentPage = 0
+        val pagesTotal: Int = ceil(n / hitsPerPage.toDouble()).toInt()
+        var currStartInclusive = 0
+        var currEndExclusive = hitsPerPage
+        repeat(pagesTotal) {
+            result[currentPage] = ArrayList(if (currEndExclusive >= n) {
+                data.subList(currStartInclusive, n)
+            } else {
+                data.subList(currStartInclusive, currEndExclusive)
+            })
+
+            currentPage++
+            currStartInclusive = currEndExclusive
+            currEndExclusive += hitsPerPage
+        }
+        return result
     }
 
 }

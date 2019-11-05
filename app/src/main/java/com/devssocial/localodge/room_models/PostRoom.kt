@@ -15,8 +15,11 @@ data class PostRoom(
     @ColumnInfo(name = "photoUrl") var photoUrl: String? = null,
     @ColumnInfo(name = "videoUrl") var videoUrl: String? = null,
     @ColumnInfo(name = "createdDate") var createdDate: Long? = null,
-    @ColumnInfo(name = "lat") var lat: Long? = null,
-    @ColumnInfo(name = "lng") var lng: Long? = null,
+    @ColumnInfo(name = "lat") var lat: Double? = null,
+    @ColumnInfo(name = "lng") var lng: Double? = null,
     @ColumnInfo(name = "rating") var rating: Int = 0, // range: [0,5]
-    @ColumnInfo(name = "likes") var likes: Set<String> = hashSetOf()
+    @ColumnInfo(name = "likes") var likes: Set<String> = hashSetOf(),
+    @ColumnInfo(name = "posterUsername") var posterUsername: String = "",
+    @ColumnInfo(name = "posterProfilePic") var posterProfilePic: String = "",
+    @ColumnInfo(name = "comments") var comments: Set<String> = hashSetOf()
 )

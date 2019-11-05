@@ -2,6 +2,7 @@ package com.devssocial.localodge.ui.dashboard.ui
 
 
 import android.Manifest
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentSender
@@ -36,7 +37,9 @@ import com.devssocial.localodge.models.Feedback
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.models.User
+import com.devssocial.localodge.room_models.PostRoom
 import com.devssocial.localodge.ui.dashboard.adapter.PostsAdapter
+import com.devssocial.localodge.ui.dashboard.utils.PostsProvider
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
@@ -50,6 +53,7 @@ import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import es.dmoral.toasty.Toasty
 import io.reactivex.Completable
@@ -67,9 +71,13 @@ import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_no_user.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_profile_pic_image_view
-import org.imperiumlabs.geofirestore.GeoFirestore
+import kotlinx.android.synthetic.main.layout_empty_state.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 class DashboardFragment :
     Fragment(),
@@ -80,24 +88,26 @@ class DashboardFragment :
         private const val TAG = "DashboardFragment"
         const val REQUEST_LOCATION_PERMISSION = 1
         const val REQUEST_CHECK_SETTINGS = 2
-        const val NEARBY_RADIUS = 1000000 // 100km
-        const val HITS_PER_PAGE = 10
-        const val GALLERY_INTENT = 213432
         private const val RC_CAMERA = 3000
+        private const val HITS_PER_PAGE = 15
     }
 
     private val disposables = CompositeDisposable()
     private var userLocation: Location? = null
+    private var expandSearchCount: Int = 0 // number of times geo search was expanded due to lack of data (limit = 2)
 
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var postsAdapter: PostsAdapter
+    private lateinit var postsProvider: PostsProvider
+    private lateinit var retrievedPosts: HashMap<Int, ArrayList<PostViewItem>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         dashboardViewModel = ViewModelProviders.of(activity!!)[DashboardViewModel::class.java]
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
+        postsProvider = PostsProvider(disposables, dashboardViewModel.postsRepo)
     }
 
     override fun onCreateView(
@@ -155,6 +165,7 @@ class DashboardFragment :
         postsAdapter = PostsAdapter(arrayListOf(), this@DashboardFragment)
         dashboard_recyclerview?.adapter = postsAdapter
         dashboard_recyclerview?.layoutManager = LinearLayoutManager(context)
+        // TODO CONTINUE HERE onScrolledToBottom: loadMore()
 
         nav_view.setNavigationItemSelectedListener(this)
 
@@ -272,7 +283,7 @@ class DashboardFragment :
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_share -> {
-                activity?.let{
+                activity?.let {
                     ShareCompat.IntentBuilder.from(it)
                         .setType("text/plain")
                         .setChooserTitle("Chooser title")
@@ -412,7 +423,7 @@ class DashboardFragment :
                     if (location == null) checkLocationSettings()
                     else {
                         this@DashboardFragment.userLocation = location
-                        loadDashboardData()
+                        loadInitialDashboardData()
                     }
                 }
         } else {
@@ -431,7 +442,7 @@ class DashboardFragment :
             val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
 
             task.addOnSuccessListener {
-                loadDashboardData()
+                loadInitialDashboardData()
             }
 
             task.addOnFailureListener { exception ->
@@ -599,38 +610,106 @@ class DashboardFragment :
         ).show()
     }
 
-    private fun loadDashboardData() {
-        Log.d(this::class.java.simpleName, "user location: $userLocation")
-        if (userLocation == null) return
-        // TODO CONTINUE HERE, EXPAND SEARCH IF NO POSTS FOUND
-        dashboardViewModel.postsRepo.loadDataAroundLocation(
-            userLocation!!,
-            object : GeoFirestore.SingleGeoQueryDataEventCallback {
-                override fun onComplete(
-                    documentSnapshots: List<DocumentSnapshot>?,
-                    exception: Exception?
-                ) {
-                    if (exception != null) {
-                        (activity as LocalodgeActivity).logAndShowError(
-                            TAG,
-                            exception,
-                            resources.getString(R.string.error_retrieving_data)
-                        )
-                    } else {
-                        val unorderedPosts = documentSnapshots?.map {
-                            it.toObject(Post::class.java) ?: return
-                        } ?: return
-                        lateinit var orderedPosts: ArrayList<PostViewItem>
-                        synchronized(this) {
-                            orderedPosts = PostsUtil.orderPosts(unorderedPosts).map { post: Post ->
-                                post.mapProperties(PostViewItem())
-                            } as ArrayList<PostViewItem>
+    private fun loadInitialDashboardData() {
+        disposables.add(
+            dashboardViewModel.postsRepo.postsDao
+                .getPosts()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        Log.e(TAG, it.message, it)
+                    },
+                    onSuccess = {
+                        val posts = it.map { roomPost ->
+                            roomPost.mapProperties(PostViewItem()).apply {
+                                if (roomPost.createdDate != null) {
+                                    createdDate = Timestamp(Date(roomPost.createdDate!!))
+                                }
+                                if (roomPost.lat != null && roomPost.lng != null) {
+                                    _geoloc = com.devssocial.localodge.models.Location(
+                                        lat = roomPost.lat!!,
+                                        lng = roomPost.lng!!
+                                    )
+                                }
+                            }
+                        } as ArrayList<PostViewItem>
+                        postsAdapter.updateList(posts)
+                        if (userLocation == null) {
+                            showError(resources.getString(R.string.could_not_get_location))
+                            return@subscribeBy
                         }
-                        postsAdapter.updateList(orderedPosts)
-                        // TODO CONTINUE HERE SAVE INITIAL DATA TO ROOM
+                        loadInitialDataFromFirebase(PostsProvider.INITIAL_RADIUS)
                     }
+                )
+        )
+    }
+
+    private fun loadInitialDataFromFirebase(radius: Double) {
+        Log.d(this::class.java.simpleName, "searching for posts with radius: $radius")
+        postsProvider.loadInitial(
+            userLocation = userLocation!!,
+            radius = radius,
+            onError = { exception ->
+                (activity as LocalodgeActivity).logAndShowError(
+                    TAG,
+                    exception,
+                    resources.getString(R.string.error_retrieving_data)
+                )
+            },
+            onSuccess = { posts: ArrayList<PostViewItem> ->
+                if ((posts.isEmpty() || posts.size < 3) && expandSearchCount < 3) {
+                    expandSearchCount++
+                    loadInitialDataFromFirebase(radius + 10.0)
+                } else {
+                    // TODO CONTINUE HERE
+//                    swipeRefreshDashboard.isRefreshing = false
+                    toggleEmptyState(posts.isEmpty())
+
+                    retrievedPosts = PostsUtil.constructMapBasedOnHitsPerPage(HITS_PER_PAGE, posts)
+                    val initialPosts = if (posts.size > HITS_PER_PAGE) {
+                        retrievedPosts[0]
+                    } else {
+                        posts
+                    } ?: arrayListOf()
+                    postsAdapter.updateList(initialPosts)
+
+                    // save initial data to room
+                    val postsRoom = initialPosts.map { postFirebase ->
+                        postFirebase.mapProperties(PostRoom()).apply {
+                            lat = postFirebase._geoloc.lat
+                            lng = postFirebase._geoloc.lng
+                            createdDate = postFirebase.createdDate?.seconds?.times(1000)
+                        }
+                    }
+                    disposables.add(
+                        dashboardViewModel.postsRepo.postsDao
+                            .deleteAll()
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeOn(Schedulers.io())
+                            .subscribe {
+                                disposables.add(
+                                    dashboardViewModel.postsRepo.postsDao
+                                        .insertAll(postsRoom)
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribeOn(Schedulers.io())
+                                        .subscribe()
+                                )
+                            }
+                    )
                 }
-            })
+            }
+        )
+    }
+
+    private fun onRefresh() {
+        if (!this::retrievedPosts.isInitialized) return
+        // TODO CONTINUE HERE SETUP SWIPE REFRESH
+        toggleEmptyState(false)
+        showProgress(true)
+        postsAdapter.clear()
+        expandSearchCount = 0
+        loadInitialDataFromFirebase(PostsProvider.INITIAL_RADIUS)
     }
 
     private fun unlikePost(post: PostViewItem, onComplete: () -> Unit) {
@@ -677,9 +756,17 @@ class DashboardFragment :
 
     private fun showProgress(show: Boolean) {
         if (show) {
-            loading_overlay.visible()
+            loading_overlay?.visible()
         } else {
-            loading_overlay.gone()
+            loading_overlay?.gone()
+        }
+    }
+
+    private fun toggleEmptyState(show: Boolean) {
+        if (show) {
+            layout_empty_state?.visible()
+        } else {
+            layout_empty_state?.gone()
         }
     }
 
