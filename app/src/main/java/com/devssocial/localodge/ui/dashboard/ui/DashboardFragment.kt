@@ -29,10 +29,7 @@ import com.devssocial.localodge.*
 import com.devssocial.localodge.R
 import com.devssocial.localodge.callbacks.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
-import com.devssocial.localodge.extensions.gone
-import com.devssocial.localodge.extensions.mapProperties
-import com.devssocial.localodge.extensions.onLoadEnded
-import com.devssocial.localodge.extensions.visible
+import com.devssocial.localodge.extensions.*
 import com.devssocial.localodge.models.Feedback
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.PostViewItem
@@ -72,6 +69,7 @@ import kotlinx.android.synthetic.main.nav_header_dashboard_no_user.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_profile_pic_image_view
 import kotlinx.android.synthetic.main.layout_empty_state.*
+import kotlinx.android.synthetic.main.layout_empty_state.view.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
@@ -100,7 +98,9 @@ class DashboardFragment :
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var postsAdapter: PostsAdapter
     private lateinit var postsProvider: PostsProvider
+
     private lateinit var retrievedPosts: HashMap<Int, ArrayList<PostViewItem>>
+    private var currentPage = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -161,13 +161,26 @@ class DashboardFragment :
         )
         toggle.syncState()
 
+        // swipe refresh
+        swipe_refresh_dashboard.setColorSchemeColors(
+            ContextCompat.getColor(
+                context!!,
+                R.color.colorPrimary
+            )
+        )
+        swipe_refresh_dashboard.setOnRefreshListener(::onRefresh)
+        swipe_refresh_dashboard.isRefreshing = true
+
         // recycler view
         postsAdapter = PostsAdapter(arrayListOf(), this@DashboardFragment)
-        dashboard_recyclerview?.adapter = postsAdapter
-        dashboard_recyclerview?.layoutManager = LinearLayoutManager(context)
-        // TODO CONTINUE HERE onScrolledToBottom: loadMore()
+        dashboard_recyclerview.adapter = postsAdapter
+        dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
+        dashboard_recyclerview.onScrolledToBottom(::loadMoreDashboardData)
 
         nav_view.setNavigationItemSelectedListener(this)
+
+        // empty state
+        layout_empty_state.share_app_button.setOnClickListener(::startShareAppIntent)
 
         retrieveCurrentUserData { user: User? ->
             if (user == null) {
@@ -283,13 +296,7 @@ class DashboardFragment :
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_share -> {
-                activity?.let {
-                    ShareCompat.IntentBuilder.from(it)
-                        .setType("text/plain")
-                        .setChooserTitle("Chooser title")
-                        .setText("http://play.google.com/store/apps/details?id=" + it.packageName)
-                        .startChooser()
-                }
+                startShareAppIntent(null)
             }
             R.id.nav_send_feedback -> {
                 context?.let {
@@ -662,8 +669,7 @@ class DashboardFragment :
                     expandSearchCount++
                     loadInitialDataFromFirebase(radius + 10.0)
                 } else {
-                    // TODO CONTINUE HERE
-//                    swipeRefreshDashboard.isRefreshing = false
+                    swipe_refresh_dashboard.isRefreshing = false
                     toggleEmptyState(posts.isEmpty())
 
                     retrievedPosts = PostsUtil.constructMapBasedOnHitsPerPage(HITS_PER_PAGE, posts)
@@ -702,13 +708,17 @@ class DashboardFragment :
         )
     }
 
+    private fun loadMoreDashboardData() {
+        currentPage++
+        postsAdapter.appendToList(retrievedPosts[currentPage] ?: arrayListOf())
+    }
+
     private fun onRefresh() {
         if (!this::retrievedPosts.isInitialized) return
-        // TODO CONTINUE HERE SETUP SWIPE REFRESH
         toggleEmptyState(false)
-        showProgress(true)
         postsAdapter.clear()
         expandSearchCount = 0
+        currentPage = 0
         loadInitialDataFromFirebase(PostsProvider.INITIAL_RADIUS)
     }
 
@@ -787,5 +797,15 @@ class DashboardFragment :
             ActivityLaunchHelper.goToLogin(activity)
         }
         helper.dialog.show()
+    }
+
+    private fun startShareAppIntent(view: View?) {
+        activity?.let {
+            ShareCompat.IntentBuilder.from(it)
+                .setType("text/plain")
+                .setChooserTitle("Chooser title")
+                .setText("http://play.google.com/store/apps/details?id=" + it.packageName)
+                .startChooser()
+        }
     }
 }

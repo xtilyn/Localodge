@@ -4,21 +4,36 @@
 								android:layout_height="match_parent"
 								xmlns:app="http://schemas.android.com/apk/res-auto"
 								android:id="@+id/layout_empty_state"
-								android:visibility="gone"
 								>
 
-				<TextView
-												android:layout_width="wrap_content"
-												android:layout_height="wrap_content"
-												android:text="No posts found nearby. Share this app with your friends!"
-												android:layout_marginBottom="22dp"
-												app:layout_constraintBottom_toTopOf="@+id/share_app_button"
+				<ImageView
+												android:id="@+id/empty_doc_image_view"
+												android:layout_width="180dp"
+												android:layout_height="180dp"
+												android:src="@drawable/empty_doc"
+												app:layout_constraintTop_toTopOf="parent"
+												app:layout_constraintBottom_toBottomOf="parent"
 												app:layout_constraintStart_toStartOf="parent"
 												app:layout_constraintEnd_toEndOf="parent"
-												android:textAppearance="@style/TextAppearance.AppCompat.Large"
-												android:gravity="center"
+												app:layout_constraintVertical_bias="0.35"
+												android:background="@drawable/circle_border"
+												android:padding="29dp"
+												/>
+
+				<TextView
+												android:id="@+id/textView3"
+												android:layout_width="0dp"
+												android:layout_height="wrap_content"
 												android:layout_marginStart="24dp"
+												android:layout_marginTop="28dp"
 												android:layout_marginEnd="24dp"
+												android:gravity="center"
+												android:text="No posts found nearby. Share this app with your friends!"
+												android:textAppearance="@style/TextAppearance.AppCompat.Large"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toBottomOf="@+id/empty_doc_image_view"
+												android:textColor="#818181"
 												/>
 
 				<Button
@@ -26,11 +41,13 @@
 												android:layout_width="wrap_content"
 												android:layout_height="wrap_content"
 												android:text="Share App"
-												app:layout_constraintVertical_bias="0.8"
-												app:layout_constraintBottom_toBottomOf="parent"
-												app:layout_constraintTop_toTopOf="parent"
-												app:layout_constraintStart_toStartOf="parent"
+												android:layout_marginTop="28dp"
 												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toBottomOf="@+id/textView3"
+												android:background="@drawable/button_default_primary"
+												android:textAllCaps="false"
+												android:textColor="@android:color/white"
 												/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

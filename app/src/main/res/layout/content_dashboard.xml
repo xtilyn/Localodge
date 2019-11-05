@@ -25,16 +25,23 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-				<androidx.recyclerview.widget.RecyclerView
-												android:id="@+id/dashboard_recyclerview"
+				<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+												android:id="@+id/swipe_refresh_dashboard"
 												android:layout_width="match_parent"
 												android:layout_height="match_parent"
-												app:layout_behavior="@string/appbar_scrolling_view_behavior"
-												>
+												app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-				</androidx.recyclerview.widget.RecyclerView>
+								<androidx.recyclerview.widget.RecyclerView
+																android:id="@+id/dashboard_recyclerview"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent"
+																>
 
-				<include layout="@layout/layout_empty_state" />
+								</androidx.recyclerview.widget.RecyclerView>
+
+				</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+				<include layout="@layout/layout_empty_state" android:visibility="gone"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
