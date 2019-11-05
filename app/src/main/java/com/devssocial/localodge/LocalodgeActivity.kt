@@ -25,7 +25,9 @@ open class LocalodgeActivity : AppCompatActivity() {
     private val broadcastReceiver by lazy {
         object: BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                logOut()
+                val sharedPref = getSharedPreferences(LOCALODGE_SHARED_PREF, Context.MODE_PRIVATE) ?: return
+                val isTrial = sharedPref.getBoolean(TRIAL_ACCOUNT_REQUESTED, false)
+                if (!isTrial) logOut()
             }
         }
     }
@@ -41,10 +43,10 @@ open class LocalodgeActivity : AppCompatActivity() {
     }
 
     fun logOut() {
-        val sharedPref = getSharedPreferences(LOCALODGE_SHARED_PREF, Context.MODE_PRIVATE) ?: return
-        sharedPref.edit().clear().apply()
         FirebaseAuth.getInstance().signOut()
         ActivityLaunchHelper.goToLogin(this)
+        val sharedPref = getSharedPreferences(LOCALODGE_SHARED_PREF, Context.MODE_PRIVATE) ?: return
+        sharedPref.edit().clear().apply()
     }
 
     fun logAndShowError(TAG: String, error: Throwable?, msgToUser: String) {

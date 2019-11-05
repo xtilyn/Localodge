@@ -61,4 +61,10 @@
 				<string name="send_feedback_failed">Could not send feedback. Please try again later.</string>
 				<string name="feedback_required">Please provide your feedback</string>
 				<string name="feedback_send">Feedback sent.</string>
+				<string name="sign_in_required">Sign In Required</string>
+				<string name="feedback_needs_credentials">Please sign in or create an account to send us feedback.</string>
+				<string name="create_post_needs_credentials">Please sign in or create an account to create a post.</string>
+				<string name="sign_in_required_to_perform_actions">Please sign in or create an account to perform actions on a post.</string>
+				<string name="sign_in_required_to_like_posts">Please sign in or create an account to like a post.</string>
+				<string name="settings">Settings</string>
 </resources>

@@ -9,10 +9,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -63,10 +60,13 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.close_dialog
-import kotlinx.android.synthetic.main.dialog_send_feedback.*
 import kotlinx.android.synthetic.main.dialog_send_feedback.view.*
+import kotlinx.android.synthetic.main.dialog_send_feedback.view.send_feedback_progress
+import kotlinx.android.synthetic.main.dialog_sign_in_required.view.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
-import kotlinx.android.synthetic.main.nav_header_dashboard.view.*
+import kotlinx.android.synthetic.main.nav_header_dashboard_no_user.view.*
+import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.*
+import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_profile_pic_image_view
 import org.imperiumlabs.geofirestore.GeoFirestore
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -113,8 +113,14 @@ class DashboardFragment :
 
         // setup widgets
         fab.setOnClickListener {
-            (it as? FloatingActionButton)?.hide()
-            findNavController().navigate(R.id.action_dashboardFragment_to_newPostFragment)
+            if (!isUserLoggedIn()) {
+                showSignInRequiredDialog(
+                    resources.getString(R.string.create_post_needs_credentials)
+                )
+            } else {
+                (it as? FloatingActionButton)?.hide()
+                findNavController().navigate(R.id.action_dashboardFragment_to_newPostFragment)
+            }
         }
 
         // setup static widgets
@@ -151,6 +157,14 @@ class DashboardFragment :
         dashboard_recyclerview?.layoutManager = LinearLayoutManager(context)
 
         nav_view.setNavigationItemSelectedListener(this)
+
+        retrieveCurrentUserData { user: User? ->
+            if (user == null) {
+                setupNoUserState()
+            } else {
+                setupUserWidgets(user)
+            }
+        }
     }
 
     override fun onStart() {
@@ -170,7 +184,6 @@ class DashboardFragment :
                 }
         )
 
-        retrieveCurrentUserData()
         getLocation()
     }
 
@@ -269,6 +282,14 @@ class DashboardFragment :
             }
             R.id.nav_send_feedback -> {
                 context?.let {
+
+                    if (!isUserLoggedIn()) {
+                        showSignInRequiredDialog(
+                            resources.getString(R.string.feedback_needs_credentials)
+                        )
+                        return@let
+                    }
+
                     val helper = DialogHelper(it)
                     helper.createDialog(
                         R.layout.dialog_send_feedback,
@@ -279,6 +300,7 @@ class DashboardFragment :
                         if (comment.isEmpty()) {
                             helper.dialogView.review_edittext.error =
                                 resources.getString(R.string.feedback_required)
+                            helper.dialogView.review_edittext.requestFocus()
                             return@setOnClickListener
                         }
                         val ratingPercent = helper.dialogView.rating_bar.rating / 5 * 100
@@ -336,6 +358,12 @@ class DashboardFragment :
         val current = postsAdapter.data[position]
         when (view.id) {
             R.id.user_post_more_options -> {
+                if (!isUserLoggedIn()) {
+                    showSignInRequiredDialog(
+                        resources.getString(R.string.sign_in_required_to_perform_actions)
+                    )
+                    return
+                }
                 val popupView = LayoutInflater.from(context)
                     .inflate(R.layout.popup_user_post_more_options, null)
                 val popup = PopupWindow(
@@ -350,6 +378,12 @@ class DashboardFragment :
                 ActivityLaunchHelper.goToPostDetail(activity, current.objectID)
             }
             R.id.user_post_like -> {
+                if (!isUserLoggedIn()) {
+                    showSignInRequiredDialog(
+                        resources.getString(R.string.sign_in_required_to_like_posts)
+                    )
+                    return
+                }
                 if (current.likes.contains(dashboardViewModel.userRepo.getCurrentUser()?.uid)) {
                     unlikePost(current) {
                         postsAdapter.notifyItemChanged(
@@ -434,16 +468,16 @@ class DashboardFragment :
         }
     }
 
-    private fun retrieveCurrentUserData() {
+    private fun retrieveCurrentUserData(onUserRetrieved: (User?) -> Unit) {
         val user = dashboardViewModel.userRepo.getCurrentUser()
-        if (dashboardViewModel.userRepo.getCurrentUser() == null) {
-            ActivityLaunchHelper.goToLogin(activity)
+        if (user == null) {
+            onUserRetrieved(null)
             return
         }
         disposables.addAll(
             dashboardViewModel
                 .userRepo
-                .getUserData(user!!.uid)
+                .getUserData(user.uid)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
@@ -451,7 +485,7 @@ class DashboardFragment :
                         handleError(error)
                     },
                     onSuccess = { localodgeUser ->
-                        setupUserWidgets(localodgeUser)
+                        onUserRetrieved(localodgeUser)
                     }
                 )
         )
@@ -459,7 +493,10 @@ class DashboardFragment :
 
     private fun setupUserWidgets(user: User) {
         if (context == null) return
-        val headerView = nav_view.getHeaderView(0)
+        val headerView = nav_view.inflateHeaderView(R.layout.nav_header_dashboard_signed_in)
+
+        nav_view.menu.getItem(0).subMenu.getItem(2).isVisible = true
+
         val usernameFormat = "@${user.username}"
         headerView.username_text_view.text = usernameFormat
 
@@ -487,6 +524,16 @@ class DashboardFragment :
                 dh.dialog.dismiss()
             }
             dh.dialog.show()
+        }
+    }
+
+    private fun setupNoUserState() {
+        if (context == null) return
+        nav_view.menu.getItem(0).subMenu.getItem(2).isVisible = false
+
+        val headerView = nav_view.inflateHeaderView(R.layout.nav_header_dashboard_no_user)
+        headerView.sign_in_button.setOnClickListener {
+            ActivityLaunchHelper.goToLogin(activity)
         }
     }
 
@@ -634,5 +681,24 @@ class DashboardFragment :
         } else {
             loading_overlay.gone()
         }
+    }
+
+    private fun isUserLoggedIn(): Boolean = dashboardViewModel.userRepo.getCurrentUser() != null
+
+    private fun showSignInRequiredDialog(message: String) {
+        if (context == null) return
+        val helper = DialogHelper(context!!)
+        helper.createDialog(
+            R.layout.dialog_sign_in_required,
+            R.style.DefaultDialogAnimation
+        )
+        helper.dialogView.sign_in_message.text = message
+        helper.dialogView.close_dialog.setOnClickListener {
+            helper.dialog.dismiss()
+        }
+        helper.dialogView.dialog_sign_in_button.setOnClickListener {
+            ActivityLaunchHelper.goToLogin(activity)
+        }
+        helper.dialog.show()
     }
 }

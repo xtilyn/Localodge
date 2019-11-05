@@ -29,6 +29,14 @@
 																/>
 
 								<Button
+																android:id="@+id/popup_user_post_block_user"
+																android:layout_width="match_parent"
+																android:layout_height="wrap_content"
+																android:text="Block user"
+																style="@style/Widget.AppCompat.Button.Borderless"
+																/>
+
+								<Button
 																android:id="@+id/popup_user_post_hide"
 																android:layout_width="match_parent"
 																android:layout_height="wrap_content"

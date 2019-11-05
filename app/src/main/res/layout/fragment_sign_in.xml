@@ -216,6 +216,37 @@
 
 				</androidx.cardview.widget.CardView>
 
+				<androidx.cardview.widget.CardView
+												android:layout_width="0dp"
+												android:layout_height="50dp"
+												android:layout_marginTop="4dp"
+												app:layout_constraintTop_toBottomOf="@+id/sign_in_button"
+												app:layout_constraintEnd_toEndOf="parent"
+												android:layout_marginEnd="24dp"
+												app:layout_constraintStart_toStartOf="parent"
+												android:layout_marginStart="24dp"
+												android:id="@+id/continue_button"
+												app:cardCornerRadius="12dp"
+												app:cardBackgroundColor="@color/paleDogwood"
+												app:cardElevation="8dp"
+												android:clickable="true"
+												android:focusable="true"
+												android:foreground="?attr/selectableItemBackgroundBorderless"
+												>
+
+								<TextView
+																android:id="@+id/continue_text_view"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent"
+																android:text="Continue without logging in"
+																android:gravity="center"
+																android:textColor="@color/matteBlack"
+																android:textSize="18sp"
+																fontPath="fonts/Montserrat-SemiBold.ttf"
+																/>
+
+				</androidx.cardview.widget.CardView>
+
 				<FrameLayout
 												android:id="@+id/loading_overlay"
 												android:layout_width="match_parent"

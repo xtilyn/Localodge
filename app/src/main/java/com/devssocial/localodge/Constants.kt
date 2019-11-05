@@ -2,8 +2,7 @@ package com.devssocial.localodge
 
 // SHARED PREF
 const val LOCALODGE_SHARED_PREF = "com.localodge.shared_pref"
-const val USER_PROFILE_URL = "userProfileUrl"
-const val USERNAME = "username"
+const val TRIAL_ACCOUNT_REQUESTED = "trialAccRequested"
 
 // ALGOLIA API
 const val ALGOLIA_APP_ID = "L4UXH3U7Y3"

@@ -1,22 +1,16 @@
 package com.devssocial.localodge.ui.dashboard.ui
 
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import com.devssocial.localodge.LOCALODGE_SHARED_PREF
-
 import com.devssocial.localodge.R
-import com.devssocial.localodge.USERNAME
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.KeyboardUtils
 import io.reactivex.disposables.CompositeDisposable
@@ -96,7 +90,7 @@ class NewPostFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         // TODO load user profile pic and username in their corresponding widgets
-        // grab from shared pref. If failed/empty, grab from firebase
+        // grab from ROOM. If failed/empty, grab from firebase
     }
 
     override fun onStop() {

@@ -1,6 +1,7 @@
 package com.devssocial.localodge.ui.login.ui
 
 
+import android.content.Context
 import android.os.Bundle
 import android.transition.ChangeBounds
 import android.transition.TransitionManager
@@ -13,10 +14,13 @@ import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import com.devssocial.localodge.LOCALODGE_SHARED_PREF
 import com.devssocial.localodge.R
+import com.devssocial.localodge.TRIAL_ACCOUNT_REQUESTED
 import com.devssocial.localodge.extensions.isEmail
 import com.devssocial.localodge.ui.login.view_model.LoginViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
@@ -40,6 +44,14 @@ class SignInFragment : Fragment() {
             }
             R.id.back_button -> {
                 toggleRegister(false)
+            }
+            R.id.continue_button -> {
+                val sharedPref = activity?.getSharedPreferences(LOCALODGE_SHARED_PREF, Context.MODE_PRIVATE) ?: return@OnClickListener
+                sharedPref.edit {
+                    this.putBoolean(TRIAL_ACCOUNT_REQUESTED, true)
+                    this.commit()
+                }
+                goToDashboard()
             }
             R.id.sign_in_button -> {
                 if (loginViewModel.isRegisterVisible) {
@@ -74,6 +86,7 @@ class SignInFragment : Fragment() {
         // setup widgets
         register_button?.setOnClickListener(signInFragmentClickListener)
         sign_in_button?.setOnClickListener(signInFragmentClickListener)
+        continue_button?.setOnClickListener(signInFragmentClickListener)
         forgot_password?.setOnClickListener(signInFragmentClickListener)
     }
 

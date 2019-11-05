@@ -1,23 +1,20 @@
 package com.devssocial.localodge.ui.dashboard.ui
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import androidx.lifecycle.ViewModelProviders
 import com.devssocial.localodge.*
+import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.models.User
+import com.devssocial.localodge.room_models.UserRoom
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import com.esafirm.imagepicker.features.ImagePicker
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.R.attr.name
-
 
 
 class DashboardActivity : LocalodgeActivity() {
@@ -40,11 +37,17 @@ class DashboardActivity : LocalodgeActivity() {
         window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = getMenuInflater()
+        inflater.inflate(R.menu.main, menu)
+        // TODO CONTINUE HERE INFLATE MENU
+    }
+
     override fun onStart() {
         super.onStart()
 
-        getCurrentUserData { user: User ->
-            saveToSharedPref(user)
+        getCurrentUserDataFromFirebase { user: User ->
+            saveToRoom(user)
         }
     }
 
@@ -53,7 +56,7 @@ class DashboardActivity : LocalodgeActivity() {
         else super.onBackPressed()
     }
 
-    private fun getCurrentUserData(onSuccess: (User) -> Unit) {
+    private fun getCurrentUserDataFromFirebase(onSuccess: (User) -> Unit) {
         val userId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
         disposables.add(
             dashboardViewModel.userRepo.getUserData(userId)
@@ -74,16 +77,18 @@ class DashboardActivity : LocalodgeActivity() {
         )
     }
 
-    private fun saveToSharedPref(user: User) {
-        val sharedPref = getSharedPreferences(
-            LOCALODGE_SHARED_PREF,
-            Context.MODE_PRIVATE
-        ) ?: return
-        with(sharedPref.edit()) {
-            putString(USERNAME, user.username)
-            putString(USER_PROFILE_URL, user.profilePicUrl)
-            apply()
+    private fun saveToRoom(user: User) {
+        val userRoom = user.mapProperties(UserRoom()).apply {
+            if (user.joinedDate != null)
+                joinedDate = user.joinedDate!!.seconds * 1000
         }
+        disposables.add(
+            dashboardViewModel.userRepo.userDao
+                .insert(userRoom)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
+        )
     }
 
 }
