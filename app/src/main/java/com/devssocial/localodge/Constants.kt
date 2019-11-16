@@ -17,6 +17,7 @@ const val COLLECTION_USERS = "users"
 const val COLLECTION_CITIES = "cities"
 const val COLLECTION_POSTS = "posts"
 const val COLLECTION_FEEDBACK = "feedback"
+const val COLLECTION_BLACKLIST = "blacklist"
 
 // firestore fields
 const val FIELD_LIKES = "likes"

@@ -85,4 +85,9 @@
 				</string>
 				<string name="attachment_summary_off">Only download attachments when manually requested</string>
 				<string name="continue_without_logging_in">Continue without logging in</string>
+				<string name="go_to_login">Go to login</string>
+				<string name="account_suspended">Account Suspended</string>
+				<string name="account_suspended_message">Your account has been temporarily suspended due to numerous received reports.</string>
+				<string name="account_banned">Account Banned</string>
+				<string name="account_banned_message">Your account has been banned due to numerous received reports.</string>
 </resources>

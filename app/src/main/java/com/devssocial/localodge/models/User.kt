@@ -8,5 +8,6 @@ data class User(
     var username: String = "",
     var profilePicUrl: String = "",
     var email: String = "",
-    @ServerTimestamp var joinedDate: Timestamp? = null
+    @ServerTimestamp var joinedDate: Timestamp? = null,
+    var suspendedTillDate: Long = 0
 )

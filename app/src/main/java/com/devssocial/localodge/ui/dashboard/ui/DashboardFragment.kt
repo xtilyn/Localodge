@@ -54,8 +54,10 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import es.dmoral.toasty.Toasty
 import io.reactivex.Completable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.content_dashboard.*
@@ -64,6 +66,7 @@ import kotlinx.android.synthetic.main.dialog_choose_photo.view.close_dialog
 import kotlinx.android.synthetic.main.dialog_send_feedback.view.*
 import kotlinx.android.synthetic.main.dialog_send_feedback.view.send_feedback_progress
 import kotlinx.android.synthetic.main.dialog_sign_in_required.view.*
+import kotlinx.android.synthetic.main.dialog_warning.view.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_no_user.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.*
@@ -92,7 +95,8 @@ class DashboardFragment :
 
     private val disposables = CompositeDisposable()
     private var userLocation: Location? = null
-    private var expandSearchCount: Int = 0 // number of times geo search was expanded due to lack of data (limit = 2)
+    private var expandSearchCount: Int =
+        0 // number of times geo search was expanded due to lack of data (limit = 2)
 
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -107,7 +111,8 @@ class DashboardFragment :
 
         dashboardViewModel = ViewModelProviders.of(activity!!)[DashboardViewModel::class.java]
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-        postsProvider = PostsProvider(disposables, dashboardViewModel.postsRepo, dashboardViewModel.userRepo)
+        postsProvider =
+            PostsProvider(disposables, dashboardViewModel.postsRepo, dashboardViewModel.userRepo)
     }
 
     override fun onCreateView(
@@ -492,17 +497,50 @@ class DashboardFragment :
             onUserRetrieved(null)
             return
         }
-        disposables.addAll(
+        // TODO CONTINUE HERE
+        val disposable = Single.zip(
             dashboardViewModel
                 .userRepo
-                .getUserData(user.uid)
+                .getUserData(user.uid),
+            dashboardViewModel
+                .localodgeRepo
+                .getBlacklist()
+                .onErrorResumeNext {
+                    if (it.message == NO_VALUE)
+                        return@onErrorResumeNext Single.just(hashSetOf())
+                    else
+                        return@onErrorResumeNext Single.error(it)
+                },
+            BiFunction<User, HashSet<String>, Pair<User, HashSet<String>>> { localodgeUser, blacklist ->
+                return@BiFunction Pair(localodgeUser, blacklist)
+            }
+        )
+        disposables.addAll(
+            disposable
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
                     onError = { error ->
                         handleError(error)
                     },
-                    onSuccess = { localodgeUser ->
+                    onSuccess = { pair ->
+                        val localodgeUser = pair.first
+                        if (localodgeUser.suspendedTillDate > 0) {
+                            showWarningDialog(
+                                resources.getString(R.string.account_suspended),
+                                resources.getString(R.string.account_suspended_message)
+                            )
+                            return@subscribeBy
+                        }
+
+                        if (pair.second.contains(user.uid)) {
+                            showWarningDialog(
+                                resources.getString(R.string.account_banned),
+                                resources.getString(R.string.account_banned_message)
+                            )
+                            return@subscribeBy
+                        }
+
                         onUserRetrieved(localodgeUser)
                     }
                 )
@@ -669,7 +707,7 @@ class DashboardFragment :
                     expandSearchCount++
                     loadInitialDataFromFirebase(radius + 10.0)
                 } else {
-                    swipe_refresh_dashboard.isRefreshing = false
+                    swipe_refresh_dashboard?.isRefreshing = false
                     toggleEmptyState(posts.isEmpty())
 
                     retrievedPosts = PostsUtil.constructMapBasedOnHitsPerPage(HITS_PER_PAGE, posts)
@@ -806,6 +844,22 @@ class DashboardFragment :
                 .setChooserTitle("Chooser title")
                 .setText("http://play.google.com/store/apps/details?id=" + it.packageName)
                 .startChooser()
+        }
+    }
+
+    private fun showWarningDialog(title: String, message: String) {
+        context?.let {
+            val dh = DialogHelper(it)
+            dh.createDialog(R.layout.dialog_warning)
+            dh.setCancelable(false)
+
+            dh.dialogView.warning_title?.text = title
+            dh.dialogView.warning_message?.text = message
+            dh.dialogView.dialog_login_btn?.setOnClickListener {
+                (activity as? LocalodgeActivity)?.logOut()
+            }
+
+            dh.dialog.show()
         }
     }
 }
