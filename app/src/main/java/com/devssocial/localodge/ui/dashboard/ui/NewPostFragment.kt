@@ -99,7 +99,7 @@ class NewPostFragment : Fragment() {
     }
 
     private fun onPostButtonClick() {
-        // TODO CONTINUE HERE
+        // TODO CONTINUE HERE empty check
         // todo set location in geofirestore
 //        val collectionRef = FirebaseFirestore.getInstance().collection(POSTS)
 //        val geoFirestore = GeoFirestore(collectionRef)

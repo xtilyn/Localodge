@@ -240,7 +240,7 @@
 																android:layout_height="match_parent"
 																android:text="@string/continue_without_logging_in"
 																android:gravity="center"
-																android:textColor="#838383"
+																android:textColor="@android:color/white"
 																android:textSize="18sp"
 																fontPath="fonts/Montserrat-SemiBold.ttf"
 																/>

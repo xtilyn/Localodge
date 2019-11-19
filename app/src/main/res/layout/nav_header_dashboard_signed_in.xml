@@ -66,6 +66,8 @@
             android:src="@drawable/ic_notifications_white"
             android:scaleType="fitXY"
             android:contentDescription="@string/notifications_button"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/circle_ripple"
             />
 
     <View

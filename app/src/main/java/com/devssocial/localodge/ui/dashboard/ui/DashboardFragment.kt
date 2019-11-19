@@ -573,7 +573,7 @@ class DashboardFragment :
         if (context == null) return
         val headerView = nav_view.inflateHeaderView(R.layout.nav_header_dashboard_signed_in)
 
-        nav_view.menu.getItem(0).subMenu.getItem(2).isVisible = true
+        nav_view.menu.getItem(0).subMenu.getItem(3).isVisible = true
 
         val usernameFormat = "@${user.username}"
         headerView.username_text_view.text = usernameFormat
@@ -607,7 +607,7 @@ class DashboardFragment :
 
     private fun setupNoUserState() {
         if (context == null) return
-        nav_view.menu.getItem(0).subMenu.getItem(2).isVisible = false
+        nav_view.menu.getItem(0).subMenu.getItem(3).isVisible = false
 
         val headerView = nav_view.inflateHeaderView(R.layout.nav_header_dashboard_no_user)
         headerView.sign_in_button.setOnClickListener {
