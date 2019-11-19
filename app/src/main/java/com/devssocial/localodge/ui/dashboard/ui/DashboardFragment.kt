@@ -82,6 +82,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
+import kotlin.concurrent.withLock
 
 class DashboardFragment :
     Fragment(),
@@ -1075,6 +1076,7 @@ class DashboardFragment :
                     onSuccess = {
                         dashboardViewModel.blockedUsers = it
                         dashboardViewModel.blockedUsersRetrieved.set(true)
+                        lock.withLock { condition.signalAll() }
                     }
                 )
         )
@@ -1094,6 +1096,7 @@ class DashboardFragment :
                     onSuccess = {
                         blockedPosts = it
                         blockedPostsRetrieved.set(true)
+                        lock.withLock { condition.signalAll() }
                     }
                 )
         )

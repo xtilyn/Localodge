@@ -69,6 +69,5 @@ fun Any.waitWithCondition(
         while (!shouldStopWaiting.get()) {
             condition.await()
         }
-        condition.signalAll()
     }
 }
