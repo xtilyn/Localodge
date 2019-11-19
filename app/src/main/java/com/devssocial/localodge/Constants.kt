@@ -18,9 +18,12 @@ const val COLLECTION_CITIES = "cities"
 const val COLLECTION_POSTS = "posts"
 const val COLLECTION_FEEDBACK = "feedback"
 const val COLLECTION_BLACKLIST = "blacklist"
+const val COLLECTION_NOTIFICATIONS = "notifications"
 
 // firestore fields
 const val FIELD_LIKES = "likes"
+const val FIELD_TIMESTAMP = "timestamp"
+const val FIELD_UNREAD = "unread"
 
 // RxJava error message
 const val NO_VALUE = "No value"

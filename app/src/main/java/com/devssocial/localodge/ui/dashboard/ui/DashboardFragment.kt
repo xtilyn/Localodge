@@ -73,6 +73,7 @@ import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_profile_pic_image_view
 import kotlinx.android.synthetic.main.layout_empty_state.*
 import kotlinx.android.synthetic.main.layout_empty_state.view.*
+import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
@@ -128,7 +129,7 @@ class DashboardFragment :
 
         // setup widgets
         fab.setOnClickListener {
-            if (!isUserLoggedIn()) {
+            if (!dashboardViewModel.isUserLoggedIn()) {
                 showSignInRequiredDialog(
                     resources.getString(R.string.create_post_needs_credentials)
                 )
@@ -306,7 +307,7 @@ class DashboardFragment :
             R.id.nav_send_feedback -> {
                 context?.let {
 
-                    if (!isUserLoggedIn()) {
+                    if (!dashboardViewModel.isUserLoggedIn()) {
                         showSignInRequiredDialog(
                             resources.getString(R.string.feedback_needs_credentials)
                         )
@@ -354,6 +355,9 @@ class DashboardFragment :
                     helper.dialog.show()
                 }
             }
+            R.id.nav_contact_us -> {
+                // TODO OPEN WEB PAGE TO LEAD TO LANDING PAGE 'Contact Us'
+            }
             R.id.nav_sign_out -> {
                 if (context == null) return true
                 DialogHelper.showConfirmActionDialog(
@@ -381,7 +385,7 @@ class DashboardFragment :
         val current = postsAdapter.data[position]
         when (view.id) {
             R.id.user_post_more_options -> {
-                if (!isUserLoggedIn()) {
+                if (!dashboardViewModel.isUserLoggedIn()) {
                     showSignInRequiredDialog(
                         resources.getString(R.string.sign_in_required_to_perform_actions)
                     )
@@ -401,21 +405,23 @@ class DashboardFragment :
                 ActivityLaunchHelper.goToPostDetail(activity, current.objectID)
             }
             R.id.user_post_like -> {
-                if (!isUserLoggedIn()) {
+                if (!dashboardViewModel.isUserLoggedIn()) {
                     showSignInRequiredDialog(
                         resources.getString(R.string.sign_in_required_to_like_posts)
                     )
                     return
                 }
+                val shouldUpdateInitialDataInRoom =
+                    retrievedPosts[0]?.any { it.objectID == current.objectID } == true
                 if (current.likes.contains(dashboardViewModel.userRepo.getCurrentUser()?.uid)) {
-                    unlikePost(current) {
+                    unlikePost(current, shouldUpdateInitialDataInRoom) {
                         postsAdapter.notifyItemChanged(
                             position,
                             AdapterPayload.LIKED_OR_UNLIKED_POST
                         )
                     }
                 } else {
-                    likePost(current) {
+                    likePost(current, shouldUpdateInitialDataInRoom) {
                         postsAdapter.notifyItemChanged(
                             position,
                             AdapterPayload.LIKED_OR_UNLIKED_POST
@@ -497,8 +503,8 @@ class DashboardFragment :
             onUserRetrieved(null)
             return
         }
-        // TODO CONTINUE HERE
-        val disposable = Single.zip(
+
+        val getUserDataAndBlacklist = Single.zip(
             dashboardViewModel
                 .userRepo
                 .getUserData(user.uid),
@@ -515,8 +521,9 @@ class DashboardFragment :
                 return@BiFunction Pair(localodgeUser, blacklist)
             }
         )
+
         disposables.addAll(
-            disposable
+            getUserDataAndBlacklist
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
@@ -542,6 +549,21 @@ class DashboardFragment :
                         }
 
                         onUserRetrieved(localodgeUser)
+                    }
+                ),
+            dashboardViewModel
+                .userRepo
+                .getNotifications()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onSuccess = { unreadNotifications ->
+                        dashboardViewModel.unreadNotifications = unreadNotifications
+                        if (unreadNotifications.size > 0)
+                            unread_notifs_indicator?.instaVisible()
                     }
                 )
         )
@@ -640,10 +662,7 @@ class DashboardFragment :
     }
 
     private fun handleError(error: Throwable) {
-        if (error.message == NO_VALUE) {
-            ActivityLaunchHelper.goToLogin(activity!!)
-            return
-        }
+        Log.e(TAG, error.message, error)
         showError(resources.getString(R.string.generic_error_message))
     }
 
@@ -760,19 +779,24 @@ class DashboardFragment :
         loadInitialDataFromFirebase(PostsProvider.INITIAL_RADIUS)
     }
 
-    private fun unlikePost(post: PostViewItem, onComplete: () -> Unit) {
+    private fun unlikePost(post: PostViewItem, updateInRoom: Boolean, onComplete: () -> Unit) {
         val currUserId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
         post.likes.remove(currUserId)
-        updateLikes(post.objectID, post.likes, onComplete)
+        updateLikes(post.objectID, post.likes, updateInRoom, onComplete)
     }
 
-    private fun likePost(post: PostViewItem, onComplete: () -> Unit) {
+    private fun likePost(post: PostViewItem, updateInRoom: Boolean, onComplete: () -> Unit) {
         val currUserId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
         post.likes.add(currUserId)
-        updateLikes(post.objectID, post.likes, onComplete)
+        updateLikes(post.objectID, post.likes, updateInRoom, onComplete)
     }
 
-    private fun updateLikes(postId: String, newLikes: HashSet<String>, onComplete: () -> Unit) {
+    private fun updateLikes(
+        postId: String,
+        newLikes: HashSet<String>,
+        updateInRoom: Boolean,
+        onComplete: () -> Unit
+    ) {
         disposables.add(
             dashboardViewModel.postsRepo
                 .updateLikes(postId, newLikes)
@@ -791,6 +815,10 @@ class DashboardFragment :
                     }
                 )
         )
+
+        if (updateInRoom) {
+            dashboardViewModel.postsRepo.postsDao.updateLikes(postId, newLikes)
+        }
     }
 
     private fun showProfilePicProgress(show: Boolean) {
@@ -817,8 +845,6 @@ class DashboardFragment :
             layout_empty_state?.gone()
         }
     }
-
-    private fun isUserLoggedIn(): Boolean = dashboardViewModel.userRepo.getCurrentUser() != null
 
     private fun showSignInRequiredDialog(message: String) {
         if (context == null) return

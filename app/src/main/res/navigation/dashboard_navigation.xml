@@ -19,11 +19,25 @@
 																app:popEnterAnim="@anim/slide_in_up"
 																app:popExitAnim="@anim/slide_out_down"
 																/>
+								<action
+																android:id="@+id/action_dashboardFragment_to_notificationsFragment"
+																app:destination="@id/notificationsFragment"
+																app:enterAnim="@anim/slide_in_up"
+																app:exitAnim="@anim/slide_out_down"
+																app:popEnterAnim="@anim/slide_in_up"
+																app:popExitAnim="@anim/slide_out_down"
+																/>
 				</fragment>
 				<fragment
 												android:id="@+id/newPostFragment"
 												android:name="com.devssocial.localodge.ui.dashboard.ui.NewPostFragment"
 												android:label="fragment_new_post"
 												tools:layout="@layout/fragment_new_post"
+												/>
+				<fragment
+												android:id="@+id/notificationsFragment"
+												android:name="com.devssocial.localodge.ui.dashboard.ui.NotificationsFragment"
+												android:label="fragment_notifications"
+												tools:layout="@layout/fragment_notifications"
 												/>
 </navigation>

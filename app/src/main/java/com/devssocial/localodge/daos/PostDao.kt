@@ -21,4 +21,6 @@ interface PostDao {
     @Query("DELETE FROM posts")
     fun deleteAll(): Completable
 
+    @Query("UPDATE posts SET likes = :likes WHERE objectID = :objectID")
+    fun updateLikes(objectID: String, likes: HashSet<String>): Completable
 }
