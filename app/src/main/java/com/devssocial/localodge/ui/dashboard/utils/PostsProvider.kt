@@ -31,6 +31,8 @@ class PostsProvider(
     fun loadInitial(
         userLocation: Location,
         radius: Double,
+        blockedUsers: HashSet<String>,
+        blockedPosts: HashSet<String>,
         onError: (Exception) -> Unit,
         onSuccess: (ArrayList<PostViewItem>) -> Unit
     ) {
@@ -96,10 +98,14 @@ class PostsProvider(
                                                     },
                                                     onComplete = {
                                                         // remove empty users
+                                                        // remove blocked users
+                                                        // remove blocked posts
                                                         val iterator = orderedPosts.iterator()
                                                         while (iterator.hasNext()) {
                                                             val curr = iterator.next()
-                                                            if (curr.posterUsername.isEmpty()) {
+                                                            if (curr.posterUsername.isEmpty() ||
+                                                                blockedUsers.contains(curr.posterUserId) ||
+                                                                blockedPosts.contains(curr.objectID)) {
                                                                 iterator.remove()
                                                             }
                                                         }

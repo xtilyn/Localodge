@@ -130,4 +130,52 @@ class UserRepository(private val context: Context) {
         return RxFirebaseFirestore.update(ref, mapOf("profilePicUrl" to url))
     }
 
+    fun getBlocking(): Single<HashSet<String>> {
+        val userId = getCurrentUserId() ?: return Single.just(hashSetOf())
+        val ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_BLOCKING)
+
+        return RxFirebaseFirestore.data(ref)
+            .flatMap {
+                Single.just(
+                    it.value().documents.map { doc -> doc.id }.toHashSet()
+                )
+            }
+            .onErrorResumeNext {
+                if (it.message == NO_VALUE) return@onErrorResumeNext Single.just(hashSetOf())
+                else return@onErrorResumeNext Single.error(it)
+            }
+    }
+
+    fun getBlockedPosts(): Single<HashSet<String>> {
+        val userId = getCurrentUserId() ?: return Single.just(hashSetOf())
+        val ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_BLOCKED_POSTS)
+
+        return RxFirebaseFirestore.data(ref)
+            .flatMap {
+                Single.just(
+                    it.value().documents.map { doc -> doc.id }.toHashSet()
+                )
+            }
+            .onErrorResumeNext {
+                if (it.message == NO_VALUE) return@onErrorResumeNext Single.just(hashSetOf())
+                else return@onErrorResumeNext Single.error(it)
+            }
+    }
+
+    fun blockUser(userToBlock: String): Completable {
+        val userId = getCurrentUserId() ?: return Completable.complete()
+        val ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_BLOCKING)
+            .document(userToBlock)
+
+        return RxFirebaseFirestore.set(ref, mapOf(FIELD_USER_ID to userToBlock))
+    }
 }

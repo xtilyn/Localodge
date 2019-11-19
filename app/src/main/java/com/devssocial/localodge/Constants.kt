@@ -19,14 +19,21 @@ const val COLLECTION_POSTS = "posts"
 const val COLLECTION_FEEDBACK = "feedback"
 const val COLLECTION_BLACKLIST = "blacklist"
 const val COLLECTION_NOTIFICATIONS = "notifications"
+const val COLLECTION_REPORTS = "reports"
+const val COLLECTION_BLOCKING = "blocking"
+const val COLLECTION_BLOCKED_POSTS = "blockedPosts"
 
 // firestore fields
 const val FIELD_LIKES = "likes"
 const val FIELD_TIMESTAMP = "timestamp"
 const val FIELD_UNREAD = "unread"
+const val FIELD_USER_ID = "userId"
 
 // RxJava error message
 const val NO_VALUE = "No value"
+
+val REPORT_REASONS = arrayOf("Illegal", "Hatred", "Violence", "Discrimination", "Harassment", "Trolling", "Spamming",
+    "Impersonation", "Advertisement", "Fraud", "Age Limit", "Other")
 
 // Firebase error codes
 const val ERROR_USER_DISABLED = "ERROR_USER_DISABLED"

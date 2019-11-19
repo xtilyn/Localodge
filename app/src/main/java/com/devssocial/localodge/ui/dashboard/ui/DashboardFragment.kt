@@ -29,11 +29,9 @@ import com.devssocial.localodge.*
 import com.devssocial.localodge.R
 import com.devssocial.localodge.callbacks.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
+import com.devssocial.localodge.enums.ReportType
 import com.devssocial.localodge.extensions.*
-import com.devssocial.localodge.models.Feedback
-import com.devssocial.localodge.models.Post
-import com.devssocial.localodge.models.PostViewItem
-import com.devssocial.localodge.models.User
+import com.devssocial.localodge.models.*
 import com.devssocial.localodge.room_models.PostRoom
 import com.devssocial.localodge.ui.dashboard.adapter.PostsAdapter
 import com.devssocial.localodge.ui.dashboard.utils.PostsProvider
@@ -74,9 +72,13 @@ import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_p
 import kotlinx.android.synthetic.main.layout_empty_state.*
 import kotlinx.android.synthetic.main.layout_empty_state.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.*
+import kotlinx.android.synthetic.main.popup_user_post_more_options.view.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
@@ -103,6 +105,11 @@ class DashboardFragment :
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var postsAdapter: PostsAdapter
     private lateinit var postsProvider: PostsProvider
+
+    private val lock: ReentrantLock by lazy { ReentrantLock() }
+    private val condition: Condition by lazy { lock.newCondition() }
+    private val blockedPostsRetrieved: AtomicBoolean by lazy { AtomicBoolean(false) }
+    private var blockedPosts: HashSet<String>? = null
 
     private lateinit var retrievedPosts: HashMap<Int, ArrayList<PostViewItem>>
     private var currentPage = 0
@@ -214,6 +221,8 @@ class DashboardFragment :
                 }
         )
 
+        getBlockedUsers()
+        getBlockedPosts()
         getLocation()
     }
 
@@ -399,6 +408,56 @@ class DashboardFragment :
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     true
                 )
+                popupView.popup_user_post_report_post.setOnClickListener {
+                    context?.let {
+                        DialogHelper.showReportDialog(it, ReportType.POST) { reason, desc ->
+                            sendPostReport(current.objectID, reason, desc)
+                        }
+                    }
+                }
+                popupView.popup_user_post_report_user.setOnClickListener {
+                    context?.let {
+                        DialogHelper.showReportDialog(it, ReportType.USER) { reason, desc ->
+                            sendUserReport(current.posterUserId, reason, desc)
+                        }
+                    }
+                }
+                popupView.popup_user_post_block_user.setOnClickListener {
+                    context?.let {
+                        DialogHelper.showConfirmActionDialog(
+                            it,
+                            resources.getString(R.string.are_you_sure),
+                            resources.getString(R.string.are_you_sure_you_want_to_block_this_user),
+                            resources.getString(R.string.block_user),
+                            { dialog ->
+                                dialog.dismiss()
+                                blockUser(current.posterUserId)
+                            },
+                            resources.getString(R.string.cancel),
+                            { dialog ->
+                                dialog.dismiss()
+                            }
+                        )
+                    }
+                }
+                popupView.popup_user_post_hide.setOnClickListener {
+                    context?.let {
+                        DialogHelper.showConfirmActionDialog(
+                            it,
+                            null,
+                            resources.getString(R.string.confirm_hide_post),
+                            resources.getString(R.string.yes),
+                            { dialog ->
+                                dialog.dismiss()
+                                blockPost(current.objectID)
+                            },
+                            resources.getString(R.string.cancel),
+                            { dialog ->
+                                dialog.dismiss()
+                            }
+                        )
+                    }
+                }
                 popup.showAsDropDown(view)
             }
             R.id.user_post_media_content_container, R.id.user_post_comment -> {
@@ -664,6 +723,7 @@ class DashboardFragment :
     private fun handleError(error: Throwable) {
         Log.e(TAG, error.message, error)
         showError(resources.getString(R.string.generic_error_message))
+        showProgress(false)
     }
 
     private fun showError(message: String) {
@@ -675,6 +735,13 @@ class DashboardFragment :
     }
 
     private fun loadInitialDashboardData() {
+        if (!dashboardViewModel.blockedUsersRetrieved.get()) {
+            this.waitWithCondition(lock, condition, dashboardViewModel.blockedUsersRetrieved)
+        }
+        if (blockedPosts == null) {
+            this.waitWithCondition(lock, condition, blockedPostsRetrieved)
+        }
+
         disposables.add(
             dashboardViewModel.postsRepo.postsDao
                 .getPosts()
@@ -691,7 +758,7 @@ class DashboardFragment :
                                     createdDate = Timestamp(Date(roomPost.createdDate!!))
                                 }
                                 if (roomPost.lat != null && roomPost.lng != null) {
-                                    _geoloc = com.devssocial.localodge.models.Location(
+                                    _geoloc = Location(
                                         lat = roomPost.lat!!,
                                         lng = roomPost.lng!!
                                     )
@@ -714,6 +781,8 @@ class DashboardFragment :
         postsProvider.loadInitial(
             userLocation = userLocation!!,
             radius = radius,
+            blockedUsers = dashboardViewModel.blockedUsers,
+            blockedPosts = blockedPosts!!,
             onError = { exception ->
                 (activity as LocalodgeActivity).logAndShowError(
                     TAG,
@@ -887,5 +956,144 @@ class DashboardFragment :
 
             dh.dialog.show()
         }
+    }
+
+    private fun sendUserReport(
+        userIdToReport: String,
+        reason: String,
+        desc: String
+    ) {
+        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
+        val report = Report(
+            reportedByUserId = userId,
+            reason = reason,
+            description = desc
+        )
+        showProgress(true)
+        disposables.add(
+            dashboardViewModel
+                .localodgeRepo
+                .sendUserReport(userIdToReport, report)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let { c ->
+                            Toasty.success(
+                                c,
+                                resources.getString(R.string.report_sent)
+                            ).show()
+                        }
+                    }
+                )
+        )
+    }
+
+    private fun blockUser(userToBlock: String) {
+        showProgress(true)
+        disposables.add(
+            dashboardViewModel
+                .userRepo
+                .blockUser(userToBlock)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let {
+                            Toasty.success(
+                                it,
+                                getString(R.string.user_blocked)
+                            )
+                        }
+                    }
+                )
+        )
+    }
+
+    private fun sendPostReport(
+        postIdToReport: String,
+        reason: String,
+        desc: String
+    ) {
+        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
+        val report = Report(
+            reportedByUserId = userId,
+            reason = reason,
+            description = desc
+        )
+        showProgress(true)
+        disposables.add(
+            dashboardViewModel
+                .localodgeRepo
+                .sendPostReport(postIdToReport, report)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let { c ->
+                            Toasty.success(
+                                c,
+                                resources.getString(R.string.report_sent)
+                            ).show()
+                        }
+                    }
+                )
+        )
+    }
+
+    private fun getBlockedUsers() {
+        if (!dashboardViewModel.isUserLoggedIn()) return
+        disposables.add(
+            dashboardViewModel
+                .userRepo
+                .getBlocking()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onSuccess = {
+                        dashboardViewModel.blockedUsers = it
+                        dashboardViewModel.blockedUsersRetrieved.set(true)
+                    }
+                )
+        )
+    }
+
+    private fun getBlockedPosts() {
+        if (!dashboardViewModel.isUserLoggedIn()) return
+        disposables.add(
+            dashboardViewModel
+                .userRepo
+                .getBlockedPosts()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onSuccess = {
+                        blockedPosts = it
+                        blockedPostsRetrieved.set(true)
+                    }
+                )
+        )
+    }
+
+    private fun blockPost(postId: String) {
+        // TODO CONTINUE HERE also update in room (if currPage 0)
+
     }
 }

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+								xmlns:app="http://schemas.android.com/apk/res-auto"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:background="@drawable/dialog_bg"
+								>
+
+
+				<TextView
+												android:id="@+id/report_title"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												android:layout_marginStart="24dp"
+												android:textColor="@color/matteBlack"
+												android:textSize="24sp"
+												app:layout_constraintBottom_toBottomOf="@+id/close_dialog"
+												app:layout_constraintEnd_toStartOf="@+id/close_dialog"
+												app:layout_constraintHorizontal_bias="0"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toTopOf="@+id/close_dialog"
+												/>
+
+				<View
+												android:id="@+id/view2"
+												android:layout_width="0dp"
+												android:layout_height="2dp"
+												android:layout_marginStart="24dp"
+												android:layout_marginTop="12dp"
+												android:layout_marginEnd="24dp"
+												android:background="@color/lightGray"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toBottomOf="@id/report_title"
+												/>
+
+				<ImageButton
+												android:id="@+id/close_dialog"
+												android:layout_width="50dp"
+												android:layout_height="50dp"
+												android:layout_marginTop="8dp"
+												android:layout_marginEnd="8dp"
+												android:background="@drawable/circle_ripple"
+												android:contentDescription="@string/close_dialog"
+												android:padding="8dp"
+												android:scaleType="fitXY"
+												android:src="@drawable/ic_close_dark"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintTop_toTopOf="parent"
+												/>
+
+				<TextView
+												android:id="@+id/reason_text"
+												fontPath="fonts/Montserrat-SemiBold.ttf"
+												android:layout_width="0dp"
+												android:layout_height="wrap_content"
+												android:layout_marginTop="18dp"
+												android:text="Reason:"
+												android:textColor="@color/matteBlack"
+												app:layout_constraintEnd_toEndOf="@id/view2"
+												app:layout_constraintStart_toStartOf="@id/view2"
+												app:layout_constraintTop_toBottomOf="@id/view2"
+												/>
+
+				<androidx.appcompat.widget.AppCompatSpinner
+												android:id="@+id/report_reasons_spinner"
+												android:layout_width="0dp"
+												android:layout_height="50dp"
+												android:spinnerMode="dropdown"
+												app:layout_constraintEnd_toEndOf="@id/reason_text"
+												app:layout_constraintStart_toStartOf="@id/reason_text"
+												app:layout_constraintTop_toBottomOf="@id/reason_text"
+												>
+
+				</androidx.appcompat.widget.AppCompatSpinner>
+
+				<TextView
+												android:id="@+id/description_text"
+												fontPath="fonts/Montserrat-SemiBold.ttf"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												android:layout_marginTop="24dp"
+												android:text="Description:"
+												android:textColor="@color/matteBlack"
+												app:layout_constraintStart_toStartOf="@+id/report_reasons_spinner"
+												app:layout_constraintTop_toBottomOf="@id/report_reasons_spinner"
+												/>
+
+				<EditText
+												android:id="@+id/report_desc_edittext"
+												android:layout_width="0dp"
+												android:layout_height="wrap_content"
+												android:background="@drawable/dialog_bg_light_gray"
+												android:lines="5"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintTop_toBottomOf="@id/description_text"
+												android:layout_marginStart="24dp"
+												android:layout_marginEnd="24dp"
+												android:paddingStart="8dp"
+												android:paddingEnd="8dp"
+												android:hint="@string/tell_us_more_about_this_hint"
+												android:inputType="textMultiLine"
+												android:importantForAutofill="no"
+												android:layout_marginTop="4dp"
+												/>
+
+				<Button
+												android:id="@+id/send_report_button"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												android:background="@drawable/button_default_primary"
+												android:textAllCaps="false"
+												android:text="Send Report"
+												android:textColor="@android:color/white"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintTop_toBottomOf="@id/report_desc_edittext"
+												app:layout_constraintStart_toStartOf="parent"
+												android:layout_marginTop="24dp"
+												android:paddingStart="18dp"
+												android:paddingEnd="18dp"
+												app:layout_constraintBottom_toBottomOf="parent"
+												android:layout_marginBottom="24dp"
+												/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

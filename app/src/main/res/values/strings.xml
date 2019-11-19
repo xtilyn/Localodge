@@ -92,4 +92,14 @@
 				<string name="account_banned_message">Your account has been banned due to numerous received reports.</string>
 				<string name="notifications_button">Notifications button</string>
 				<string name="contact_us">Contact Us</string>
+				<string name="tell_us_more_about_this_hint">Tell us more about this %s</string>
+				<string name="report_holder">Report %s</string>
+				<string name="user">User</string>
+				<string name="report_sent">Report sent.</string>
+				<string name="are_you_sure">Are you sure?</string>
+				<string name="are_you_sure_you_want_to_block_this_user">Are you sure you want to block this user?</string>
+				<string name="block_user">Block User</string>
+				<string name="confirm_hide_post">Prevent this post from ever showing up?</string>
+				<string name="yes">Yes</string>
+				<string name="user_blocked">User blocked.</string>
 </resources>

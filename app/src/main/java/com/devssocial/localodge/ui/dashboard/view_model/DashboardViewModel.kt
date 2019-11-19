@@ -7,6 +7,7 @@ import com.devssocial.localodge.shared.LocalodgeRepository
 import com.devssocial.localodge.shared.UserRepository
 import com.devssocial.localodge.ui.dashboard.repo.PostsRepository
 import io.reactivex.subjects.BehaviorSubject
+import java.util.concurrent.atomic.AtomicBoolean
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -18,7 +19,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     var onBackPressed = BehaviorSubject.create<Boolean>()
     var isDrawerOpen = false
+
     lateinit var unreadNotifications: ArrayList<Notification>
+    lateinit var blockedUsers: HashSet<String>
+    val blockedUsersRetrieved = AtomicBoolean(false)
 
     fun isUserLoggedIn(): Boolean = userRepo.getCurrentUser() != null
 }
