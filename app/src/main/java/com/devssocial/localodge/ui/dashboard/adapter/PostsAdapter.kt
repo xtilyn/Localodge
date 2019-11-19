@@ -10,10 +10,16 @@ import com.devssocial.localodge.callbacks.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.extensions.instaGone
 import com.devssocial.localodge.extensions.instaVisible
+import com.devssocial.localodge.models.Location
 import com.devssocial.localodge.models.PostViewItem
+import com.devssocial.localodge.ui.dashboard.utils.LocationFormatter
 import kotlinx.android.synthetic.main.list_item_user_post.view.*
 
-class PostsAdapter(val data: ArrayList<PostViewItem>, private val listener: ListItemListener) :
+class PostsAdapter(
+    val data: ArrayList<PostViewItem>,
+    private val listener: ListItemListener,
+    private val userLocation: Location
+) :
     RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
 
     inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
@@ -54,6 +60,17 @@ class PostsAdapter(val data: ArrayList<PostViewItem>, private val listener: List
             } else {
                 itemView.user_post_promoted_text.instaGone()
             }
+
+            val locationFormatted = "${
+            LocationFormatter.distFrom(
+                userLocation.lat.toFloat(),
+                userLocation.lng.toFloat(),
+                item._geoloc.lat.toFloat(),
+                item._geoloc.lng.toFloat()
+            )
+            } km"
+            itemView.distance_text.text = locationFormatted
+
 
             // listeners
             itemView.user_post_profile_pic.setOnClickListener(this)

@@ -184,12 +184,6 @@ class DashboardFragment :
         swipe_refresh_dashboard.setOnRefreshListener(::onRefresh)
         swipe_refresh_dashboard.isRefreshing = true
 
-        // recycler view
-        postsAdapter = PostsAdapter(arrayListOf(), this@DashboardFragment)
-        dashboard_recyclerview.adapter = postsAdapter
-        dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
-        dashboard_recyclerview.onScrolledToBottom(::loadMoreDashboardData)
-
         nav_view.setNavigationItemSelectedListener(this)
 
         // empty state
@@ -735,6 +729,19 @@ class DashboardFragment :
     }
 
     private fun loadInitialDashboardData() {
+        // setup recycler view
+        postsAdapter = PostsAdapter(
+            arrayListOf(),
+            this@DashboardFragment,
+            Location(
+                lat = userLocation!!.latitude,
+                lng = userLocation!!.longitude
+            )
+        )
+        dashboard_recyclerview.adapter = postsAdapter
+        dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
+        dashboard_recyclerview.onScrolledToBottom(::loadMoreDashboardData)
+
         if (!dashboardViewModel.blockedUsersRetrieved.get()) {
             this.waitWithCondition(lock, condition, dashboardViewModel.blockedUsersRetrieved)
         }
@@ -1108,7 +1115,7 @@ class DashboardFragment :
                     },
                     onComplete = {
                         showProgress(false)
-                        context?.let{ c ->
+                        context?.let { c ->
                             Toasty.success(c, resources.getString(R.string.post_blocked)).show()
                         }
                         postsAdapter.data.remove(post)
