@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.devssocial.localodge.ui.dashboard.ui.DashboardActivity
 import com.devssocial.localodge.ui.login.ui.LoginActivity
-import com.devssocial.localodge.ui.post_detail.PostDetailActivity
+import com.devssocial.localodge.ui.post_detail.ui.PostDetailActivity
 import com.devssocial.localodge.ui.settings.SettingsActivity
 
 class ActivityLaunchHelper {
@@ -12,7 +12,8 @@ class ActivityLaunchHelper {
     companion object {
 
         // INTENT KEYS
-        private const val CONTENT_ID = "userId"
+        const val CONTENT_ID = "userId"
+        const val REQUEST_COMMENT = "comment"
 
         fun goToLogin(activity: Activity?) {
             val intent = Intent(activity, LoginActivity::class.java)
@@ -27,8 +28,11 @@ class ActivityLaunchHelper {
             activity?.finish()
         }
 
-        fun goToPostDetail(activity: Activity?, postId: String) {
-            goToSimpleActivity(activity, postId, PostDetailActivity::class.java)
+        fun goToPostDetail(activity: Activity?, postId: String, requestComment: Boolean) {
+            val intent = Intent(activity, PostDetailActivity::class.java)
+            intent.putExtra(CONTENT_ID, postId)
+            intent.putExtra(REQUEST_COMMENT, requestComment)
+            activity?.startActivity(intent)
         }
 
         fun goToSettings(activity: Activity?) {

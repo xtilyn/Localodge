@@ -1,4 +1,4 @@
-package com.devssocial.localodge.ui.post_detail
+package com.devssocial.localodge.ui.post_detail.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

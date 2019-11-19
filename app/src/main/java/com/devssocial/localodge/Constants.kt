@@ -22,6 +22,7 @@ const val COLLECTION_NOTIFICATIONS = "notifications"
 const val COLLECTION_REPORTS = "reports"
 const val COLLECTION_BLOCKING = "blocking"
 const val COLLECTION_BLOCKED_POSTS = "blockedPosts"
+const val COLLECTION_COMMENTS = "comments"
 
 // firestore fields
 const val FIELD_LIKES = "likes"

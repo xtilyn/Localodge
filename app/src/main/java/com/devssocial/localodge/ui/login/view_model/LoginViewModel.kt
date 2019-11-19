@@ -18,7 +18,7 @@ import io.reactivex.subjects.BehaviorSubject
 class LoginViewModel (application: Application) : AndroidViewModel(application) {
 
     private val repo = LoginRepository()
-    private val context = application.applicationContext
+    private val context = application.baseContext
 
     var isRegisterVisible = false
     var onBackPressed = BehaviorSubject.create<Boolean>()

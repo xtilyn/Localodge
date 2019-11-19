@@ -3,6 +3,7 @@ package com.devssocial.localodge.room_models
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.devssocial.localodge.models.Location
 
 @Entity(tableName = "user")
 data class UserRoom(

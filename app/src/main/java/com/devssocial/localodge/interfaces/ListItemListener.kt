@@ -1,4 +1,4 @@
-package com.devssocial.localodge.callbacks
+package com.devssocial.localodge.interfaces
 
 import android.view.View
 

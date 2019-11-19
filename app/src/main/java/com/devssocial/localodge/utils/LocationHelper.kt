@@ -1,4 +1,4 @@
-package com.devssocial.localodge.ui.dashboard.utils
+package com.devssocial.localodge.utils
 
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -7,7 +7,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-object LocationFormatter {
+object LocationHelper {
 
     fun distFrom(lat1: Float, lng1: Float, lat2: Float?, lng2: Float?): String {
         if (lat2 == null || lng2 == null) return ""

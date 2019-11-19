@@ -2,7 +2,6 @@ package com.devssocial.localodge.ui.dashboard.ui
 
 
 import android.Manifest
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentSender
@@ -11,7 +10,6 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -27,20 +25,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.devssocial.localodge.*
 import com.devssocial.localodge.R
-import com.devssocial.localodge.callbacks.ListItemListener
+import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
-import com.devssocial.localodge.enums.ReportType
 import com.devssocial.localodge.extensions.*
+import com.devssocial.localodge.interfaces.PostOptionsListener
 import com.devssocial.localodge.models.*
 import com.devssocial.localodge.room_models.PostRoom
 import com.devssocial.localodge.ui.dashboard.adapter.PostsAdapter
 import com.devssocial.localodge.ui.dashboard.utils.PostsProvider
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
-import com.devssocial.localodge.utils.ActivityLaunchHelper
-import com.devssocial.localodge.utils.DialogHelper
-import com.devssocial.localodge.utils.KeyboardUtils
-import com.devssocial.localodge.utils.PhotoPicker
+import com.devssocial.localodge.utils.*
 import com.esafirm.imagepicker.features.ImagePicker
 import com.esafirm.imagepicker.model.Image
 import com.google.android.gms.common.api.ResolvableApiException
@@ -49,7 +44,6 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentSnapshot
 import es.dmoral.toasty.Toasty
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -72,7 +66,6 @@ import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_p
 import kotlinx.android.synthetic.main.layout_empty_state.*
 import kotlinx.android.synthetic.main.layout_empty_state.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.*
-import kotlinx.android.synthetic.main.popup_user_post_more_options.view.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
@@ -87,7 +80,7 @@ import kotlin.concurrent.withLock
 class DashboardFragment :
     Fragment(),
     NavigationView.OnNavigationItemSelectedListener,
-    EasyPermissions.PermissionCallbacks, ListItemListener {
+    EasyPermissions.PermissionCallbacks, ListItemListener, PostOptionsListener {
 
     companion object {
         private const val TAG = "DashboardFragment"
@@ -395,68 +388,19 @@ class DashboardFragment :
                     )
                     return
                 }
-                val popupView = LayoutInflater.from(context)
-                    .inflate(R.layout.popup_user_post_more_options, null)
-                val popup = PopupWindow(
-                    popupView,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    true
+                PostsHelper(this@DashboardFragment).showMoreOptionsPopup(
+                    context,
+                    view,
+                    current,
+                    position
                 )
-                popupView.popup_user_post_report_post.setOnClickListener {
-                    context?.let {
-                        DialogHelper.showReportDialog(it, ReportType.POST) { reason, desc ->
-                            sendPostReport(current.objectID, reason, desc)
-                        }
-                    }
-                }
-                popupView.popup_user_post_report_user.setOnClickListener {
-                    context?.let {
-                        DialogHelper.showReportDialog(it, ReportType.USER) { reason, desc ->
-                            sendUserReport(current.posterUserId, reason, desc)
-                        }
-                    }
-                }
-                popupView.popup_user_post_block_user.setOnClickListener {
-                    context?.let {
-                        DialogHelper.showConfirmActionDialog(
-                            it,
-                            resources.getString(R.string.are_you_sure),
-                            resources.getString(R.string.are_you_sure_you_want_to_block_this_user),
-                            resources.getString(R.string.block_user),
-                            { dialog ->
-                                dialog.dismiss()
-                                blockUser(current.posterUserId)
-                            },
-                            resources.getString(R.string.cancel),
-                            { dialog ->
-                                dialog.dismiss()
-                            }
-                        )
-                    }
-                }
-                popupView.popup_user_post_hide.setOnClickListener {
-                    context?.let {
-                        DialogHelper.showConfirmActionDialog(
-                            it,
-                            null,
-                            resources.getString(R.string.confirm_hide_post),
-                            resources.getString(R.string.yes),
-                            { dialog ->
-                                dialog.dismiss()
-                                blockPost(current, position)
-                            },
-                            resources.getString(R.string.cancel),
-                            { dialog ->
-                                dialog.dismiss()
-                            }
-                        )
-                    }
-                }
-                popup.showAsDropDown(view)
             }
             R.id.user_post_media_content_container, R.id.user_post_comment -> {
-                ActivityLaunchHelper.goToPostDetail(activity, current.objectID)
+                ActivityLaunchHelper.goToPostDetail(
+                    activity,
+                    current.objectID,
+                    view.id == R.id.user_post_comment
+                )
             }
             R.id.user_post_like -> {
                 if (!dashboardViewModel.isUserLoggedIn()) {
@@ -483,6 +427,7 @@ class DashboardFragment :
                     }
                 }
             }
+            // TODO userName/profile pic on click
         }
     }
 
@@ -495,6 +440,12 @@ class DashboardFragment :
                     if (location == null) checkLocationSettings()
                     else {
                         this@DashboardFragment.userLocation = location
+                        activity?.let{
+                            SharedPrefManager(it).saveLocation(
+                                userLocation!!.latitude.toFloat(),
+                                userLocation!!.longitude.toFloat()
+                            )
+                        }
                         loadInitialDashboardData()
                     }
                 }
@@ -966,101 +917,6 @@ class DashboardFragment :
         }
     }
 
-    private fun sendUserReport(
-        userIdToReport: String,
-        reason: String,
-        desc: String
-    ) {
-        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
-        val report = Report(
-            reportedByUserId = userId,
-            reason = reason,
-            description = desc
-        )
-        showProgress(true)
-        disposables.add(
-            dashboardViewModel
-                .localodgeRepo
-                .sendUserReport(userIdToReport, report)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribeBy(
-                    onError = {
-                        handleError(it)
-                    },
-                    onComplete = {
-                        showProgress(false)
-                        context?.let { c ->
-                            Toasty.success(
-                                c,
-                                resources.getString(R.string.report_sent)
-                            ).show()
-                        }
-                    }
-                )
-        )
-    }
-
-    private fun blockUser(userToBlock: String) {
-        showProgress(true)
-        disposables.add(
-            dashboardViewModel
-                .userRepo
-                .blockUser(userToBlock)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribeBy(
-                    onError = {
-                        handleError(it)
-                    },
-                    onComplete = {
-                        showProgress(false)
-                        context?.let {
-                            Toasty.success(
-                                it,
-                                getString(R.string.user_blocked)
-                            )
-                        }
-                    }
-                )
-        )
-    }
-
-    private fun sendPostReport(
-        postIdToReport: String,
-        reason: String,
-        desc: String
-    ) {
-        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
-        val report = Report(
-            reportedByUserId = userId,
-            reason = reason,
-            description = desc
-        )
-        showProgress(true)
-        disposables.add(
-            dashboardViewModel
-                .localodgeRepo
-                .sendPostReport(postIdToReport, report)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribeBy(
-                    onError = {
-                        handleError(it)
-                    },
-                    onComplete = {
-                        showProgress(false)
-                        context?.let { c ->
-                            Toasty.success(
-                                c,
-                                resources.getString(R.string.report_sent)
-                            ).show()
-                        }
-                    }
-                )
-        )
-    }
-
     private fun getBlockedUsers() {
         if (!dashboardViewModel.isUserLoggedIn()) return
         disposables.add(
@@ -1102,14 +958,101 @@ class DashboardFragment :
         )
     }
 
-    private fun blockPost(post: PostViewItem, position: Int) {
+    override fun onReportUser(userIdToReport: String, reason: String, desc: String) {
+        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
+        val report = Report(
+            reportedByUserId = userId,
+            reason = reason,
+            description = desc
+        )
         showProgress(true)
-        blockedPosts!!.add(post.objectID)
+        disposables.add(
+            dashboardViewModel
+                .localodgeRepo
+                .sendUserReport(userIdToReport, report)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let { c ->
+                            Toasty.success(
+                                c,
+                                resources.getString(R.string.report_sent)
+                            ).show()
+                        }
+                    }
+                )
+        )
+    }
+
+    override fun onReportPost(postId: String, reason: String, desc: String) {
+        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
+        val report = Report(
+            reportedByUserId = userId,
+            reason = reason,
+            description = desc
+        )
+        showProgress(true)
+        disposables.add(
+            dashboardViewModel
+                .localodgeRepo
+                .sendPostReport(postId, report)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let { c ->
+                            Toasty.success(
+                                c,
+                                resources.getString(R.string.report_sent)
+                            ).show()
+                        }
+                    }
+                )
+        )
+    }
+
+    override fun onBlockUser(userId: String) {
+        showProgress(true)
+        disposables.add(
+            dashboardViewModel
+                .userRepo
+                .blockUser(userId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let {
+                            Toasty.success(
+                                it,
+                                getString(R.string.user_blocked)
+                            )
+                        }
+                    }
+                )
+        )
+    }
+
+    override fun onBlockPost(postViewItem: PostViewItem, position: Int?) {
+        showProgress(true)
+        blockedPosts!!.add(postViewItem.objectID)
         val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
         disposables.addAll(
             dashboardViewModel
                 .userRepo
-                .blockPost(post.objectID)
+                .blockPost(postViewItem.objectID)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
@@ -1121,8 +1064,8 @@ class DashboardFragment :
                         context?.let { c ->
                             Toasty.success(c, resources.getString(R.string.post_blocked)).show()
                         }
-                        postsAdapter.data.remove(post)
-                        postsAdapter.notifyItemRemoved(position)
+                        postsAdapter.data.remove(postViewItem)
+                        postsAdapter.notifyItemRemoved(position!!)
                     }
                 )
         )
