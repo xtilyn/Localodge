@@ -102,4 +102,5 @@
 				<string name="confirm_hide_post">Prevent this post from ever showing up?</string>
 				<string name="yes">Yes</string>
 				<string name="user_blocked">User blocked.</string>
+				<string name="post_blocked">Post blocked.</string>
 </resources>

@@ -24,4 +24,6 @@ interface UserDao {
     @Query("DELETE FROM user")
     fun deleteAll(): Completable
 
+    @Query("UPDATE user SET blockedPosts = :blockedPosts WHERE userId = :userId")
+    fun updateBlockedPosts(userId: String, blockedPosts: HashSet<String>): Completable
 }

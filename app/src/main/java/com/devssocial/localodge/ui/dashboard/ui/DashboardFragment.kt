@@ -449,7 +449,7 @@ class DashboardFragment :
                             resources.getString(R.string.yes),
                             { dialog ->
                                 dialog.dismiss()
-                                blockPost(current.objectID)
+                                blockPost(current, position)
                             },
                             resources.getString(R.string.cancel),
                             { dialog ->
@@ -1092,8 +1092,37 @@ class DashboardFragment :
         )
     }
 
-    private fun blockPost(postId: String) {
-        // TODO CONTINUE HERE also update in room (if currPage 0)
+    private fun blockPost(post: PostViewItem, position: Int) {
+        showProgress(true)
+        blockedPosts!!.add(post.objectID)
+        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
+        disposables.addAll(
+            dashboardViewModel
+                .userRepo
+                .blockPost(post.objectID)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let{ c ->
+                            Toasty.success(c, resources.getString(R.string.post_blocked)).show()
+                        }
+                        postsAdapter.data.remove(post)
+                        postsAdapter.notifyItemRemoved(position)
+                    }
+                )
+        )
 
+        dashboardViewModel
+            .userRepo
+            .userDao
+            .updateBlockedPosts(userId, blockedPosts!!)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 }

@@ -27,7 +27,7 @@ const val COLLECTION_BLOCKED_POSTS = "blockedPosts"
 const val FIELD_LIKES = "likes"
 const val FIELD_TIMESTAMP = "timestamp"
 const val FIELD_UNREAD = "unread"
-const val FIELD_USER_ID = "userId"
+const val FIELD_OBJECT_ID = "objectID"
 
 // RxJava error message
 const val NO_VALUE = "No value"

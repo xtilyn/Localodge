@@ -176,6 +176,17 @@ class UserRepository(private val context: Context) {
             .collection(COLLECTION_BLOCKING)
             .document(userToBlock)
 
-        return RxFirebaseFirestore.set(ref, mapOf(FIELD_USER_ID to userToBlock))
+        return RxFirebaseFirestore.set(ref, mapOf(FIELD_OBJECT_ID to userToBlock))
+    }
+
+    fun blockPost(postIdToBlock: String): Completable {
+        val userId = getCurrentUserId() ?: return Completable.complete()
+        val ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_BLOCKED_POSTS)
+            .document(postIdToBlock)
+
+        return RxFirebaseFirestore.set(ref, mapOf(FIELD_OBJECT_ID to postIdToBlock))
     }
 }
