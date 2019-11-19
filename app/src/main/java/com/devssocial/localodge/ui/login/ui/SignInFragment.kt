@@ -151,10 +151,6 @@ class SignInFragment : Fragment() {
     }
 
     private fun goToDashboard() {
-        updateConstraints(R.layout.fragment_sign_in_alt_3)
-        sign_in_root_layout?.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorPrimary))
-        sign_in_text_view?.text = ""
-        sign_in_button?.setOnClickListener(null)
         ActivityLaunchHelper.goToDashboard(activity!!)
     }
 
