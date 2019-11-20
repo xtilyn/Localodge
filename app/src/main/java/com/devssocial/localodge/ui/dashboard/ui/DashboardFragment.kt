@@ -713,8 +713,8 @@ class DashboardFragment :
                     onSuccess = {
                         val posts = it.map { roomPost ->
                             roomPost.mapProperties(PostViewItem()).apply {
-                                if (roomPost.createdDate != null) {
-                                    createdDate = Timestamp(Date(roomPost.createdDate!!))
+                                if (roomPost.timestamp != null) {
+                                    timestamp = Timestamp(Date(roomPost.timestamp!!))
                                 }
                                 if (roomPost.lat != null && roomPost.lng != null) {
                                     _geoloc = Location(
@@ -770,7 +770,7 @@ class DashboardFragment :
                         postFirebase.mapProperties(PostRoom()).apply {
                             lat = postFirebase._geoloc.lat
                             lng = postFirebase._geoloc.lng
-                            createdDate = postFirebase.createdDate?.seconds?.times(1000)
+                            timestamp = postFirebase.timestamp?.seconds?.times(1000)
                         }
                     }
                     disposables.add(

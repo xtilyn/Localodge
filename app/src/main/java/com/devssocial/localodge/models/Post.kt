@@ -9,7 +9,7 @@ data class Post(
     var postDescription: String = "",
     var photoUrl: String? = null,
     var videoUrl: String? = null,
-    @ServerTimestamp var createdDate: Timestamp? = null,
+    @ServerTimestamp var timestamp: Timestamp? = null,
     var _geoloc: Location = Location(),
     var rating: Int = 0, // range: [0,5]
     var likes: Set<String> = hashSetOf()
@@ -21,7 +21,7 @@ data class PostViewItem(
     var postDescription: String = "",
     var photoUrl: String? = null,
     var videoUrl: String? = null,
-    @ServerTimestamp var createdDate: Timestamp? = null,
+    @ServerTimestamp var timestamp: Timestamp? = null,
     var _geoloc: Location = Location(),
     var rating: Int = 0, // range: [0,5]
     var likes: HashSet<String> = hashSetOf(),
@@ -29,5 +29,5 @@ data class PostViewItem(
     // adapter fields
     var posterUsername: String = "",
     var posterProfilePic: String = "",
-    var comments: Set<String> = hashSetOf()
+    var comments: ArrayList<CommentViewItem> = arrayListOf()
 )

@@ -3,6 +3,7 @@ package com.devssocial.localodge.extensions
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
+import android.view.animation.BounceInterpolator
 
 fun View.instaGone() {
     visibility = View.GONE
@@ -14,6 +15,25 @@ fun View.instaInvisible() {
 
 fun View.instaVisible() {
     visibility = View.VISIBLE
+}
+
+fun View.popShow() {
+    animate().scaleX(1f).scaleY(1f).setInterpolator(BounceInterpolator())
+        .setListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator) {
+                super.onAnimationStart(animation)
+                visibility = View.VISIBLE
+            }
+        })
+}
+
+fun View.popHide() {
+    animate().scaleX(0f).scaleY(0f).setListener(object : AnimatorListenerAdapter() {
+        override fun onAnimationEnd(animation: Animator?) {
+            super.onAnimationEnd(animation)
+            visibility = View.GONE
+        }
+    })
 }
 
 fun View.visible(animate: Boolean = true, onAnimationEndCallback: () -> Unit = {}) {

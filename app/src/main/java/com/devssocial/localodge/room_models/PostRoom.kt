@@ -14,7 +14,7 @@ data class PostRoom(
     @ColumnInfo(name = "postDescription") var postDescription: String = "",
     @ColumnInfo(name = "photoUrl") var photoUrl: String? = null,
     @ColumnInfo(name = "videoUrl") var videoUrl: String? = null,
-    @ColumnInfo(name = "createdDate") var createdDate: Long? = null,
+    @ColumnInfo(name = "timestamp") var timestamp: Long? = null,
     @ColumnInfo(name = "lat") var lat: Double? = null,
     @ColumnInfo(name = "lng") var lng: Double? = null,
     @ColumnInfo(name = "rating") var rating: Int = 0, // range: [0,5]

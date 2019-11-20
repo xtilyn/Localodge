@@ -18,22 +18,22 @@ class PostsUtilsTest {
         val post1 = Post(
             rating = 5,
             likes = setOf("haha"),
-            createdDate = Timestamp(Date(System.currentTimeMillis()))
+            timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post2 = Post(
             rating = 1,
             likes = setOf("haha", "hoho"),
-            createdDate = Timestamp(Date(System.currentTimeMillis()))
+            timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post3 = Post(
             rating = 1,
             likes = setOf("haha"),
-            createdDate = Timestamp(Date(System.currentTimeMillis()))
+            timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post4 = Post(
             rating = 1,
             likes = setOf("haha"),
-            createdDate = Timestamp(Date(System.currentTimeMillis() - 100))
+            timestamp = Timestamp(Date(System.currentTimeMillis() - 100))
         )
         val unorderedPosts = arrayListOf(
             post4,

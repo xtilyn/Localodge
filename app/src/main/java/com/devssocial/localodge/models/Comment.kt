@@ -1,6 +1,22 @@
 package com.devssocial.localodge.models
 
-data class Comment (
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ServerTimestamp
+
+data class Comment(
     var objectID: String = "",
-    // TODO CONTINUE HERE COMMENT
+    var postedBy: String = "",
+    var body: String = "",
+    @ServerTimestamp var timestamp: Timestamp? = null
+)
+
+data class CommentViewItem(
+    var objectID: String = "",
+    var postedBy: String = "",
+    @ServerTimestamp var timestamp: Timestamp? = null,
+    var body: String = "",
+
+    // adapter fields
+    var postedByProfilePic: String = "",
+    var postedByUsername: String = ""
 )

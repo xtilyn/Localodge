@@ -11,14 +11,27 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedList
+import androidx.paging.RxPagedListBuilder
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.devssocial.localodge.LocalodgeActivity
 import com.devssocial.localodge.R
+import com.devssocial.localodge.data_objects.AdapterPayload
+import com.devssocial.localodge.enums.Status
+import com.devssocial.localodge.extensions.popHide
+import com.devssocial.localodge.extensions.popShow
+import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.interfaces.PostOptionsListener
+import com.devssocial.localodge.models.CommentViewItem
 import com.devssocial.localodge.models.Location
 import com.devssocial.localodge.models.PostViewItem
+import com.devssocial.localodge.ui.post_detail.adapter.CommentsPagedAdapter
+import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSource
+import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSourceFactory
 import com.devssocial.localodge.ui.post_detail.view_model.PostViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
-import com.devssocial.localodge.utils.ActivityLaunchHelper.Companion.CONTENT_ID
-import com.devssocial.localodge.utils.ActivityLaunchHelper.Companion.REQUEST_COMMENT
+import com.devssocial.localodge.utils.ActivityLaunchHelper.CONTENT_ID
+import com.devssocial.localodge.utils.ActivityLaunchHelper.REQUEST_COMMENT
 import com.devssocial.localodge.utils.KeyboardUtils
 import com.devssocial.localodge.utils.PostsHelper
 import com.devssocial.localodge.utils.SharedPrefManager
@@ -28,20 +41,24 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.fragment_post_detail.*
 import kotlinx.android.synthetic.main.list_item_user_post.*
 
-class PostDetailFragment : Fragment(), PostOptionsListener {
+class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
 
     companion object {
         private const val TAG = "PostDetailFragment"
     }
 
     private val disposables = CompositeDisposable()
+    private val commentsInitialLoadResult = BehaviorSubject.createDefault(Status.LOADING)
 
     private lateinit var postViewModel: PostViewModel
     private lateinit var postId: String
     private lateinit var postViewItem: PostViewItem
+    private lateinit var commentsAdapter: CommentsPagedAdapter
+    private lateinit var factory: CommentsDataSourceFactory
 
     private val postItemsListener: View.OnClickListener by lazy {
         View.OnClickListener {
@@ -54,11 +71,9 @@ class PostDetailFragment : Fragment(), PostOptionsListener {
                         null
                     )
                 }
-                R.id.user_post_username, R.id.user_post_profile_pic -> {
-                    ActivityLaunchHelper.gotoUserProfile(postViewItem.posterUserId)
-                }
                 R.id.user_post_media_content_container -> {
                     ActivityLaunchHelper.goToMediaViewer(
+                        activity,
                         postViewItem.photoUrl,
                         postViewItem.videoUrl
                     )
@@ -140,6 +155,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener {
                     )
                 }
             }
+
+            setupRecyclerView()
         }
     }
 
@@ -177,7 +194,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener {
     }
 
     private fun showProgress(show: Boolean) {
-        swipe_refresh_post_detail?.isRefreshing = show
+        if (show) loading_overlay?.popShow()
+        else loading_overlay?.popHide()
     }
 
     private fun toggleLike() {
@@ -188,12 +206,34 @@ class PostDetailFragment : Fragment(), PostOptionsListener {
             postViewItem.likes.add(userId)
         }
         updateLikes(postViewItem.likes) {
-            // TODO CONTINUE HERE
+            if (context == null) return@updateLikes
+            user_post_like.setCompoundDrawables(
+                if (postViewItem.likes.contains(userId)) {
+                    ContextCompat.getDrawable(context!!, R.drawable.ic_favorite_filled)
+                } else {
+                    ContextCompat.getDrawable(context!!, R.drawable.ic_favorite_border)
+                },
+                null, null, null
+            )
         }
     }
 
     private fun updateLikes(newLikes: HashSet<String>, onComplete: () -> Unit) {
-        asd
+        disposables.add(
+            postViewModel
+                .postsRepo
+                .updateLikes(postViewItem.objectID, newLikes)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        onComplete()
+                    }
+                )
+        )
     }
 
     private fun onPostComment(view: View) {
@@ -205,8 +245,69 @@ class PostDetailFragment : Fragment(), PostOptionsListener {
         disposables.add(
             postViewModel
                 .postsRepo
-                .postComment(comment)
+                .postComment(postViewItem.objectID, comment)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        context?.let {
+                            factory.invalidateDataSource()
+                            setupRecyclerView()
+                            comment_et?.setText("")
+                        }
+                    }
+                )
         )
+    }
+
+    private fun setupRecyclerView() {
+        commentsAdapter = CommentsPagedAdapter(this@PostDetailFragment)
+        comments_recycler_view?.adapter = commentsAdapter
+        comments_recycler_view?.layoutManager = LinearLayoutManager(context)
+
+        factory = CommentsDataSourceFactory(
+            postId,
+            disposables,
+            commentsInitialLoadResult,
+            postViewModel.postsRepo
+        )
+        val config = PagedList.Config.Builder()
+            .setPageSize(10)
+            .setEnablePlaceholders(true)
+            .setInitialLoadSizeHint(10)
+            .build()
+
+        disposables.addAll(
+            RxPagedListBuilder(factory, config).buildObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe {
+                    commentsAdapter.submitList(it)
+                },
+            commentsInitialLoadResult
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    swipe_refresh_comments?.isRefreshing = it == Status.LOADING
+                    if (it == Status.ERROR) showError()
+                }
+        )
+    }
+
+    private fun showError() {
+        context?.let {
+            Toasty.error(it, getString(R.string.generic_error_message)).show()
+        }
+    }
+
+    override fun onItemClick(view: View, position: Int) {
+        // TODO
+    }
+
+    override fun onItemLongPress(view: View, position: Int) {
+        // TODO
     }
 
     override fun onReportUser(userIdToReport: String, reason: String, desc: String) {

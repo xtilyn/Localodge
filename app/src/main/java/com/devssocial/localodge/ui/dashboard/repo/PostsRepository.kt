@@ -5,9 +5,9 @@ import android.location.Location
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.*
 import com.devssocial.localodge.extensions.mapProperties
-import com.devssocial.localodge.models.Post
-import com.devssocial.localodge.models.PostViewItem
+import com.devssocial.localodge.models.*
 import com.devssocial.localodge.shared.UserRepository
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.Query
@@ -15,6 +15,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import org.imperiumlabs.geofirestore.GeoFirestore
 class PostsRepository(context: Context) {
@@ -53,7 +54,7 @@ class PostsRepository(context: Context) {
         val rootRef = firestore
             .collection(COLLECTION_POSTS)
             .document(postId)
-        val getPostDetail = RxFirebaseFirestore.data(rootRef)
+        return RxFirebaseFirestore.data(rootRef)
             .flatMap {
                 val post = it.value().toObject(Post::class.java)
                 val postViewItem = post!!.mapProperties(PostViewItem())
@@ -68,36 +69,45 @@ class PostsRepository(context: Context) {
                     .subscribeOn(Schedulers.io())
 
             }
+    }
 
-        val commentsRef = firestore
+    fun getComments(postId: String, limit: Long?, startAfter: Timestamp?): Single<ArrayList<CommentViewItem>> {
+        var commentsRef = firestore
             .collection(COLLECTION_POSTS)
             .document(postId)
             .collection(COLLECTION_COMMENTS)
-        val getComments = RxFirebaseFirestore.data(commentsRef)
+            .orderBy(FIELD_TIMESTAMP)
+
+        if (startAfter != null) commentsRef = commentsRef.startAfter(startAfter)
+        if (limit != null) commentsRef = commentsRef.limit(limit)
+
+        return RxFirebaseFirestore.data(commentsRef)
             .flatMap {
-                Single.just(
-                    it.value().documents.map { doc ->
-                        doc.id
-                    }.toHashSet()
-                )
+                val comments = it.value().documents.map { doc ->
+                    doc.toObject(Comment::class.java)!!.mapProperties(CommentViewItem())
+                }
+                val getCommentPosterDetails = comments.map { c ->
+                    userRepo.getUserData(c.postedBy)
+                }
+                Single.zip(getCommentPosterDetails) { res ->
+                    val commenters = res.map { user -> user as User }
+                    for (i in comments.indices) {
+                        comments[i].postedByProfilePic = commenters[i].profilePicUrl
+                        comments[i].postedByUsername = commenters[i].username
+                    }
+                    comments as ArrayList
+                }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
             }
             .onErrorResumeNext {
-                if (it.message == NO_VALUE) return@onErrorResumeNext Single.just(hashSetOf())
+                if (it.message == NO_VALUE) return@onErrorResumeNext Single.just(arrayListOf())
                 else Single.error(it)
             }
-
-        return Single.zip(
-            getPostDetail,
-            getComments,
-            BiFunction { postViewItem, comments ->
-                postViewItem.comments = comments
-                postViewItem
-            }
-        )
     }
 
     fun postComment(postId: String, comment: String): Completable {
-        val userId = userRepo.getCurrentUserId() ?: Completable.complete()
+        val userId = userRepo.getCurrentUserId() ?: return Completable.complete()
         val ref = firestore
             .collection(COLLECTION_POSTS)
             .document(postId)
@@ -105,8 +115,10 @@ class PostsRepository(context: Context) {
             .document()
 
         val commentObj = Comment(
-            // TODO CONTINUE HERE COMMENT
+            objectID = ref.id,
+            postedBy = userId,
+            body = comment
         )
-        return RxFirebaseFirestore.data()
+        return RxFirebaseFirestore.set(ref, commentObj)
     }
 }

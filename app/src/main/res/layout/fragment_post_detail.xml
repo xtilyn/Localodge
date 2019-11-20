@@ -7,37 +7,39 @@
 								tools:context=".ui.post_detail.ui.PostDetailFragment"
 								>
 
-				<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-												android:id="@+id/swipe_refresh_post_detail"
+				<androidx.core.widget.NestedScrollView
 												android:layout_width="match_parent"
 												android:layout_height="match_parent"
+												android:fillViewport="true"
 												>
 
-								<androidx.core.widget.NestedScrollView
+								<LinearLayout
 																android:layout_width="match_parent"
 																android:layout_height="match_parent"
-																android:fillViewport="true"
+																android:orientation="vertical"
 																>
 
-												<LinearLayout
+												<include
+																				android:id="@+id/post_detail_container"
+																				layout="@layout/list_item_user_post"
+																				/>
+
+												<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+																				android:id="@+id/swipe_refresh_comments"
 																				android:layout_width="match_parent"
 																				android:layout_height="match_parent"
-																				android:orientation="vertical"
 																				>
-
-																<include layout="@layout/list_item_user_post" android:id="@+id/post_detail_container" />
 
 																<androidx.recyclerview.widget.RecyclerView
 																								android:id="@+id/comments_recycler_view"
 																								android:layout_width="match_parent"
 																								android:layout_height="match_parent"
 																								/>
+												</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-												</LinearLayout>
+								</LinearLayout>
 
-								</androidx.core.widget.NestedScrollView>
-
-				</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+				</androidx.core.widget.NestedScrollView>
 
 				<androidx.constraintlayout.widget.ConstraintLayout
 												android:id="@+id/post_comment_container"
@@ -77,4 +79,24 @@
 																/>
 
 				</androidx.constraintlayout.widget.ConstraintLayout>
+
+				<FrameLayout
+												android:id="@+id/loading_overlay"
+												android:layout_width="match_parent"
+												android:layout_height="match_parent"
+												android:elevation="22dp"
+												android:background="#80ffffff"
+
+												>
+
+								<com.github.ybq.android.spinkit.SpinKitView
+																android:id="@+id/spin_kit"
+																style="@style/SpinKitView.Large.CubeGrid"
+																android:layout_width="wrap_content"
+																android:layout_height="wrap_content"
+																android:layout_gravity="center"
+																app:SpinKit_Color="@color/colorAccent"/>
+
+				</FrameLayout>
+
 </FrameLayout>

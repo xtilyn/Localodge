@@ -42,7 +42,7 @@ class PostViewHolder(itemView: View) :
             }
 
             itemView.user_post_timestamp?.text = DateUtils.convertMessageTimestamp(
-                item.createdDate!!.seconds * 1000L)
+                item.timestamp!!.seconds * 1000L)
 
             itemView.user_post_description.text = item.postDescription
             itemView.user_post_username.text = item.posterUsername
