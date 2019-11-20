@@ -95,4 +95,18 @@ class PostsRepository(context: Context) {
             }
         )
     }
+
+    fun postComment(postId: String, comment: String): Completable {
+        val userId = userRepo.getCurrentUserId() ?: Completable.complete()
+        val ref = firestore
+            .collection(COLLECTION_POSTS)
+            .document(postId)
+            .collection(COLLECTION_COMMENTS)
+            .document()
+
+        val commentObj = Comment(
+            // TODO CONTINUE HERE COMMENT
+        )
+        return RxFirebaseFirestore.data()
+    }
 }
