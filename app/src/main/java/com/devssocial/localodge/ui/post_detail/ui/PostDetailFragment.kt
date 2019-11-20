@@ -25,6 +25,7 @@ import com.devssocial.localodge.interfaces.PostOptionsListener
 import com.devssocial.localodge.models.CommentViewItem
 import com.devssocial.localodge.models.Location
 import com.devssocial.localodge.models.PostViewItem
+import com.devssocial.localodge.models.Report
 import com.devssocial.localodge.ui.post_detail.adapter.CommentsPagedAdapter
 import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSource
 import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSourceFactory
@@ -311,18 +312,111 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     }
 
     override fun onReportUser(userIdToReport: String, reason: String, desc: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val userId = postViewModel.userRepo.getCurrentUserId() ?: return
+        val report = Report(
+            reportedByUserId = userId,
+            reason = reason,
+            description = desc
+        )
+        showProgress(true)
+        disposables.add(
+            postViewModel
+                .localodgeRepo
+                .sendUserReport(userIdToReport, report)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let { c ->
+                            Toasty.success(
+                                c,
+                                resources.getString(R.string.report_sent)
+                            ).show()
+                        }
+                    }
+                )
+        )
     }
 
     override fun onReportPost(postId: String, reason: String, desc: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val userId = postViewModel.userRepo.getCurrentUserId() ?: return
+        val report = Report(
+            reportedByUserId = userId,
+            reason = reason,
+            description = desc
+        )
+        showProgress(true)
+        disposables.add(
+            postViewModel
+                .localodgeRepo
+                .sendPostReport(postId, report)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let { c ->
+                            Toasty.success(
+                                c,
+                                resources.getString(R.string.report_sent)
+                            ).show()
+                        }
+                    }
+                )
+        )
     }
 
     override fun onBlockUser(userId: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        showProgress(true)
+        disposables.add(
+            postViewModel
+                .userRepo
+                .blockUser(userId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let {
+                            Toasty.success(
+                                it,
+                                getString(R.string.user_blocked)
+                            )
+                        }
+                    }
+                )
+        )
     }
 
     override fun onBlockPost(postViewItem: PostViewItem, position: Int?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        showProgress(true)
+        disposables.addAll(
+            postViewModel
+                .userRepo
+                .blockPost(postViewItem.objectID)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onComplete = {
+                        showProgress(false)
+                        context?.let { c ->
+                            Toasty.success(c, resources.getString(R.string.post_blocked)).show()
+                        }
+                    }
+                )
+        )
     }
 }

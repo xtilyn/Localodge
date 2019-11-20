@@ -427,7 +427,6 @@ class DashboardFragment :
                     }
                 }
             }
-            // TODO userName/profile pic on click
         }
     }
 
