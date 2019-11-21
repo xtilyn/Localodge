@@ -64,7 +64,7 @@
 				<string name="sign_in_required">Sign In Required</string>
 				<string name="feedback_needs_credentials">Please sign in or create an account to send us feedback.</string>
 				<string name="create_post_needs_credentials">Please sign in or create an account to create a post.</string>
-				<string name="sign_in_required_to_perform_actions">Please sign in or create an account to perform actions on a post.</string>
+				<string name="sign_in_required_to_perform_actions">Please sign in or create an account to perform actions.</string>
 				<string name="sign_in_required_to_like_posts">Please sign in or create an account to like a post.</string>
 				<string name="settings">Settings</string>
 				<string name="could_not_get_location">Something went wrong while retrieving your location.</string>
@@ -106,4 +106,8 @@
 				<string name="post_comment">Post comment</string>
 				<string name="more_options">More options</string>
 				<string name="comment_required">Comment required</string>
+				<string name="see_more">See more</string>
+				<string name="see_less">See less</string>
+				<string name="sign_in_required_to_comment">Sign in required to post a comment.</string>
+				<string name="report">Report</string>
 </resources>

@@ -18,5 +18,7 @@ data class CommentViewItem(
 
     // adapter fields
     var postedByProfilePic: String = "",
-    var postedByUsername: String = ""
+    var postedByUsername: String = "",
+    var isCommentTooLong: Boolean = false,
+    var isExpanded: Boolean = false
 )

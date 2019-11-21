@@ -131,9 +131,12 @@ class DashboardFragment :
         // setup widgets
         fab.setOnClickListener {
             if (!dashboardViewModel.isUserLoggedIn()) {
-                showSignInRequiredDialog(
-                    resources.getString(R.string.create_post_needs_credentials)
-                )
+                activity?.let { a ->
+                    DialogHelper(a).showSignInRequiredDialog(
+                        a,
+                        resources.getString(R.string.create_post_needs_credentials)
+                    )
+                }
             } else {
                 (it as? FloatingActionButton)?.hide()
                 findNavController().navigate(R.id.action_dashboardFragment_to_newPostFragment)
@@ -305,9 +308,12 @@ class DashboardFragment :
                 context?.let {
 
                     if (!dashboardViewModel.isUserLoggedIn()) {
-                        showSignInRequiredDialog(
-                            resources.getString(R.string.feedback_needs_credentials)
-                        )
+                        activity?.let { a ->
+                            DialogHelper(a).showSignInRequiredDialog(
+                                a,
+                                resources.getString(R.string.feedback_needs_credentials)
+                            )
+                        }
                         return@let
                     }
 
@@ -357,8 +363,7 @@ class DashboardFragment :
             }
             R.id.nav_sign_out -> {
                 if (context == null) return true
-                DialogHelper.showConfirmActionDialog(
-                    context = context!!,
+                DialogHelper(context!!).showConfirmActionDialog(
                     message = resources.getString(R.string.sign_out_confirmation),
                     positiveButtonText = resources.getString(R.string.sign_out),
                     positiveButtonCallback = {
@@ -383,9 +388,12 @@ class DashboardFragment :
         when (view.id) {
             R.id.user_post_more_options -> {
                 if (!dashboardViewModel.isUserLoggedIn()) {
-                    showSignInRequiredDialog(
-                        resources.getString(R.string.sign_in_required_to_perform_actions)
-                    )
+                    activity?.let { a ->
+                        DialogHelper(a).showSignInRequiredDialog(
+                            a,
+                            resources.getString(R.string.sign_in_required_to_perform_actions)
+                        )
+                    }
                     return
                 }
                 PostsHelper(this@DashboardFragment).showMoreOptionsPopup(
@@ -404,9 +412,12 @@ class DashboardFragment :
             }
             R.id.user_post_like -> {
                 if (!dashboardViewModel.isUserLoggedIn()) {
-                    showSignInRequiredDialog(
-                        resources.getString(R.string.sign_in_required_to_like_posts)
-                    )
+                    activity?.let { a ->
+                        DialogHelper(a).showSignInRequiredDialog(
+                            a,
+                            resources.getString(R.string.sign_in_required_to_like_posts)
+                        )
+                    }
                     return
                 }
                 val shouldUpdateInitialDataInRoom =
@@ -871,23 +882,6 @@ class DashboardFragment :
         } else {
             layout_empty_state?.gone()
         }
-    }
-
-    private fun showSignInRequiredDialog(message: String) {
-        if (context == null) return
-        val helper = DialogHelper(context!!)
-        helper.createDialog(
-            R.layout.dialog_sign_in_required,
-            R.style.DefaultDialogAnimation
-        )
-        helper.dialogView.sign_in_message.text = message
-        helper.dialogView.close_dialog.setOnClickListener {
-            helper.dialog.dismiss()
-        }
-        helper.dialogView.dialog_sign_in_button.setOnClickListener {
-            ActivityLaunchHelper.goToLogin(activity)
-        }
-        helper.dialog.show()
     }
 
     private fun startShareAppIntent(view: View?) {

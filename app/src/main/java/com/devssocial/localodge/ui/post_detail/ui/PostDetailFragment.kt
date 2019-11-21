@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
@@ -14,28 +16,23 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
 import androidx.paging.RxPagedListBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.devssocial.localodge.LocalodgeActivity
 import com.devssocial.localodge.R
 import com.devssocial.localodge.data_objects.AdapterPayload
+import com.devssocial.localodge.enums.ReportType
 import com.devssocial.localodge.enums.Status
 import com.devssocial.localodge.extensions.popHide
 import com.devssocial.localodge.extensions.popShow
 import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.interfaces.PostOptionsListener
-import com.devssocial.localodge.models.CommentViewItem
 import com.devssocial.localodge.models.Location
 import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.models.Report
 import com.devssocial.localodge.ui.post_detail.adapter.CommentsPagedAdapter
-import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSource
 import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSourceFactory
 import com.devssocial.localodge.ui.post_detail.view_model.PostViewModel
-import com.devssocial.localodge.utils.ActivityLaunchHelper
+import com.devssocial.localodge.utils.*
 import com.devssocial.localodge.utils.ActivityLaunchHelper.CONTENT_ID
 import com.devssocial.localodge.utils.ActivityLaunchHelper.REQUEST_COMMENT
-import com.devssocial.localodge.utils.KeyboardUtils
-import com.devssocial.localodge.utils.PostsHelper
-import com.devssocial.localodge.utils.SharedPrefManager
 import com.devssocial.localodge.view_holders.PostViewHolder
 import es.dmoral.toasty.Toasty
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -65,6 +62,15 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
         View.OnClickListener {
             when (it.id) {
                 R.id.user_post_more_options -> {
+                    if (!isLoggedIn()) {
+                        activity?.let { a ->
+                            DialogHelper(a).showSignInRequiredDialog(
+                                a,
+                                resources.getString(R.string.sign_in_required_to_perform_actions)
+                            )
+                        }
+                        return@OnClickListener
+                    }
                     PostsHelper(this@PostDetailFragment).showMoreOptionsPopup(
                         context,
                         user_post_more_options,
@@ -80,10 +86,28 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                     )
                 }
                 R.id.user_post_comment -> {
+                    if (!isLoggedIn()) {
+                        activity?.let { a ->
+                            DialogHelper(a).showSignInRequiredDialog(
+                                a,
+                                resources.getString(R.string.sign_in_required_to_comment)
+                            )
+                        }
+                        return@OnClickListener
+                    }
                     comment_et?.requestFocus()
                     context?.let { c -> KeyboardUtils.showKeyboard(c) }
                 }
                 R.id.user_post_like -> {
+                    if (!isLoggedIn()) {
+                        activity?.let { a ->
+                            DialogHelper(a).showSignInRequiredDialog(
+                                a,
+                                resources.getString(R.string.sign_in_required_to_like_posts)
+                            )
+                        }
+                        return@OnClickListener
+                    }
                     toggleLike()
                 }
             }
@@ -238,6 +262,16 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     }
 
     private fun onPostComment(view: View) {
+        if (!isLoggedIn()) {
+            activity?.let { a ->
+                DialogHelper(a).showSignInRequiredDialog(
+                    a,
+                    resources.getString(R.string.sign_in_required_to_comment)
+                )
+            }
+            return
+        }
+
         val comment = comment_et?.text.toString()
         if (comment.isBlank()) {
             comment_et?.error = resources.getString(R.string.comment_required)
@@ -265,7 +299,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     }
 
     private fun setupRecyclerView() {
-        commentsAdapter = CommentsPagedAdapter(this@PostDetailFragment)
+        val userId = postViewModel.userRepo.getCurrentUserId() ?: ""
+        commentsAdapter = CommentsPagedAdapter(this@PostDetailFragment, userId)
         comments_recycler_view?.adapter = commentsAdapter
         comments_recycler_view?.layoutManager = LinearLayoutManager(context)
 
@@ -304,11 +339,58 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     }
 
     override fun onItemClick(view: View, position: Int) {
-        // TODO
+        when (view.id) {
+            R.id.comment_toggle_text -> {
+                commentsAdapter.notifyItemChanged(position, AdapterPayload.EXPAND_OR_COLLAPSE)
+            }
+        }
     }
 
-    override fun onItemLongPress(view: View, position: Int) {
-        // TODO
+    override fun onItemLongPress(view: View, position: Int): Boolean {
+        val current = commentsAdapter.currentList?.get(position) ?: return false
+        val popupView = LayoutInflater.from(context).inflate(R.layout.popup_layout_report, null)
+        val popup = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+
+        popupView.findViewById<Button>(R.id.report_button).setOnClickListener {
+            context?.let {
+                DialogHelper(it).showReportDialog(
+                    it, ReportType.USER
+                ) { reason, desc ->
+
+                    showProgress(true)
+                    val userId = postViewModel.userRepo.getCurrentUserId() ?: return@showReportDialog
+                    disposables.add(
+                        postViewModel
+                            .localodgeRepo
+                            .sendUserReport(
+                                current.postedBy,
+                                Report(
+                                    reportedByUserId = userId,
+                                    reason = reason,
+                                    description = desc
+                                )
+                            )
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeOn(Schedulers.io())
+                            .subscribeBy(
+                                onError = { error ->
+                                    handleError(error)
+                                },
+                                onComplete = {
+                                    showProgress(false)
+                                    context?.let { c ->
+                                        Toasty.success(c, getString(R.string.report_sent))
+                                    }
+                                }
+                            )
+                    )
+                }
+            }
+            popup.dismiss()
+        }
+
+        popup.showAsDropDown(view, view.width, 0)
+        return true
     }
 
     override fun onReportUser(userIdToReport: String, reason: String, desc: String) {
@@ -419,4 +501,6 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                 )
         )
     }
+
+    private fun isLoggedIn(): Boolean = postViewModel.userRepo.getCurrentUser() != null
 }
