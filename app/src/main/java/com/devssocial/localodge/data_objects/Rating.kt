@@ -14,15 +14,24 @@ object Rating {
         4 to 899
     )
 
-    // TODO FORMAT WITH COMMAS ?
     fun getPriceInFormattedString(rating: Int): String {
+        var count = 0
         val builder = StringBuilder()
-        val lastDig = rating % 10
+        var lastDig = rating % 10
         builder.append(lastDig)
         var temp = rating / 10
         builder.insert(0, ".${temp % 10}")
         temp /= 10
-        builder.insert(0, temp)
+        while (temp > 0) {
+            if (count == 3) {
+                builder.insert(0, " ")
+                count = 0
+            }
+            lastDig = temp % 10
+            builder.insert(0, lastDig)
+            count++
+            temp /= 10
+        }
         return builder.toString()
     }
 }

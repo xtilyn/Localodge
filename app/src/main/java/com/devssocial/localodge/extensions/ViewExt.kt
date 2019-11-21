@@ -3,6 +3,8 @@ package com.devssocial.localodge.extensions
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AnticipateOvershootInterpolator
 import android.view.animation.BounceInterpolator
 
 fun View.instaGone() {
@@ -18,7 +20,9 @@ fun View.instaVisible() {
 }
 
 fun View.popShow() {
-    animate().scaleX(1f).scaleY(1f).setInterpolator(BounceInterpolator())
+    animate().scaleX(1f).scaleY(1f)
+        .setInterpolator(AnticipateOvershootInterpolator())
+        .setDuration(300)
         .setListener(object : AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator) {
                 super.onAnimationStart(animation)
@@ -27,11 +31,14 @@ fun View.popShow() {
         })
 }
 
-fun View.popHide() {
-    animate().scaleX(0f).scaleY(0f).setListener(object : AnimatorListenerAdapter() {
+fun View.popHide(onAnimationEndCallback: () -> Unit = {}) {
+    animate().scaleX(0f).scaleY(0f)
+        .setDuration(300)
+        .setListener(object : AnimatorListenerAdapter() {
         override fun onAnimationEnd(animation: Animator?) {
             super.onAnimationEnd(animation)
             visibility = View.GONE
+            onAnimationEndCallback()
         }
     })
 }

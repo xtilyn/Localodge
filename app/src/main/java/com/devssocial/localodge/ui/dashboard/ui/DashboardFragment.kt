@@ -27,6 +27,7 @@ import com.devssocial.localodge.*
 import com.devssocial.localodge.R
 import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
+import com.devssocial.localodge.enums.Status
 import com.devssocial.localodge.extensions.*
 import com.devssocial.localodge.interfaces.PostOptionsListener
 import com.devssocial.localodge.models.*
@@ -46,12 +47,14 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Timestamp
 import es.dmoral.toasty.Toasty
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.close_dialog
@@ -66,6 +69,8 @@ import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_p
 import kotlinx.android.synthetic.main.layout_empty_state.*
 import kotlinx.android.synthetic.main.layout_empty_state.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
@@ -99,11 +104,8 @@ class DashboardFragment :
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var postsAdapter: PostsAdapter
     private lateinit var postsProvider: PostsProvider
-
-    private val lock: ReentrantLock by lazy { ReentrantLock() }
-    private val condition: Condition by lazy { lock.newCondition() }
-    private val blockedPostsRetrieved: AtomicBoolean by lazy { AtomicBoolean(false) }
     private var blockedPosts: HashSet<String>? = null
+    private val blockedPostsResult = BehaviorSubject.create<Status>()
 
     private lateinit var retrievedPosts: HashMap<Int, ArrayList<PostViewItem>>
     private var currentPage = 0
@@ -403,11 +405,18 @@ class DashboardFragment :
                     position
                 )
             }
-            R.id.user_post_media_content_container, R.id.user_post_comment -> {
+            R.id.user_post_comment -> {
                 ActivityLaunchHelper.goToPostDetail(
                     activity,
                     current.objectID,
                     view.id == R.id.user_post_comment
+                )
+            }
+            R.id.user_post_media_content_container -> {
+                ActivityLaunchHelper.goToMediaViewer(
+                    activity,
+                    current.photoUrl,
+                    current.videoUrl
                 )
             }
             R.id.user_post_like -> {
@@ -450,7 +459,7 @@ class DashboardFragment :
                     if (location == null) checkLocationSettings()
                     else {
                         this@DashboardFragment.userLocation = location
-                        activity?.let{
+                        activity?.let {
                             SharedPrefManager(it).saveLocation(
                                 userLocation!!.latitude.toFloat(),
                                 userLocation!!.longitude.toFloat()
@@ -631,7 +640,7 @@ class DashboardFragment :
     }
 
     private fun captureImage() {
-        ImagePicker.cameraOnly().start(this)
+        PhotoPicker.captureImage(this)
     }
 
     private fun showLocationNotFoundDialog() {
@@ -704,13 +713,27 @@ class DashboardFragment :
         dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
         dashboard_recyclerview.onScrolledToBottom(::loadMoreDashboardData)
 
-        if (!dashboardViewModel.blockedUsersRetrieved.get()) {
-            this.waitWithCondition(lock, condition, dashboardViewModel.blockedUsersRetrieved)
+        if (dashboardViewModel.isUserLoggedIn()) {
+            if (blockedPosts == null || dashboardViewModel.blockedUsers == null) {
+                disposables.addAll(
+                    Observable.zip(
+                        blockedPostsResult,
+                        dashboardViewModel.blockedUsersResult,
+                        BiFunction<Status, Status, Pair<Boolean, Boolean>> { s1, s2 ->
+                            Pair(s1 == Status.SUCCESS_WITH_DATA, s2 == Status.SUCCESS_WITH_DATA)
+                        }
+                    )
+                        .subscribe { results ->
+                            if (results.first && results.second) {
+                                loadDashboardDataFromRoom()
+                            }
+                        }
+                )
+            }
         }
-        if (blockedPosts == null) {
-            this.waitWithCondition(lock, condition, blockedPostsRetrieved)
-        }
+    }
 
+    private fun loadDashboardDataFromRoom() {
         disposables.add(
             dashboardViewModel.postsRepo.postsDao
                 .getPosts()
@@ -747,11 +770,17 @@ class DashboardFragment :
 
     private fun loadInitialDataFromFirebase(radius: Double) {
         Log.d(this::class.java.simpleName, "searching for posts with radius: $radius")
+        var blockedUsers = hashSetOf<String>()
+        var blockedPosts = hashSetOf<String>()
+        if (dashboardViewModel.isUserLoggedIn()) {
+            blockedUsers = dashboardViewModel.blockedUsers!!
+            blockedPosts = this.blockedPosts!!
+        }
         postsProvider.loadInitial(
             userLocation = userLocation!!,
             radius = radius,
-            blockedUsers = dashboardViewModel.blockedUsers,
-            blockedPosts = blockedPosts!!,
+            blockedUsers = blockedUsers,
+            blockedPosts = blockedPosts,
             onError = { exception ->
                 (activity as LocalodgeActivity).logAndShowError(
                     TAG,
@@ -924,8 +953,7 @@ class DashboardFragment :
                     },
                     onSuccess = {
                         dashboardViewModel.blockedUsers = it
-                        dashboardViewModel.blockedUsersRetrieved.set(true)
-                        lock.withLock { condition.signalAll() }
+                        dashboardViewModel.blockedUsersResult.onNext(Status.SUCCESS_WITH_DATA)
                     }
                 )
         )
@@ -938,14 +966,14 @@ class DashboardFragment :
                 .userRepo
                 .getBlockedPosts()
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribeBy(
                     onError = {
                         handleError(it)
                     },
                     onSuccess = {
                         blockedPosts = it
-                        blockedPostsRetrieved.set(true)
-                        lock.withLock { condition.signalAll() }
+                        blockedPostsResult.onNext(Status.SUCCESS_WITH_DATA)
                     }
                 )
         )

@@ -7,9 +7,9 @@ class RatingTest {
 
     @Test
     fun shouldFormatAsCurrencyWith2Decimals() {
-        val result = Rating.getPriceInFormattedString(221231485)
+        val result = Rating.getPriceInFormattedString(221231400)
         println(result)
-        assert(result == "2212314.85")
+        assert(result == "2 212 314.00")
     }
 
 }

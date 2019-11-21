@@ -110,4 +110,8 @@
 				<string name="see_less">See less</string>
 				<string name="sign_in_required_to_comment">Sign in required to post a comment.</string>
 				<string name="report">Report</string>
+				<string name="go_back">Go back</string>
+				<string name="pick_from_gallery">pick from gallery</string>
+				<string name="take_photo">take photo</string>
+				<string name="delete_image">delete image</string>
 </resources>

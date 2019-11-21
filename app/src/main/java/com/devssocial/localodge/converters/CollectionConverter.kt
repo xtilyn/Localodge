@@ -4,15 +4,23 @@ import android.util.JsonReader
 import android.util.JsonWriter
 import android.util.Log
 import androidx.room.TypeConverter
+import com.google.firebase.Timestamp
 import java.io.IOException
 import java.io.StringReader
 import java.io.StringWriter
+import java.util.*
 
 public class CollectionConverter {
 
     companion object {
         private const val TAG = "CollectionConverter"
     }
+
+    @TypeConverter
+    public fun fromTimeStamp(timestamp: Timestamp): Long = timestamp.seconds * 1000L
+
+    @TypeConverter
+    public fun toTimeStamp(millis: Long): Timestamp = Timestamp(Date(millis))
 
     @TypeConverter
     public fun fromStringSet(strings: Set<String>?): String? {

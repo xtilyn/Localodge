@@ -43,4 +43,25 @@ class Playground {
             )
     }
 
+    @Test
+    fun singleOnErrorResumeNext() {
+        val disposable = Single.just("this should not print")
+            .flatMap {
+                Single.error<String>(Throwable("No value"))
+            }
+            .onErrorResumeNext {
+                if (it.message == "No value") return@onErrorResumeNext Single.just("this should print")
+                else return@onErrorResumeNext Single.error(it)
+            }
+        disposable.subscribeOn(Schedulers.trampoline()).observeOn(Schedulers.trampoline())
+            .subscribeBy(
+                onError = {
+                    println("subscribe onError: ${it.message}")
+                },
+                onSuccess = {
+                    println("subscribe onSuccess: $it")
+                }
+            )
+    }
+
 }

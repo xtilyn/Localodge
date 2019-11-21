@@ -21,6 +21,7 @@
 												android:layout_marginTop="8dp"
 												android:layout_marginStart="8dp"
 												android:elevation="2dp"
+												android:contentDescription="@string/go_back"
 												/>
 
 				<androidx.core.widget.NestedScrollView
@@ -111,7 +112,58 @@
 																												app:layout_constraintEnd_toEndOf="parent"
 																												android:layout_marginStart="8dp"
 																												app:layout_constraintStart_toStartOf="parent"
+																												android:importantForAutofill="no"
+																												tools:ignore="LabelFor"
 																												/>
+
+																				<androidx.cardview.widget.CardView
+																												android:id="@+id/user_post_media_content_container"
+																												android:layout_width="0dp"
+																												android:layout_height="wrap_content"
+																												app:layout_constraintTop_toBottomOf="@id/post_description_edit_text"
+																												app:layout_constraintStart_toStartOf="parent"
+																												android:layout_marginStart="12dp"
+																												app:layout_constraintEnd_toEndOf="parent"
+																												android:layout_marginEnd="12dp"
+																												android:layout_marginTop="8dp"
+																												app:cardCornerRadius="12dp"
+																												app:cardElevation="0dp"
+																												android:clickable="true"
+																												android:focusable="true"
+																												android:foreground="?attr/selectableItemBackground"
+																												>
+
+																								<ImageView
+																																android:id="@+id/user_post_image_content"
+																																android:layout_width="match_parent"
+																																android:layout_height="188dp"
+																																android:scaleType="centerCrop"
+																																android:visibility="gone"
+																																/>
+
+																								<ImageView
+																																android:id="@+id/play_video"
+																																android:layout_width="70dp"
+																																android:layout_height="70dp"
+																																android:src="@drawable/ic_play_circle_outline"
+																																android:layout_gravity="center"
+																																android:visibility="gone"
+																																/>
+
+																								<ImageButton
+																																android:id="@+id/delete_media"
+																																android:layout_width="54dp"
+																																android:layout_height="50dp"
+																																android:src="@drawable/ic_delete"
+																																style="@style/Widget.AppCompat.Button.Borderless"
+																																android:layout_gravity="top|end"
+																																android:contentDescription="@string/delete_image"
+																																android:scaleType="fitXY"
+																																android:elevation="4dp"
+																																android:visibility="gone"
+																																/>
+
+																				</androidx.cardview.widget.CardView>
 
 																				<TextView
 																												android:id="@+id/description_prompt"
@@ -130,15 +182,15 @@
 																												android:layout_marginTop="8dp"
 																												android:layout_height="50dp"
 																												android:src="@drawable/ic_photo_camera"
-																												app:layout_constraintTop_toBottomOf="@id/post_description_edit_text"
-																												android:background="@drawable/rounded_border"
+																												app:layout_constraintTop_toBottomOf="@id/user_post_media_content_container"
+																												android:background="@drawable/button_default_outline"
 																												app:layout_constraintEnd_toEndOf="parent"
 																												android:layout_marginEnd="8dp"
 																												app:layout_constraintStart_toStartOf="@+id/guideline4"
 																												android:layout_marginStart="8dp"
 																												android:layout_marginBottom="8dp"
 																												app:layout_constraintBottom_toBottomOf="parent"
-																												android:foreground="?attr/selectableItemBackground"
+																												android:contentDescription="@string/take_photo"
 																												/>
 
 																				<ImageButton
@@ -147,15 +199,15 @@
 																												android:layout_marginTop="8dp"
 																												android:layout_height="50dp"
 																												android:src="@drawable/ic_image"
-																												app:layout_constraintTop_toBottomOf="@id/post_description_edit_text"
-																												android:background="@drawable/rounded_border"
+																												app:layout_constraintTop_toBottomOf="@id/user_post_media_content_container"
+																												android:background="@drawable/button_default_outline"
 																												android:layout_marginEnd="8dp"
 																												app:layout_constraintStart_toStartOf="parent"
 																												app:layout_constraintEnd_toStartOf="@id/guideline4"
 																												android:layout_marginStart="8dp"
 																												android:layout_marginBottom="8dp"
 																												app:layout_constraintBottom_toBottomOf="parent"
-																												android:foreground="?attr/selectableItemBackground"
+																												android:contentDescription="@string/pick_from_gallery"
 																												/>
 
 																				<androidx.constraintlayout.widget.Guideline
@@ -203,16 +255,13 @@
 																				app:cardCornerRadius="12dp"
 																				app:cardBackgroundColor="@color/lightGray"
 																				app:cardElevation="2dp"
-																				android:clickable="true"
-																				android:focusable="true"
 																				app:layout_constraintBottom_toBottomOf="parent"
 																				app:layout_constraintVertical_bias="0"
 																				android:layout_marginBottom="12dp"
-																				android:foreground="?attr/selectableItemBackgroundBorderless"
 																				>
 
 																<TextView
-																								android:id="@+id/sign_in_text_view"
+																								android:id="@+id/post_text_view"
 																								android:layout_width="match_parent"
 																								android:layout_height="match_parent"
 																								android:text="@string/post"
@@ -220,6 +269,9 @@
 																								android:textColor="@android:color/white"
 																								android:textSize="18sp"
 																								fontPath="fonts/Montserrat-SemiBold.ttf"
+																								android:background="@drawable/circle_ripple"
+																								android:clickable="true"
+																								android:focusable="true"
 																								/>
 
 												</androidx.cardview.widget.CardView>
@@ -227,5 +279,7 @@
 								</androidx.constraintlayout.widget.ConstraintLayout>
 
 				</androidx.core.widget.NestedScrollView>
+
+				<include layout="@layout/layout_loading_overlay" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
