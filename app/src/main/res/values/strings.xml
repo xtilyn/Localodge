@@ -114,4 +114,7 @@
 				<string name="pick_from_gallery">pick from gallery</string>
 				<string name="take_photo">take photo</string>
 				<string name="delete_image">delete image</string>
+				<string name="discard_changes">Discard Changes?</string>
+				<string name="are_you_sure_you_want_to_discard_changes">Are you sure you want to discard changes?</string>
+				<string name="discard">Discard</string>
 </resources>

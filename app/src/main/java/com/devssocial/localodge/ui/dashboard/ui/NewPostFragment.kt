@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -19,6 +20,7 @@ import com.devssocial.localodge.models.User
 import com.devssocial.localodge.room_models.UserRoom
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
+import com.devssocial.localodge.utils.DialogHelper
 import com.devssocial.localodge.utils.KeyboardUtils
 import com.devssocial.localodge.utils.PhotoPicker
 import com.esafirm.imagepicker.features.ImagePicker
@@ -93,6 +95,26 @@ class NewPostFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requireActivity().onBackPressedDispatcher.addCallback {
+            if (post_description_edit_text?.text?.isEmpty() == false || !currentMediaPath.isNullOrBlank()) {
+                context?.let {
+                    DialogHelper(it)
+                        .showConfirmActionDialog(
+                            getString(R.string.discard_changes),
+                            getString(R.string.are_you_sure_you_want_to_discard_changes),
+                            getString(R.string.discard),
+                            { dialog ->
+                                dialog.dismiss()
+                                activity?.onBackPressed()
+                            },
+                            getString(R.string.cancel),
+                            { dialog -> dialog.dismiss() },
+                            false
+                        )
+                }
+            }
+        }
+
         // setup static widgets
         post_description_edit_text.requestFocus()
         KeyboardUtils.showKeyboard(context!!)
@@ -164,9 +186,19 @@ class NewPostFragment : Fragment() {
     private fun togglePostButton() {
         if (context == null) return
         if (post_description_edit_text?.text?.isEmpty() == false || !currentMediaPath.isNullOrBlank()) {
-            post_button?.setCardBackgroundColor(ContextCompat.getColor(context!!, R.color.colorPrimary))
+            post_button?.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    context!!,
+                    R.color.colorPrimary
+                )
+            )
         } else {
-            post_button?.setCardBackgroundColor(ContextCompat.getColor(context!!, R.color.lightGray))
+            post_button?.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    context!!,
+                    R.color.lightGray
+                )
+            )
         }
     }
 

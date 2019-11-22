@@ -51,7 +51,9 @@ class DialogHelper(private val context: Context) {
         positiveButtonCallback: (dialog: AlertDialog) -> Unit,
 
         negativeButtonText: String,
-        negativeButtonCallback: (dialog: AlertDialog) -> Unit
+        negativeButtonCallback: (dialog: AlertDialog) -> Unit,
+
+        cancelable: Boolean = true
     ) {
         createDialog(R.layout.dialog_confirm_action)
 
@@ -73,6 +75,11 @@ class DialogHelper(private val context: Context) {
         dialogView.dialogNegativeButton.text = negativeButtonText
         dialogView.dialogPositiveButton.setOnClickListener { positiveButtonCallback(dialog) }
         dialogView.dialogNegativeButton.setOnClickListener { negativeButtonCallback(dialog) }
+
+        if (!cancelable) {
+            dialog.setCancelable(false)
+            dialog.setCanceledOnTouchOutside(false)
+        }
 
         dialog.show()
     }
