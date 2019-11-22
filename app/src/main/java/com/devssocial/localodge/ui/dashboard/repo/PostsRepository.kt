@@ -2,6 +2,7 @@ package com.devssocial.localodge.ui.dashboard.repo
 
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.*
 import com.devssocial.localodge.extensions.mapProperties
@@ -13,11 +14,15 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.Query
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.SingleObserver
+import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import org.imperiumlabs.geofirestore.GeoFirestore
+import org.imperiumlabs.geofirestore.extension.setLocation
+
 class PostsRepository(context: Context) {
 
     companion object {
@@ -71,7 +76,11 @@ class PostsRepository(context: Context) {
             }
     }
 
-    fun getComments(postId: String, limit: Long?, startAfter: Timestamp?): Single<ArrayList<CommentViewItem>> {
+    fun getComments(
+        postId: String,
+        limit: Long?,
+        startAfter: Timestamp?
+    ): Single<ArrayList<CommentViewItem>> {
         var commentsRef = firestore
             .collection(COLLECTION_POSTS)
             .document(postId)
@@ -120,5 +129,35 @@ class PostsRepository(context: Context) {
             body = comment
         )
         return RxFirebaseFirestore.set(ref, commentObj)
+    }
+
+    fun createPost(
+        lat: Double,
+        lng: Double,
+        desc: String,
+        videoUrl: String?,
+        photoUrl: String?,
+        rating: Int
+    ): Single<String> {
+        val userId = userRepo.getCurrentUserId() ?: return Single.just("")
+        val ref = firestore.collection(COLLECTION_POSTS).document()
+        val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))
+        val newPost = Post(
+            posterUserId = userId,
+            objectID = ref.id,
+            postDescription = desc,
+            photoUrl = photoUrl,
+            videoUrl = videoUrl,
+            rating = rating,
+            likes = hashSetOf()
+        )
+
+        return RxFirebaseFirestore.set(ref, newPost)
+            .andThen(SingleSource<String> { observer ->
+                geoFirestore.setLocation(ref.id, GeoPoint(lat, lng)) { exception ->
+                    if (exception != null) observer.onError(Throwable(exception.message))
+                    else observer.onSuccess(ref.id)
+                }
+            })
     }
 }

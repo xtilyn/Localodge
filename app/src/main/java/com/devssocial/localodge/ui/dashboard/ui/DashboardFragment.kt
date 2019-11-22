@@ -730,6 +730,10 @@ class DashboardFragment :
                         }
                 )
             }
+        } else {
+            blockedPosts = hashSetOf()
+            dashboardViewModel.blockedUsers = hashSetOf()
+            loadDashboardDataFromRoom()
         }
     }
 

@@ -117,4 +117,6 @@
 				<string name="discard_changes">Discard Changes?</string>
 				<string name="are_you_sure_you_want_to_discard_changes">Are you sure you want to discard changes?</string>
 				<string name="discard">Discard</string>
+				<string name="location_needed_to_make_a_post">Your location is required to publish a post.</string>
+				<string name="location_needed_to_make_a_post_with_question">Your location is required to publish a post. Turn on location?</string>
 </resources>

@@ -1,7 +1,12 @@
 package com.devssocial.localodge.ui.dashboard.ui
 
 
+import android.Manifest
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.IntentSender
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -17,30 +23,34 @@ import com.bumptech.glide.Glide
 import com.devssocial.localodge.R
 import com.devssocial.localodge.extensions.*
 import com.devssocial.localodge.models.User
-import com.devssocial.localodge.room_models.UserRoom
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
-import com.devssocial.localodge.utils.ActivityLaunchHelper
-import com.devssocial.localodge.utils.DialogHelper
-import com.devssocial.localodge.utils.KeyboardUtils
-import com.devssocial.localodge.utils.PhotoPicker
+import com.devssocial.localodge.utils.*
 import com.esafirm.imagepicker.features.ImagePicker
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
 import es.dmoral.toasty.Toasty
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.fragment_new_post.*
 import kotlinx.android.synthetic.main.layout_loading_overlay.*
+import pub.devrel.easypermissions.AfterPermissionGranted
+import pub.devrel.easypermissions.EasyPermissions
 
-class NewPostFragment : Fragment() {
+class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     companion object {
         private const val TAG = "NewPostFragment"
     }
 
     private lateinit var dashboardViewModel: DashboardViewModel
+    private val userLocationResult by lazy { BehaviorSubject.create<Location>() }
     private val disposables = CompositeDisposable()
     private var currentMediaPath: String? = null
+    private var chosenPostRating: Int = 0
 
     private val newPostClickListener = View.OnClickListener { view ->
         when (view.id) {
@@ -73,7 +83,7 @@ class NewPostFragment : Fragment() {
                 togglePostButton()
             }
             R.id.promote_post -> {
-                // TODO CONTINUE HERE SHOW RATING OPTIONS DIALOG
+                // TODO CONTINUE HERE SHOW RATING OPTIONS DIALOG and change chosenPostRating (if changed)
             }
         }
     }
@@ -96,7 +106,7 @@ class NewPostFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         requireActivity().onBackPressedDispatcher.addCallback {
-            if (post_description_edit_text?.text?.isEmpty() == false || !currentMediaPath.isNullOrBlank()) {
+            if (hasData()) {
                 context?.let {
                     DialogHelper(it)
                         .showConfirmActionDialog(
@@ -150,6 +160,14 @@ class NewPostFragment : Fragment() {
         disposables.clear()
     }
 
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        showLocationNotFoundDialog()
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+        getLocation()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
             ImagePicker.getFirstImageOrNull(data)?.let { image ->
@@ -169,23 +187,157 @@ class NewPostFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    private fun getLocation() {
+        if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            if (activity == null) return
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    if (location == null) checkLocationSettings()
+                    else {
+                        userLocationResult.onNext(location)
+                    }
+                }
+        } else {
+            requestLocationPermission()
+        }
+    }
+
+    private fun checkLocationSettings() {
+        LocationRequest.create()?.apply {
+            priority = LocationRequest.PRIORITY_LOW_POWER
+        }?.let { locationRequest ->
+            val builder = LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest)
+
+            val client: SettingsClient = LocationServices.getSettingsClient(activity!!)
+            val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+
+            task.addOnFailureListener { exception ->
+                if (exception is ResolvableApiException) {
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+                    try {
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        exception.startResolutionForResult(
+                            activity!!,
+                            DashboardFragment.REQUEST_CHECK_SETTINGS
+                        )
+                    } catch (sendEx: IntentSender.SendIntentException) {
+                        // Ignore the error.
+                    }
+                }
+            }
+        }
+    }
+
+    @AfterPermissionGranted(DashboardFragment.REQUEST_LOCATION_PERMISSION)
+    fun requestLocationPermission() {
+        val perms = Manifest.permission.ACCESS_FINE_LOCATION
+        if (EasyPermissions.hasPermissions(context!!, perms)) {
+            getLocation()
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                resources.getString(R.string.location_needed_to_make_a_post_with_question),
+                DashboardFragment.REQUEST_LOCATION_PERMISSION,
+                perms
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
     private fun onPostButtonClick() {
-        // TODO CONTINUE HERE empty check
-        // todo set location in geofirestore
-//        val collectionRef = FirebaseFirestore.getInstance().collection(POSTS)
-//        val geoFirestore = GeoFirestore(collectionRef)
-//        geoFirestore.setLocation("que8B9fxxjcvbC81h32VRjeBSUW2", GeoPoint(37.7853889, -122.4056973)) { exception ->
-//            if (exception != null)
-//                Log.d(TAG, "Location saved on server successfully!")
-//        }
-//        disposables.add(
-//
-//        )
+        if (hasData()) {
+            val desc = post_description_edit_text?.text?.toString() ?: ""
+            var photoUrl: String? = null
+            var videoUrl: String? = null
+            if (!currentMediaPath.isNullOrEmpty()) {
+                if (PhotoPicker.isVideoFile(currentMediaPath)) videoUrl = currentMediaPath
+                else photoUrl = currentMediaPath
+            }
+
+            val location = SharedPrefManager(activity).getLocation()
+            if (location == null) {
+                getLocation()
+                disposables.add(
+                    userLocationResult
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe { userLoc: Location? ->
+                            if (userLoc != null) createPost(
+                                lat = userLoc.latitude,
+                                lng = userLoc.longitude,
+                                desc = desc,
+                                photoUrl = photoUrl,
+                                videoUrl = videoUrl
+                            )
+                        }
+                )
+            } else {
+                createPost(
+                    lat = location.lat,
+                    lng = location.lng,
+                    desc = desc,
+                    photoUrl = photoUrl,
+                    videoUrl = videoUrl
+                )
+            }
+        }
+    }
+
+    private fun createPost(
+        lat: Double,
+        lng: Double,
+        desc: String,
+        photoUrl: String?,
+        videoUrl: String?
+    ) {
+        showProgress(true)
+        disposables.add(
+            dashboardViewModel
+                .postsRepo
+                .createPost(
+                    lat = lat,
+                    lng = lng,
+                    desc = desc,
+                    photoUrl = photoUrl,
+                    videoUrl = videoUrl,
+                    rating = chosenPostRating
+                )
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {
+                        handleError(it)
+                    },
+                    onSuccess = { postId ->
+                        showProgress(false)
+                        if (postId.isEmpty()) return@subscribeBy
+                        ActivityLaunchHelper.goToPostDetail(
+                            activity,
+                            postId,
+                            false
+                        )
+                    }
+                )
+        )
     }
 
     private fun togglePostButton() {
         if (context == null) return
-        if (post_description_edit_text?.text?.isEmpty() == false || !currentMediaPath.isNullOrBlank()) {
+        if (hasData()) {
             post_button?.setCardBackgroundColor(
                 ContextCompat.getColor(
                     context!!,
@@ -201,6 +353,9 @@ class NewPostFragment : Fragment() {
             )
         }
     }
+
+    private fun hasData(): Boolean =
+        post_description_edit_text?.text?.isEmpty() == false || !currentMediaPath.isNullOrBlank()
 
     private fun getUserDataFromRoom(onSuccess: (User) -> Unit) {
         val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
@@ -252,5 +407,17 @@ class NewPostFragment : Fragment() {
         context?.let {
             Toasty.error(it, getString(R.string.generic_error_message))
         }
+    }
+
+    private fun showLocationNotFoundDialog() {
+        val dialog = AlertDialog.Builder(context!!).create()
+        dialog.setCancelable(false)
+        dialog.setCanceledOnTouchOutside(false)
+        dialog.setTitle(resources.getString(R.string.location_needed_to_make_a_post))
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Retry") { dialogInterface, _ ->
+            dialogInterface.dismiss()
+            getLocation()
+        }
+        dialog.show()
     }
 }
