@@ -23,6 +23,11 @@ const val COLLECTION_REPORTS = "reports"
 const val COLLECTION_BLOCKING = "blocking"
 const val COLLECTION_BLOCKED_POSTS = "blockedPosts"
 const val COLLECTION_COMMENTS = "comments"
+const val COLLECTION_METADATA = "metadata"
+
+// firestore documents
+const val DOC_CUSTOMER_INFO = "customerInfo"
+const val DOC_META = "meta"
 
 // firestore fields
 const val FIELD_LIKES = "likes"

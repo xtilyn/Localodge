@@ -232,20 +232,24 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     private fun proceedToPayment(post: Post) {
         if (context == null) return
-//        val action = NewPostFragmentDirections
-//            .actionSlotPickerFragmentToPaymentFragment(
-//                incomingPurchaseJson,
-//                picUrl
-//            )
-//        findNavController().navigate(action)
-
-        // TODO CONTINUE HERE IF CUSTOMER HAS A CARD/NOT
-        // TODO CONTINUE HERE CONFIRM PAYMENT METHOD
-        // todo once payment obtained, change ui to look like promoted rating (depending on the rating chosen)
+        disposables.add(
+            post.toJsonRx()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { postJson ->
+                    val action = NewPostFragmentDirections
+                        .actionNewPostFragmentToPaymentFragment(postJson)
+                    findNavController().navigate(action)
+                }
+        )
     }
 
     private fun toggleViewsBasedOnRating(rating: Int) {
         if (context == null) return
+        if (chosenPostRating == 0) {
+            promotion_method.popHide()
+            return
+        }
         chosen_rating_text.text = when (rating) {
             5 -> getString(R.string.featured_posts_30_days)
             4 -> getString(R.string.featured_posts_7_days)
@@ -254,8 +258,7 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
             1 -> getString(R.string.highlighted_posts)
             else -> ""
         }
-        promotion_method_title.popShow()
-        chosen_rating_text.popShow()
+        promotion_method.popShow()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

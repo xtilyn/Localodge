@@ -9,16 +9,18 @@ object ApiKeysProviders {
 
     private const val GET_STRIPE_KEY = "getStripeKey"
 
-    fun getStripeKey(): Single<HttpsCallableResult> {
-        val task = FirebaseFunctions.getInstance().getHttpsCallable(GET_STRIPE_KEY).call()
-        return Single.create { emitter ->
-            try {
-                val httpsCallableResult = Tasks.await(task)
-                emitter.onSuccess(httpsCallableResult)
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    fun getStripeKey(onSuccess: (String) -> Unit) {
+        onSuccess("pk_test_TYooMQauvdEDq54NiTphI7jx")
+        // TODO CONTINUE HERE CONFIGURE STRIPE IN SERVER
+//        val task = FirebaseFunctions.getInstance().getHttpsCallable(GET_STRIPE_KEY).call()
+//        return Single.create { emitter ->
+//            try {
+//                val httpsCallableResult = Tasks.await(task)
+//                emitter.onSuccess(httpsCallableResult.data as String)
+//            } catch (e: Exception) {
+//                emitter.onError(e)
+//            }
+//        }
     }
 
 }

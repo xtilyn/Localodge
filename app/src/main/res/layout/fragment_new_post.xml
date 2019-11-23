@@ -254,35 +254,69 @@
 																				android:background="?attr/selectableItemBackgroundBorderless"
 																				/>
 
-												<TextView
-																				android:id="@+id/promotion_method_title"
-																				android:layout_width="wrap_content"
+												<androidx.cardview.widget.CardView
+																				android:id="@+id/promotion_method"
+																				android:layout_width="0dp"
 																				android:layout_height="wrap_content"
-																				android:text="Promotion method: "
-																				app:layout_constraintTop_toBottomOf="@id/promote_post"
-																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-																				app:layout_constraintStart_toStartOf="parent"
-																				app:layout_constraintEnd_toEndOf="parent"
-																				android:layout_marginTop="12dp"
+																				app:cardElevation="48dp"
 																				android:visibility="gone"
-																				/>
+																				app:layout_constraintBottom_toBottomOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				>
 
-												<TextView
-																				android:id="@+id/chosen_rating_text"
-																				android:layout_width="wrap_content"
-																				android:layout_height="wrap_content"
-																				android:text="Featured: 30 days"
-																				app:layout_constraintTop_toBottomOf="@id/promotion_method_title"
-																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-																				android:textColor="@color/matteBlack"
-																				app:layout_constraintStart_toStartOf="parent"
-																				app:layout_constraintEnd_toEndOf="parent"
-																				fontPath="fonts/Montserrat-SemiBold.ttf"
-																				android:visibility="gone"
-																				/>
+																<androidx.constraintlayout.widget.ConstraintLayout
+																								android:layout_width="match_parent"
+																								android:layout_height="match_parent"
+																								>
+
+																				<ImageButton
+																												android:id="@+id/remove_promotion"
+																												style="@style/Widget.AppCompat.Button.Borderless"
+																												android:layout_width="54dp"
+																												android:layout_height="50dp"
+																												android:layout_marginStart="34dp"
+																												android:scaleType="fitXY"
+																												android:src="@drawable/ic_delete"
+																												app:layout_constraintBottom_toBottomOf="@+id/chosen_rating_text"
+																												app:layout_constraintEnd_toEndOf="parent"
+																												app:layout_constraintTop_toTopOf="@+id/promotion_method_title"
+																												android:layout_marginEnd="12dp"
+																												/>
+
+																				<TextView
+																												android:id="@+id/promotion_method_title"
+																												android:layout_width="wrap_content"
+																												android:layout_height="wrap_content"
+																												android:layout_marginStart="34dp"
+																												android:layout_marginTop="12dp"
+																												android:text="Promotion method: "
+																												android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																												app:layout_constraintStart_toStartOf="parent"
+																												app:layout_constraintTop_toTopOf="parent"
+																												/>
+
+																				<TextView
+																												android:id="@+id/chosen_rating_text"
+																												fontPath="fonts/Montserrat-SemiBold.ttf"
+																												android:layout_width="wrap_content"
+																												android:layout_height="wrap_content"
+																												android:layout_marginStart="34dp"
+																												android:layout_marginBottom="12dp"
+																												android:text="Featured: 30 days"
+																												android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																												android:textColor="@color/matteBlack"
+																												app:layout_constraintBottom_toBottomOf="parent"
+																												app:layout_constraintStart_toStartOf="parent"
+																												app:layout_constraintTop_toBottomOf="@id/promotion_method_title"
+																												/>
+
+																</androidx.constraintlayout.widget.ConstraintLayout>
+
+												</androidx.cardview.widget.CardView>
 
 												<androidx.cardview.widget.CardView
-																				app:layout_constraintTop_toBottomOf="@id/chosen_rating_text"
+																				app:layout_constraintTop_toBottomOf="@id/promote_post"
 																				android:layout_width="0dp"
 																				android:layout_height="50dp"
 																				android:layout_marginTop="18dp"

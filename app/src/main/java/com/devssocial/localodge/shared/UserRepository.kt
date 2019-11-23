@@ -5,6 +5,8 @@ import android.content.Intent
 import android.util.Log
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.*
+import com.devssocial.localodge.models.CustomerInfo
+import com.devssocial.localodge.models.Meta
 import com.devssocial.localodge.models.Notification
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.utils.FirebasePathProvider
@@ -60,6 +62,36 @@ class UserRepository(private val context: Context) {
                 } else {
                     Single.error(Exception(NO_VALUE))
                 }
+            }
+    }
+
+    fun getCustomerInfo(userId: String): Single<CustomerInfo?> {
+        val ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_METADATA)
+            .document(DOC_CUSTOMER_INFO)
+
+        return RxFirebaseFirestore.data(ref)
+            .flatMap { Single.just(it.value().toObject(CustomerInfo::class.java)) }
+            .onErrorResumeNext {
+                if (it.message == "No value") return@onErrorResumeNext Single.just(null)
+                else return@onErrorResumeNext Single.error(it)
+            }
+    }
+
+    fun getMeta(userId: String): Single<Meta?> {
+        val ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_METADATA)
+            .document(DOC_META)
+
+        return RxFirebaseFirestore.data(ref)
+            .flatMap { Single.just(it.value().toObject(Meta::class.java)) }
+            .onErrorResumeNext {
+                if (it.message == "No value") return@onErrorResumeNext Single.just(null)
+                else return@onErrorResumeNext Single.error(it)
             }
     }
     

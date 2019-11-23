@@ -8,7 +8,5 @@ data class User(
     var username: String = "",
     var profilePicUrl: String = "",
     var email: String = "",
-    @ServerTimestamp var joinedDate: Timestamp? = null,
-    var suspendedTillDate: Long = 0,
-    var strikesCount: Int = 0 // maximum of 3 before user is banned permanently
+    @ServerTimestamp var joinedDate: Timestamp? = null
 )

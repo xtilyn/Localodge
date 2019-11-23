@@ -52,6 +52,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Function3
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
@@ -533,6 +534,9 @@ class DashboardFragment :
                 .userRepo
                 .getUserData(user.uid),
             dashboardViewModel
+                .userRepo
+                .getMeta(user.uid),
+            dashboardViewModel
                 .localodgeRepo
                 .getBlacklist()
                 .onErrorResumeNext {
@@ -541,8 +545,9 @@ class DashboardFragment :
                     else
                         return@onErrorResumeNext Single.error(it)
                 },
-            BiFunction<User, HashSet<String>, Pair<User, HashSet<String>>> { localodgeUser, blacklist ->
-                return@BiFunction Pair(localodgeUser, blacklist)
+            Function3<User, Meta?, HashSet<String>, Triple<User, Meta?, HashSet<String>>>
+            { localodgeUser, meta, blacklist ->
+                return@Function3 Triple(localodgeUser, meta, blacklist)
             }
         )
 
@@ -554,9 +559,12 @@ class DashboardFragment :
                     onError = { error ->
                         handleError(error)
                     },
-                    onSuccess = { pair ->
-                        val localodgeUser = pair.first
-                        if (localodgeUser.suspendedTillDate > 0) {
+                    onSuccess = { triple ->
+                        val localodgeUser = triple.first
+                        val meta = triple.second ?: Meta()
+                        val blacklist = triple.third
+
+                        if (meta.suspendedTillDate > 0) {
                             showWarningDialog(
                                 resources.getString(R.string.account_suspended),
                                 resources.getString(R.string.account_suspended_message)
@@ -564,7 +572,7 @@ class DashboardFragment :
                             return@subscribeBy
                         }
 
-                        if (pair.second.contains(user.uid)) {
+                        if (blacklist.contains(user.uid)) {
                             showWarningDialog(
                                 resources.getString(R.string.account_banned),
                                 resources.getString(R.string.account_banned_message)

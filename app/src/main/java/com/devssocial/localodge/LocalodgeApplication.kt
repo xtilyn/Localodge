@@ -3,6 +3,8 @@ package com.devssocial.localodge
 import android.app.Application
 import android.graphics.Typeface
 import androidx.annotation.NonNull
+import com.devssocial.localodge.utils.ApiKeysProviders
+import com.stripe.android.PaymentConfiguration
 import es.dmoral.toasty.Toasty
 import io.github.inflationx.calligraphy3.CalligraphyConfig
 import io.github.inflationx.calligraphy3.CalligraphyInterceptor
@@ -33,6 +35,11 @@ class LocalodgeApplication : Application() {
         Toasty.Config.getInstance()
             .setToastTypeface(Typeface.createFromAsset(assetManager, "fonts/Montserrat-SemiBold.ttf"))
             .apply()
+
+        // Stripe
+        ApiKeysProviders.getStripeKey {
+            PaymentConfiguration.init(applicationContext, it)
+        }
     }
 
 }
