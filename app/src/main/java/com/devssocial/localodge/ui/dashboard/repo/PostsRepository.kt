@@ -131,30 +131,17 @@ class PostsRepository(context: Context) {
         return RxFirebaseFirestore.set(ref, commentObj)
     }
 
-    fun createPost(
-        lat: Double,
-        lng: Double,
-        desc: String,
-        videoUrl: String?,
-        photoUrl: String?,
-        rating: Int
-    ): Single<String> {
+    fun createPost(post: Post): Single<String> {
         val userId = userRepo.getCurrentUserId() ?: return Single.just("")
         val ref = firestore.collection(COLLECTION_POSTS).document()
         val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))
-        val newPost = Post(
-            posterUserId = userId,
-            objectID = ref.id,
-            postDescription = desc,
-            photoUrl = photoUrl,
-            videoUrl = videoUrl,
-            rating = rating,
-            likes = hashSetOf()
-        )
+        post.apply {
+            posterUserId = userId
+        }
 
-        return RxFirebaseFirestore.set(ref, newPost)
+        return RxFirebaseFirestore.set(ref, post)
             .andThen(SingleSource<String> { observer ->
-                geoFirestore.setLocation(ref.id, GeoPoint(lat, lng)) { exception ->
+                geoFirestore.setLocation(ref.id, GeoPoint(post._geoloc.lat, post._geoloc.lng)) { exception ->
                     if (exception != null) observer.onError(Throwable(exception.message))
                     else observer.onSuccess(ref.id)
                 }

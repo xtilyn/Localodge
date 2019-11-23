@@ -8,10 +8,11 @@ object Rating {
 
     val prices = hashMapOf(
         0 to 0,
-        1 to 99,
-        2 to 285,
-        3 to 525,
-        4 to 899
+        1 to 395,
+        2 to 995,
+        3 to 1095,
+        4 to 2395,
+        5 to 9895
     )
 
     fun getPriceInFormattedString(rating: Int): String {

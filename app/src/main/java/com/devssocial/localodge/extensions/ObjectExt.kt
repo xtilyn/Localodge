@@ -1,6 +1,8 @@
 package com.devssocial.localodge.extensions
 
 import android.util.Log
+import com.google.gson.Gson
+import io.reactivex.Single
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
@@ -68,6 +70,17 @@ fun Any.waitWithCondition(
     lock.withLock {
         while (!shouldStopWaiting.get()) {
             condition.await()
+        }
+    }
+}
+
+fun Any.toJsonRx(): Single<String> {
+    return Single.create<String> { e ->
+        try {
+            val result = Gson().toJson(this)
+            e.onSuccess(result)
+        } catch (exception: Exception) {
+            e.onError(exception)
         }
     }
 }

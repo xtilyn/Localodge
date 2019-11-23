@@ -4,15 +4,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.devssocial.localodge.R
 import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
-import com.devssocial.localodge.extensions.instaGone
-import com.devssocial.localodge.extensions.instaVisible
 import com.devssocial.localodge.models.Location
 import com.devssocial.localodge.models.PostViewItem
-import com.devssocial.localodge.utils.LocationHelper
 import com.devssocial.localodge.view_holders.PostViewHolder
 import kotlinx.android.synthetic.main.list_item_user_post.view.*
 

@@ -119,4 +119,15 @@
 				<string name="discard">Discard</string>
 				<string name="location_needed_to_make_a_post">Your location is required to publish a post.</string>
 				<string name="location_needed_to_make_a_post_with_question">Your location is required to publish a post. Turn on location?</string>
+				<string name="promote_your_post">Promote Your Post</string>
+				<string name="exit_info">exit info</string>
+				<string name="rating_5_info">Featured posts are always shown at the top of a page. If there are multiple featured posts, they will ordered by popularity.</string>
+				<string name="rating_2_info">Urgent posts are posts that require immediate attention. Posts with the urgent icon will have an Urgent ribbon and will stand out from all others.</string>
+				<string name="rating_1_info">Highlighted posts are shown with a highlighted background colour. This makes the post stand out against other posts in a certain location.</string>
+				<string name="featured_posts">Featured Posts</string>
+				<string name="featured_posts_30_days">Featured: 30 days</string>
+				<string name="featured_posts_7_days">Featured: 7 days</string>
+				<string name="featured_posts_3_days">Featured: 3 days</string>
+				<string name="urgent_posts">Urgent</string>
+				<string name="highlighted_posts">Highlighted</string>
 </resources>

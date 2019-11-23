@@ -1,6 +1,5 @@
 package com.devssocial.localodge.ui.dashboard.utils
 
-import android.content.Context
 import android.location.Location
 import android.util.Log
 import com.devssocial.localodge.extensions.mapProperties

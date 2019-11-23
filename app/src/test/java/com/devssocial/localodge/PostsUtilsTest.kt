@@ -1,7 +1,6 @@
 package com.devssocial.localodge
 
 import com.devssocial.localodge.models.Post
-import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.google.firebase.Timestamp
 import org.junit.Test

@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+								xmlns:app="http://schemas.android.com/apk/res-auto"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:background="@drawable/dialog_bg"
+								android:paddingBottom="12dp"
+								android:id="@+id/promote_root"
+								>
+
+				<ImageButton
+												android:id="@+id/close_dialog"
+												android:layout_width="50dp"
+												android:layout_height="50dp"
+												android:layout_marginTop="8dp"
+												android:layout_marginEnd="8dp"
+												android:background="@drawable/circle_ripple"
+												android:contentDescription="@string/close_dialog"
+												android:padding="8dp"
+												android:scaleType="fitXY"
+												android:src="@drawable/ic_close_dark"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintTop_toTopOf="parent"
+												/>
+
+				<TextView
+												android:id="@+id/textView"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												android:layout_marginStart="24dp"
+												android:text="@string/promote_your_post"
+												android:textColor="@color/matteBlack"
+												android:textSize="24sp"
+												app:layout_constraintBottom_toBottomOf="@+id/close_dialog"
+												app:layout_constraintEnd_toStartOf="@+id/close_dialog"
+												app:layout_constraintHorizontal_bias="0"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toTopOf="@+id/close_dialog"
+												/>
+
+				<View
+												android:id="@+id/view"
+												android:layout_width="0dp"
+												android:layout_height="2dp"
+												android:layout_marginStart="24dp"
+												android:layout_marginTop="12dp"
+												android:layout_marginEnd="24dp"
+												android:background="@color/lightGray"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toBottomOf="@id/textView"
+												/>
+
+
+				<ImageView
+												android:id="@+id/promote_bg"
+												android:layout_width="0dp"
+												android:layout_height="200dp"
+												android:layout_marginStart="12dp"
+												android:layout_marginEnd="12dp"
+												android:scaleType="fitXY"
+												android:src="@drawable/promote_bg"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toBottomOf="@id/view"
+												/>
+
+				<TextView
+												android:id="@+id/promote_post_desc"
+												android:layout_width="0dp"
+												android:layout_height="wrap_content"
+												android:layout_marginStart="12dp"
+												android:layout_marginTop="24dp"
+												android:layout_marginEnd="12dp"
+												android:gravity="center"
+												android:paddingStart="12dp"
+												android:paddingEnd="12dp"
+												android:text="Expand your audience by promoting your posts."
+												android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toBottomOf="@id/view"
+												/>
+
+				<androidx.cardview.widget.CardView
+												android:id="@+id/rating_5"
+												android:layout_width="0dp"
+												android:layout_height="120dp"
+												android:layout_marginStart="12dp"
+												android:layout_marginTop="12dp"
+												app:cardBackgroundColor="#e8b923"
+												app:cardCornerRadius="12dp"
+												app:cardElevation="1dp"
+												app:layout_constraintEnd_toStartOf="@id/rating_4"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintTop_toBottomOf="@id/promote_bg"
+												android:clickable="true"
+												android:focusable="true"
+												android:foreground="?android:attr/selectableItemBackground"
+												android:tag="false"
+												>
+
+								<androidx.constraintlayout.widget.ConstraintLayout
+																android:id="@+id/rating_5_container"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent"
+																>
+
+												<TextView
+																				android:id="@+id/ad_title_5"
+																				fontPath="fonts/Montserrat-Bold.ttf"
+																				android:layout_width="wrap_content"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginTop="8dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="Featured"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toTopOf="parent"
+																				android:drawableEnd="@drawable/ic_info_outline_white_24dp"
+																				android:drawablePadding="3dp"
+																				android:textSize="16sp"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_price_5"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="$ 98.95"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_title_5"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_text_5"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="30 days"
+																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																				android:textColor="@color/matteBlack"
+																				app:layout_constraintBottom_toBottomOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_price_5"
+																				/>
+
+								</androidx.constraintlayout.widget.ConstraintLayout>
+
+				</androidx.cardview.widget.CardView>
+
+				<androidx.cardview.widget.CardView
+												android:id="@+id/rating_4"
+												android:layout_width="0dp"
+												android:layout_height="120dp"
+												android:layout_margin="12dp"
+												app:cardBackgroundColor="#e6c047"
+												app:cardCornerRadius="12dp"
+												app:cardElevation="1dp"
+												app:layout_constraintEnd_toStartOf="@id/rating_3"
+												app:layout_constraintStart_toEndOf="@id/rating_5"
+												app:layout_constraintTop_toBottomOf="@id/promote_bg"
+												android:alpha="1"
+												android:clickable="true"
+												android:focusable="true"
+												android:foreground="?android:attr/selectableItemBackground"
+												android:tag="false"
+												>
+
+								<androidx.constraintlayout.widget.ConstraintLayout
+																android:id="@+id/rating_4_container"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent"
+																>
+
+												<TextView
+																				android:id="@+id/ad_title_4"
+																				fontPath="fonts/Montserrat-Bold.ttf"
+																				android:layout_width="wrap_content"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginTop="8dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="Featured"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toTopOf="parent"
+																				android:drawableEnd="@drawable/ic_info_outline_white_24dp"
+																				android:drawablePadding="3dp"
+																				android:textSize="16sp"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_price_4"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="$ 9.95"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_title_4"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_text_4"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="7 days"
+																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																				android:textColor="@color/matteBlack"
+																				app:layout_constraintBottom_toBottomOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_price_4"
+																				/>
+
+
+								</androidx.constraintlayout.widget.ConstraintLayout>
+
+				</androidx.cardview.widget.CardView>
+
+				<androidx.cardview.widget.CardView
+												android:id="@+id/rating_3"
+												android:layout_width="0dp"
+												android:layout_height="120dp"
+												android:layout_marginTop="12dp"
+												android:layout_marginEnd="12dp"
+												app:cardBackgroundColor="#e0c56e"
+												app:cardCornerRadius="12dp"
+												app:cardElevation="1dp"
+												app:layout_constraintEnd_toEndOf="parent"
+												app:layout_constraintStart_toEndOf="@id/rating_4"
+												app:layout_constraintTop_toBottomOf="@id/promote_bg"
+												android:alpha="1"
+												android:clickable="true"
+												android:focusable="true"
+												android:foreground="?android:attr/selectableItemBackground"
+												android:tag="false"
+												>
+
+								<androidx.constraintlayout.widget.ConstraintLayout
+																android:id="@+id/rating_3_container"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent"
+																>
+
+												<TextView
+																				android:id="@+id/ad_title_3"
+																				fontPath="fonts/Montserrat-Bold.ttf"
+																				android:layout_width="wrap_content"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginTop="8dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="Highlight"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toTopOf="parent"
+																				android:drawableEnd="@drawable/ic_info_outline_white_24dp"
+																				android:drawablePadding="3dp"
+																				android:textSize="16sp"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_price_3"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="$ 3.95"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_title_3"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_text_3"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="3 days"
+																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																				android:textColor="@color/matteBlack"
+																				app:layout_constraintBottom_toBottomOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_price_3"
+																				/>
+
+
+								</androidx.constraintlayout.widget.ConstraintLayout>
+
+				</androidx.cardview.widget.CardView>
+
+
+				<androidx.cardview.widget.CardView
+												android:id="@+id/rating_2"
+												android:layout_width="0dp"
+												android:layout_height="120dp"
+												android:layout_marginTop="12dp"
+												app:cardBackgroundColor="#cd7f32"
+												app:cardCornerRadius="12dp"
+												app:cardElevation="1dp"
+												app:layout_constraintEnd_toEndOf="@id/rating_5"
+												app:layout_constraintStart_toStartOf="@id/rating_5"
+												app:layout_constraintTop_toBottomOf="@id/rating_5"
+												android:clickable="true"
+												android:focusable="true"
+												android:foreground="?android:attr/selectableItemBackground"
+												android:tag="false"
+												>
+
+								<androidx.constraintlayout.widget.ConstraintLayout
+																android:id="@+id/rating_2_container"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent"
+																>
+
+												<TextView
+																				android:id="@+id/ad_title_2"
+																				fontPath="fonts/Montserrat-Bold.ttf"
+																				android:layout_width="wrap_content"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginTop="8dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="Urgent"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toTopOf="parent"
+																				android:drawableEnd="@drawable/ic_info_outline_white_24dp"
+																				android:drawablePadding="3dp"
+																				android:textSize="16sp"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_price_2"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="$ 9.95"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_title_2"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_text_2"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="Lost your cat?"
+																				android:textColor="@color/exo_edit_mode_background_color"
+																				app:layout_constraintBottom_toBottomOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_price_2"
+																				/>
+
+
+								</androidx.constraintlayout.widget.ConstraintLayout>
+
+				</androidx.cardview.widget.CardView>
+
+				<androidx.cardview.widget.CardView
+												android:id="@+id/rating_1"
+												android:layout_width="0dp"
+												android:layout_height="120dp"
+												android:layout_marginTop="12dp"
+												app:cardBackgroundColor="#c0c0c0"
+												app:cardCornerRadius="12dp"
+												app:cardElevation="1dp"
+												app:layout_constraintEnd_toEndOf="@id/rating_4"
+												app:layout_constraintStart_toStartOf="@id/rating_4"
+												app:layout_constraintTop_toBottomOf="@id/rating_4"
+												android:clickable="true"
+												android:focusable="true"
+												android:foreground="?android:attr/selectableItemBackground"
+												android:tag="false"
+												>
+
+								<androidx.constraintlayout.widget.ConstraintLayout
+																android:id="@+id/rating_1_container"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent"
+																>
+
+												<TextView
+																				android:id="@+id/ad_title_1"
+																				fontPath="fonts/Montserrat-Bold.ttf"
+																				android:layout_width="wrap_content"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginTop="8dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="Highlight"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toTopOf="parent"
+																				android:drawableEnd="@drawable/ic_info_outline_white_24dp"
+																				android:drawablePadding="3dp"
+																				android:textSize="16sp"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_price_1"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="$ 3.95"
+																				android:textColor="@android:color/white"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_title_1"
+																				/>
+
+												<TextView
+																				android:id="@+id/ad_text_1"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				android:layout_marginStart="2dp"
+																				android:layout_marginEnd="2dp"
+																				android:gravity="center"
+																				android:text="Make your post shine."
+																				android:textColor="@color/exo_edit_mode_background_color"
+																				app:layout_constraintBottom_toBottomOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toBottomOf="@id/ad_price_1"
+																				/>
+
+
+								</androidx.constraintlayout.widget.ConstraintLayout>
+
+				</androidx.cardview.widget.CardView>
+
+				<androidx.cardview.widget.CardView
+												android:id="@+id/rating_info"
+												android:layout_width="0dp"
+												android:layout_height="0dp"
+												app:layout_constraintTop_toTopOf="parent"
+												app:layout_constraintBottom_toBottomOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintEnd_toEndOf="parent"
+												android:layout_marginStart="12dp"
+												android:layout_marginEnd="12dp"
+												android:layout_marginTop="12dp"
+												android:visibility="gone"
+												>
+
+								<androidx.constraintlayout.widget.ConstraintLayout
+																android:id="@+id/rating_info_container"
+																android:layout_width="match_parent"
+																android:layout_height="match_parent">
+
+												<ImageButton
+																				android:id="@+id/rating_info_back_btn"
+																				android:layout_width="50dp"
+																				android:layout_height="50dp"
+																				android:src="@drawable/ic_arrow_back_dark"
+																				style="@style/Widget.AppCompat.Button.Borderless"
+																				app:layout_constraintTop_toTopOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				android:contentDescription="@string/exit_info"
+																				/>
+
+												<TextView
+																				android:id="@+id/rating_info_title"
+																				android:layout_width="wrap_content"
+																				android:layout_height="wrap_content"
+																				android:layout_marginTop="8dp"
+																				android:drawablePadding="8dp"
+																				android:gravity="center"
+																				android:text="Rating"
+																				android:textAppearance="@style/TextAppearance.AppCompat.Large"
+																				android:textColor="@color/matteBlack"
+																				app:layout_constraintBottom_toBottomOf="@+id/rating_info_back_btn"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintTop_toTopOf="parent"
+																				/>
+
+
+												<TextView
+																				android:id="@+id/rating_info_desc"
+																				android:layout_width="0dp"
+																				android:layout_height="wrap_content"
+																				app:layout_constraintTop_toBottomOf="@id/rating_info_title"
+																				app:layout_constraintBottom_toTopOf="@id/rating_info_choose_this_btn"
+																				android:text="desc"
+																				android:gravity="center"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																				/>
+
+												<Button
+																				android:id="@+id/rating_info_choose_this_btn"
+																				android:layout_width="wrap_content"
+																				android:layout_height="wrap_content"
+																				android:text="Choose this"
+																				android:textAllCaps="false"
+																				android:background="@drawable/button_default_outline"
+																				android:paddingStart="18dp"
+																				android:paddingEnd="18dp"
+																				app:layout_constraintBottom_toBottomOf="parent"
+																				app:layout_constraintStart_toStartOf="parent"
+																				app:layout_constraintEnd_toEndOf="parent"
+																				/>
+
+								</androidx.constraintlayout.widget.ConstraintLayout>
+
+				</androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
