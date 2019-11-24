@@ -14,6 +14,7 @@ import com.devssocial.localodge.extensions.popHide
 import com.devssocial.localodge.extensions.popShow
 import com.devssocial.localodge.models.CustomerInfo
 import com.devssocial.localodge.shared.UserRepository
+import com.devssocial.localodge.utils.CloudFunctionsProvider
 import com.devssocial.localodge.utils.StripeHelper
 import com.stripe.android.model.Card
 import com.stripe.android.model.Token
@@ -114,7 +115,7 @@ class PaymentFragment : Fragment() {
                 showProgress(true)
                 createStripeToken(card_multiline_widget.card!!) { token: Token? ->
                     if (token != null) {
-                        sendIncomingCreditCard(
+                        CloudFunctionsProvider.sendIncomingCreditCard(
 
                         ) { customerInfo: CustomerInfo ->
                             disposables.add(

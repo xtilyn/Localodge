@@ -5,11 +5,11 @@ import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.HttpsCallableResult
 import io.reactivex.Single
 
-object ApiKeysProviders {
+object ApiKeysProviders : CloudFunctionsProvider(){
 
     private const val GET_STRIPE_KEY = "getStripeKey"
 
-    fun getStripeKey(onSuccess: (String) -> Unit) {
+    override fun getStripeKey(onSuccess: (String) -> Unit) {
         onSuccess("pk_test_TYooMQauvdEDq54NiTphI7jx")
         // TODO CONTINUE HERE CONFIGURE STRIPE IN SERVER
 //        val task = FirebaseFunctions.getInstance().getHttpsCallable(GET_STRIPE_KEY).call()
