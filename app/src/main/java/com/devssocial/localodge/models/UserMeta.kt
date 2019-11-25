@@ -6,11 +6,5 @@ data class Meta (
 )
 
 data class CustomerInfo (
-    var address: String = "",
-    var cardType: String = "",
-    var customerId: String = "",
-    var expDate: String = "",
-    var las4Digits: String = "",
-    var postal: String = "",
-    var sourceId: String = ""
+    var customerId: String = ""
 )

@@ -97,7 +97,7 @@
 												android:clickable="true"
 												android:focusable="true"
 												android:foreground="?android:attr/selectableItemBackground"
-												android:tag="false"
+												android:tag="@bool/falseBool"
 												>
 
 								<androidx.constraintlayout.widget.ConstraintLayout
@@ -174,7 +174,7 @@
 												android:clickable="true"
 												android:focusable="true"
 												android:foreground="?android:attr/selectableItemBackground"
-												android:tag="false"
+												android:tag="@bool/falseBool"
 												>
 
 								<androidx.constraintlayout.widget.ConstraintLayout
@@ -253,7 +253,7 @@
 												android:clickable="true"
 												android:focusable="true"
 												android:foreground="?android:attr/selectableItemBackground"
-												android:tag="false"
+													android:tag="@bool/falseBool"
 												>
 
 								<androidx.constraintlayout.widget.ConstraintLayout
@@ -331,7 +331,7 @@
 												android:clickable="true"
 												android:focusable="true"
 												android:foreground="?android:attr/selectableItemBackground"
-												android:tag="false"
+													android:tag="@bool/falseBool"
 												>
 
 								<androidx.constraintlayout.widget.ConstraintLayout
@@ -407,7 +407,7 @@
 												android:clickable="true"
 												android:focusable="true"
 												android:foreground="?android:attr/selectableItemBackground"
-												android:tag="false"
+												android:tag="@bool/falseBool"
 												>
 
 								<androidx.constraintlayout.widget.ConstraintLayout

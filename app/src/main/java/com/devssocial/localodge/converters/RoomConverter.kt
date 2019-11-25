@@ -10,7 +10,7 @@ import java.io.StringReader
 import java.io.StringWriter
 import java.util.*
 
-public class CollectionConverter {
+public class RoomConverter {
 
     companion object {
         private const val TAG = "CollectionConverter"

@@ -4,9 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import com.devssocial.localodge.converters.CollectionConverter
+import com.devssocial.localodge.converters.RoomConverter
 
-@TypeConverters(CollectionConverter::class)
+@TypeConverters(RoomConverter::class)
 @Entity(tableName = "posts")
 data class PostRoom(
     @ColumnInfo(name = "posterUserId") var posterUserId: String = "",

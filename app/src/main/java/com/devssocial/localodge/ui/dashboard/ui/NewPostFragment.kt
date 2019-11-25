@@ -166,6 +166,8 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
                 rating3.setOnClickListener(onClick)
                 rating2.setOnClickListener(onClick)
                 rating1.setOnClickListener(onClick)
+
+                dh.dialog.show()
             }
         }
     }
@@ -188,7 +190,9 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
     ): Int {
         if (context == null) return 0
         val currRatingInfoShown: Int
-        if (ratingView.tag as Boolean) {
+        val isInfoShowing = if (ratingView.tag is String) (ratingView.tag as String).toBoolean()
+        else ratingView.tag as Boolean
+        if (isInfoShowing) {
             updateConstraints(R.layout.dialog_promote_post_alt, root)
             ratingView.tag = false
             currRatingInfoShown = 0

@@ -131,4 +131,6 @@
 				<string name="urgent_posts">Urgent</string>
 				<string name="highlighted_posts">Highlighted</string>
 				<string name="invalid_card_details">Invalid card details</string>
+				<string name="payment_succeeded">Payment succeeded</string>
+				<string name="payment_failed">Payment failed</string>
 </resources>
