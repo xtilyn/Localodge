@@ -29,6 +29,7 @@ import com.stripe.android.model.Token
 import es.dmoral.toasty.Toasty
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_payment.*
 import kotlinx.android.synthetic.main.layout_loading_overlay.*
@@ -139,7 +140,15 @@ class PaymentFragment : Fragment() {
         if (context == null) return
         if (currentState == State.HAS_A_CARD) {
             showProgress(true)
-            // TODO CONTINUE HERE CALL STRIPE CLOUD FUNC
+            disposables.add(
+                CloudFunctionsProvider.chargeExistingCustomer(
+                    customerId = customerInfo.customerId,
+                    rating = pendingPost.rating
+                ).subscribeBy(
+                    onError = { handleError(it) },
+                    onSuccess = ::onPaymentSuccess
+                )
+            )
         } else {
             val card = card_multiline_widget.card
             if (card == null) {
@@ -168,28 +177,21 @@ class PaymentFragment : Fragment() {
                 object : ApiResultCallback<Token> {
                     override fun onSuccess(result: Token) {
                         val tokenID = result.id
-                        CloudFunctionsProvider.createCharge(
-                            pendingPost.rating,
-                            tokenID,
-                            save_card_checkbox.isChecked
-                        )
-                        { response: JSONObject ->
-                            ScreenUtils.enableTouch(activity)
-                            if (response.isNull("error")) {
-                                val data = response.getJSONObject("data")
-                                if (!data.isNull("customerId")) {
-                                    saveCustomerId(data.getString("customerId"))
-                                }
-                                context?.let { c ->
-                                    Toasty.success(c, getString(R.string.payment_succeeded))
-                                }
-                                ActivityLaunchHelper.goToPostDetail(
-                                    activity, pendingPost.objectID, false
+                        disposables.add(
+                            CloudFunctionsProvider.chargeNewCustomer(
+                                pendingPost.rating,
+                                tokenID,
+                                save_card_checkbox.isChecked
+                            )
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeOn(Schedulers.io())
+                                .subscribeBy(
+                                    onError = {
+                                        handleError(it)
+                                    },
+                                    onSuccess = ::onPaymentSuccess
                                 )
-                            } else {
-                                handleError(null)
-                            }
-                        }
+                        )
                     }
 
                     override fun onError(e: java.lang.Exception) {
@@ -198,6 +200,24 @@ class PaymentFragment : Fragment() {
                     }
                 })
 
+        }
+    }
+
+    private fun onPaymentSuccess(response: JSONObject) {
+        ScreenUtils.enableTouch(activity)
+        if (response.isNull("error")) {
+            val data = response.getJSONObject("data")
+            if (!data.isNull("customerId")) {
+                saveCustomerId(data.getString("customerId"))
+            }
+            context?.let { c ->
+                Toasty.success(c, getString(R.string.payment_succeeded))
+            }
+            ActivityLaunchHelper.goToPostDetail(
+                activity, pendingPost.objectID, false
+            )
+        } else {
+            handleError(null)
         }
     }
 

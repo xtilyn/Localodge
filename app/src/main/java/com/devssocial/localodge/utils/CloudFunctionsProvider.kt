@@ -5,14 +5,18 @@ import org.json.JSONObject
 
 object CloudFunctionsProvider {
 
-    fun createCharge(postRating: Int, tokenId: String, saveCard: Boolean, onComplete: (JSONObject) -> Unit) {
-        onComplete(JSONObject("{data: []}"))
+    fun chargeNewCustomer(rating: Int, tokenId: String, saveCard: Boolean): Single<JSONObject> {
+        return Single.just(JSONObject("{data: []}"))
 
         // todo continue here
         // https://stripe.com/docs/saving-cards
     }
 
-    fun getPaymentMethods(customerId: String): Single<JSONObject?> {
+    fun chargeExistingCustomer(customerId: String, rating: Int): Single<JSONObject> {
+        return Single.just(JSONObject("{data: []}"))
+    }
+
+    fun getPaymentMethods(customerId: String): Single<JSONObject> {
         return Single.just(JSONObject("{data: []}"))
 
         // https://stripe.com/docs/api/payment_methods/list
