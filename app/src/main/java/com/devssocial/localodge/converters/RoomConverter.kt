@@ -9,6 +9,7 @@ import java.io.IOException
 import java.io.StringReader
 import java.io.StringWriter
 import java.util.*
+import kotlin.collections.HashSet
 
 public class RoomConverter {
 
@@ -71,4 +72,13 @@ public class RoomConverter {
 
         return result
     }
+
+    @TypeConverter
+    public fun fromStringMap(strings: HashMap<String, Boolean>?): HashSet<String>? {
+        if (strings == null) {
+            return null
+        }
+        return strings.keys.toHashSet()
+    }
+
 }

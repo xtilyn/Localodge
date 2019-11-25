@@ -47,12 +47,15 @@ class PostsRepository(context: Context) {
         )
     }
 
-    fun updateLikes(postId: String, newLikes: HashSet<String>): Completable {
+    fun updateLikes(postId: String, newLikes: HashMap<String, Boolean>): Completable {
         val ref = firestore
             .collection(COLLECTION_POSTS)
             .document(postId)
 
-        return RxFirebaseFirestore.update(ref, mapOf<String, Set<String>>(FIELD_LIKES to newLikes))
+        return RxFirebaseFirestore.update(
+            ref,
+            mapOf<String, HashMap<String, Boolean>>(FIELD_LIKES to newLikes)
+        )
     }
 
     fun getPostDetail(postId: String): Single<PostViewItem> {
@@ -141,7 +144,10 @@ class PostsRepository(context: Context) {
 
         return RxFirebaseFirestore.set(ref, post)
             .andThen(SingleSource<String> { observer ->
-                geoFirestore.setLocation(ref.id, GeoPoint(post._geoloc.lat, post._geoloc.lng)) { exception ->
+                geoFirestore.setLocation(
+                    ref.id,
+                    GeoPoint(post._geoloc.lat, post._geoloc.lng)
+                ) { exception ->
                     if (exception != null) observer.onError(Throwable(exception.message))
                     else observer.onSuccess(ref.id)
                 }

@@ -13,6 +13,7 @@ import com.devssocial.localodge.models.User
 import com.devssocial.localodge.room_models.UserRoom
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.ActivityLaunchHelper
+import com.devssocial.localodge.utils.DialogHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -63,8 +64,25 @@ class DashboardActivity : LocalodgeActivity() {
     }
 
     override fun onBackPressed() {
-        if (dashboardViewModel.isDrawerOpen) dashboardViewModel.onBackPressed.onNext(true)
-        else super.onBackPressed()
+        when {
+            dashboardViewModel.isDrawerOpen -> dashboardViewModel.onBackPressed.onNext(true)
+            dashboardViewModel.newPostCallback?.hasData() == true -> {
+                DialogHelper(this)
+                    .showConfirmActionDialog(
+                        getString(R.string.discard_changes),
+                        getString(R.string.are_you_sure_you_want_to_discard_changes),
+                        getString(R.string.discard),
+                        { dialog ->
+                            dialog.dismiss()
+                            super.onBackPressed()
+                        },
+                        getString(R.string.cancel),
+                        { dialog -> dialog.dismiss() },
+                        false
+                    )
+            }
+            else -> super.onBackPressed()
+        }
     }
 
     private fun getCurrentUserDataFromFirebase(onSuccess: (User) -> Unit) {

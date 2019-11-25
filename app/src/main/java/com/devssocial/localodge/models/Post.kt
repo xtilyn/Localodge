@@ -12,7 +12,7 @@ data class Post(
     @ServerTimestamp var timestamp: Timestamp? = null,
     var _geoloc: Location = Location(),
     var rating: Int = 0, // range: [0,5]
-    var likes: Set<String> = hashSetOf()
+    var likes: HashMap<String, Boolean> = hashMapOf()
 )
 
 data class PostViewItem(
@@ -24,7 +24,7 @@ data class PostViewItem(
     @ServerTimestamp var timestamp: Timestamp? = null,
     var _geoloc: Location = Location(),
     var rating: Int = 0, // range: [0,5]
-    var likes: HashSet<String> = hashSetOf(),
+    var likes: HashMap<String, Boolean> = hashMapOf(),
 
     // adapter fields
     var posterUsername: String = "",

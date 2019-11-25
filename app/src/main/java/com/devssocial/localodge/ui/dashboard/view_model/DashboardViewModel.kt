@@ -6,6 +6,7 @@ import com.devssocial.localodge.enums.Status
 import com.devssocial.localodge.models.Notification
 import com.devssocial.localodge.shared.LocalodgeRepository
 import com.devssocial.localodge.shared.UserRepository
+import com.devssocial.localodge.ui.dashboard.interfaces.NewPostFragmentCallback
 import com.devssocial.localodge.ui.dashboard.repo.PostsRepository
 import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.atomic.AtomicBoolean
@@ -25,6 +26,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     var blockedUsers: HashSet<String>? = null
     val blockedUsersResult = BehaviorSubject.create<Status>()
+
+    var newPostCallback: NewPostFragmentCallback? = null
 
     fun isUserLoggedIn(): Boolean = userRepo.getCurrentUser() != null
 }

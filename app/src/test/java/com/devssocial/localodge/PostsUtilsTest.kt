@@ -1,6 +1,7 @@
 package com.devssocial.localodge
 
 import com.devssocial.localodge.models.Post
+import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.google.firebase.Timestamp
 import org.junit.Test
@@ -16,22 +17,22 @@ class PostsUtilsTest {
     fun ordersPostsCorrectly() {
         val post1 = Post(
             rating = 5,
-            likes = setOf("haha"),
+            likes = mapOf("haha" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post2 = Post(
             rating = 1,
-            likes = setOf("haha", "hoho"),
+            likes = mapOf("haha" to true, "hoho" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post3 = Post(
             rating = 1,
-            likes = setOf("haha"),
+            likes = mapOf("haha" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post4 = Post(
             rating = 1,
-            likes = setOf("haha"),
+            likes = mapOf("haha" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis() - 100))
         )
         val unorderedPosts = arrayListOf(

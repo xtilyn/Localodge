@@ -732,11 +732,13 @@ class DashboardFragment :
                         }
                     )
                         .subscribe { results ->
-                            if (results.first == Status.ERROR || results.second == Status.ERROR) {
+                            if (results.first == Status.ERROR
+                                || results.second == Status.ERROR) {
                                 handleError(null)
                                 return@subscribe
                             }
-                            if (results.first == Status.SUCCESS_WITH_DATA && results.second == Status.SUCCESS_WITH_DATA) {
+                            if (results.first == Status.SUCCESS_WITH_DATA
+                                && results.second == Status.SUCCESS_WITH_DATA) {
                                 loadDashboardDataFromRoom()
                             }
                         }
@@ -870,13 +872,13 @@ class DashboardFragment :
 
     private fun likePost(post: PostViewItem, updateInRoom: Boolean, onComplete: () -> Unit) {
         val currUserId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
-        post.likes.add(currUserId)
+        post.likes[currUserId] = true
         updateLikes(post.objectID, post.likes, updateInRoom, onComplete)
     }
 
     private fun updateLikes(
         postId: String,
-        newLikes: HashSet<String>,
+        newLikes: HashMap<String, Boolean>,
         updateInRoom: Boolean,
         onComplete: () -> Unit
     ) {
@@ -900,7 +902,7 @@ class DashboardFragment :
         )
 
         if (updateInRoom) {
-            dashboardViewModel.postsRepo.postsDao.updateLikes(postId, newLikes)
+            dashboardViewModel.postsRepo.postsDao.updateLikes(postId, newLikes.keys.toHashSet())
         }
     }
 

@@ -35,6 +35,7 @@ import com.devssocial.localodge.R
 import com.devssocial.localodge.extensions.*
 import com.devssocial.localodge.models.Post
 import com.devssocial.localodge.models.User
+import com.devssocial.localodge.ui.dashboard.interfaces.NewPostFragmentCallback
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.*
 import com.esafirm.imagepicker.features.ImagePicker
@@ -52,7 +53,7 @@ import kotlinx.android.synthetic.main.layout_loading_overlay.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 
-class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
+class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks, NewPostFragmentCallback {
 
     companion object {
         private const val TAG = "NewPostFragment"
@@ -269,6 +270,7 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         super.onCreate(savedInstanceState)
 
         dashboardViewModel = ViewModelProviders.of(activity!!)[DashboardViewModel::class.java]
+        dashboardViewModel.newPostCallback = this
     }
 
     override fun onCreateView(
@@ -281,26 +283,6 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        requireActivity().onBackPressedDispatcher.addCallback {
-            if (hasData()) {
-                context?.let {
-                    DialogHelper(it)
-                        .showConfirmActionDialog(
-                            getString(R.string.discard_changes),
-                            getString(R.string.are_you_sure_you_want_to_discard_changes),
-                            getString(R.string.discard),
-                            { dialog ->
-                                dialog.dismiss()
-                                activity?.onBackPressed()
-                            },
-                            getString(R.string.cancel),
-                            { dialog -> dialog.dismiss() },
-                            false
-                        )
-                }
-            }
-        }
 
         // setup static widgets
         post_description_edit_text.requestFocus()
@@ -505,6 +487,7 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
                             postId,
                             false
                         )
+                        activity?.finish()
                     }
                 )
         )
@@ -529,7 +512,7 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         }
     }
 
-    private fun hasData(): Boolean =
+     override fun hasData(): Boolean =
         post_description_edit_text?.text?.isEmpty() == false || !currentMediaPath.isNullOrBlank()
 
     private fun getUserDataFromRoom(onSuccess: (User) -> Unit) {

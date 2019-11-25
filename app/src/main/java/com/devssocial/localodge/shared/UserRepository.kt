@@ -65,7 +65,7 @@ class UserRepository(private val context: Context) {
             }
     }
 
-    fun getCustomerInfo(userId: String): Single<CustomerInfo?> {
+    fun getCustomerInfo(userId: String): Single<CustomerInfo> {
         val ref = firestore
             .collection(COLLECTION_USERS)
             .document(userId)
@@ -73,14 +73,14 @@ class UserRepository(private val context: Context) {
             .document(DOC_CUSTOMER_INFO)
 
         return RxFirebaseFirestore.data(ref)
-            .flatMap { Single.just(it.value().toObject(CustomerInfo::class.java)) }
+            .flatMap { Single.just(it.value().toObject(CustomerInfo::class.java)!!) }
             .onErrorResumeNext {
-                if (it.message == "No value") return@onErrorResumeNext Single.just(null)
+                if (it.message == "No value") return@onErrorResumeNext Single.just(CustomerInfo())
                 else return@onErrorResumeNext Single.error(it)
             }
     }
 
-    fun getMeta(userId: String): Single<Meta?> {
+    fun getMeta(userId: String): Single<Meta> {
         val ref = firestore
             .collection(COLLECTION_USERS)
             .document(userId)
@@ -88,9 +88,9 @@ class UserRepository(private val context: Context) {
             .document(DOC_META)
 
         return RxFirebaseFirestore.data(ref)
-            .flatMap { Single.just(it.value().toObject(Meta::class.java)) }
+            .flatMap { Single.just(it.value().toObject(Meta::class.java)!!) }
             .onErrorResumeNext {
-                if (it.message == "No value") return@onErrorResumeNext Single.just(null)
+                if (it.message == "No value") return@onErrorResumeNext Single.just(Meta())
                 else return@onErrorResumeNext Single.error(it)
             }
     }
@@ -220,5 +220,15 @@ class UserRepository(private val context: Context) {
             .document(postIdToBlock)
 
         return RxFirebaseFirestore.set(ref, mapOf(FIELD_OBJECT_ID to postIdToBlock))
+    }
+
+    fun saveCustomerId(customerId: String): Completable {
+        val ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(getCurrentUserId() ?: return Completable.complete())
+            .collection(COLLECTION_METADATA)
+            .document(DOC_CUSTOMER_INFO)
+
+        return RxFirebaseFirestore.set(ref, CustomerInfo(customerId = customerId))
     }
 }

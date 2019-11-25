@@ -1,30 +1,20 @@
 package com.devssocial.localodge.utils
 
-import io.reactivex.Completable
 import io.reactivex.Single
 import org.json.JSONObject
 
-open class CloudFunctionsProvider {
+object CloudFunctionsProvider {
 
-    fun saveCard(paymentMethodId: String, customerId: String): Completable {
-        // todo continue here call a cloud function that performs the following:
-        // https://stripe.com/docs/payments/save-after-payment
-//        // This creates a new Customer and attaches the PaymentMethod in one API call.
-//        const customer = await stripe.customers.create({
-//                payment_method: intent.payment_method,
-//        });
+    fun createCharge(postRating: Int, tokenId: String, saveCard: Boolean, onComplete: (JSONObject) -> Unit) {
+        onComplete(JSONObject("{data: []}"))
 
-        // with customer Id (if customerId.isNotEmpty())
-//        const paymentMethod = await stripe.paymentMethods.attach(
-//            intent.payment_method,
-//            {
-//                    customer: '{{CUSTOMER_ID}}',
-//            }
-//        );
-        return Completable.complete()
+        // todo continue here
+        // https://stripe.com/docs/saving-cards
     }
 
     fun getPaymentMethods(customerId: String): Single<JSONObject?> {
+        return Single.just(JSONObject("{data: []}"))
+
         // https://stripe.com/docs/api/payment_methods/list
         // todo continue here call a cloud function that performs the following:
         // var stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
@@ -86,8 +76,19 @@ open class CloudFunctionsProvider {
         //    {...}
         //  ]
         //}
-        return Single.just(null)
     }
 
-    open fun getStripeKey(onSuccess: (String) -> Unit) {}
+    fun getStripeKey(onSuccess: (String) -> Unit) {
+        onSuccess("pk_test_TYooMQauvdEDq54NiTphI7jx")
+        // TODO CONTINUE HERE CONFIGURE STRIPE IN SERVER
+//        val task = FirebaseFunctions.getInstance().getHttpsCallable(GET_STRIPE_KEY).call()
+//        return Single.create { emitter ->
+//            try {
+//                val httpsCallableResult = Tasks.await(task)
+//                emitter.onSuccess(httpsCallableResult.data as String)
+//            } catch (e: Exception) {
+//                emitter.onError(e)
+//            }
+//        }
+    }
 }

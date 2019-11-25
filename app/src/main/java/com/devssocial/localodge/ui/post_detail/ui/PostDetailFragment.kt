@@ -228,7 +228,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
         if (postViewItem.likes.contains(userId)) {
             postViewItem.likes.remove(userId)
         } else {
-            postViewItem.likes.add(userId)
+            postViewItem.likes[userId] = true
         }
         updateLikes(postViewItem.likes) {
             if (context == null) return@updateLikes
@@ -243,7 +243,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
         }
     }
 
-    private fun updateLikes(newLikes: HashSet<String>, onComplete: () -> Unit) {
+    private fun updateLikes(newLikes: HashMap<String, Boolean>, onComplete: () -> Unit) {
         disposables.add(
             postViewModel
                 .postsRepo
