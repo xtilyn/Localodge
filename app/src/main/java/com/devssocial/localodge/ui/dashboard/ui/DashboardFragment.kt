@@ -693,8 +693,8 @@ class DashboardFragment :
         )
     }
 
-    private fun handleError(error: Throwable) {
-        Log.e(TAG, error.message, error)
+    private fun handleError(error: Throwable?) {
+        error?.let { Log.e(TAG, error.message, error) }
         showError(resources.getString(R.string.generic_error_message))
         showProgress(false)
     }
@@ -727,12 +727,16 @@ class DashboardFragment :
                     Observable.zip(
                         blockedPostsResult,
                         dashboardViewModel.blockedUsersResult,
-                        BiFunction<Status, Status, Pair<Boolean, Boolean>> { s1, s2 ->
-                            Pair(s1 == Status.SUCCESS_WITH_DATA, s2 == Status.SUCCESS_WITH_DATA)
+                        BiFunction<Status, Status, Pair<Status, Status>> { s1, s2 ->
+                            Pair(s1, s2)
                         }
                     )
                         .subscribe { results ->
-                            if (results.first && results.second) {
+                            if (results.first == Status.ERROR || results.second == Status.ERROR) {
+                                handleError(null)
+                                return@subscribe
+                            }
+                            if (results.first == Status.SUCCESS_WITH_DATA && results.second == Status.SUCCESS_WITH_DATA) {
                                 loadDashboardDataFromRoom()
                             }
                         }
