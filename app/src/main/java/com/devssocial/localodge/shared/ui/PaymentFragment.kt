@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.devssocial.localodge.R
+import com.devssocial.localodge.extensions.gone
 import com.devssocial.localodge.extensions.popHide
 import com.devssocial.localodge.extensions.popShow
 import com.devssocial.localodge.models.CardDetails
@@ -138,6 +139,9 @@ class PaymentFragment : Fragment() {
 
     private fun onContinueClick(view: View) {
         if (context == null) return
+
+        // TODO CONTINUE HERE LET CUSTOMER REVIEW DETAILS FIRST BEFORE PROCEED
+
         if (currentState == State.HAS_A_CARD) {
             showProgress(true)
             disposables.add(
@@ -229,7 +233,7 @@ class PaymentFragment : Fragment() {
 
     private fun showProgress(show: Boolean) {
         if (show) loading_overlay?.popShow()
-        else loading_overlay?.popHide()
+        else loading_overlay?.gone()
     }
 
     private fun handleError(

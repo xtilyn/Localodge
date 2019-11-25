@@ -14,6 +14,8 @@ object CloudFunctionsProvider {
 
     fun chargeExistingCustomer(customerId: String, rating: Int): Single<JSONObject> {
         return Single.just(JSONObject("{data: []}"))
+
+        // todo continue here
     }
 
     fun getPaymentMethods(customerId: String): Single<JSONObject> {

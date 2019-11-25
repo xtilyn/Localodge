@@ -76,15 +76,11 @@ fun View.invisible(animate: Boolean = true) {
 }
 
 /** Set the View visibility to GONE and eventually animate view alpha till 0% */
-fun View.gone(animate: Boolean = true) {
-    if (animate) {
-        animate().alpha(0f).setDuration(300).setListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                super.onAnimationEnd(animation)
-                visibility = View.GONE
-            }
-        })
-    } else {
-        visibility = View.GONE
-    }
+fun View.gone() {
+    animate().alpha(0f).setDuration(300).setListener(object : AnimatorListenerAdapter() {
+        override fun onAnimationEnd(animation: Animator) {
+            super.onAnimationEnd(animation)
+            visibility = View.GONE
+        }
+    })
 }
