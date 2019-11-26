@@ -12,6 +12,7 @@ import com.devssocial.localodge.enums.ReportType
 import com.devssocial.localodge.extensions.instaGone
 import com.devssocial.localodge.extensions.instaVisible
 import kotlinx.android.synthetic.main.dialog_confirm_action.view.*
+import kotlinx.android.synthetic.main.dialog_info.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.close_dialog
 import kotlinx.android.synthetic.main.dialog_sign_in_required.view.*
@@ -83,7 +84,7 @@ class DialogHelper(private val context: Context) {
     fun showReportDialog(
         context: Context,
         reportType: ReportType,
-        onSendReport:(String, String) -> Unit
+        onSendReport: (String, String) -> Unit
     ) {
         createDialog(R.layout.dialog_report)
 
@@ -128,6 +129,16 @@ class DialogHelper(private val context: Context) {
             activity?.let { act ->
                 ActivityLaunchHelper.goToLogin(act)
             }
+        }
+        dialog.show()
+    }
+
+    fun showInfoDialog(message: String, onDismiss: () -> Unit) {
+        createDialog(R.layout.dialog_info)
+        dialogView.info_message.text = message
+        dialogView.dismiss_info.setOnClickListener {
+            dialog.dismiss()
+            onDismiss()
         }
         dialog.show()
     }

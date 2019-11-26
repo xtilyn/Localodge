@@ -10,11 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.devssocial.localodge.R
 import com.devssocial.localodge.extensions.*
 import com.devssocial.localodge.models.*
 import com.devssocial.localodge.shared.UserRepository
+import com.devssocial.localodge.ui.dashboard.ui.DashboardActivity
 import com.devssocial.localodge.utils.*
 import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
 import com.devssocial.localodge.utils.helpers.DialogHelper
@@ -245,6 +247,7 @@ class PaymentFragment : Fragment() {
         if (context == null) return
         if (card_multiline_widget.card == null) {
             Toasty.error(context!!, getString(R.string.invalid_card_details)).show()
+            return
         }
 
         val dh = DialogHelper(context!!)
@@ -300,7 +303,10 @@ class PaymentFragment : Fragment() {
 
                         // listeners
                         val closeDialog = View.OnClickListener { dh.dialog.dismiss() }
-                        dh.dialogView.proceed_order.setOnClickListener(::proceedOrder)
+                        dh.dialogView.proceed_order.setOnClickListener {
+                            dh.dialog.dismiss()
+                            proceedOrder()
+                        }
                         dh.dialogView.cancel_order.setOnClickListener(closeDialog)
                         dh.dialogView.close_dialog.setOnClickListener(closeDialog)
 
@@ -310,7 +316,7 @@ class PaymentFragment : Fragment() {
         )
     }
 
-    private fun proceedOrder(view: View) {
+    private fun proceedOrder() {
         if (currentState == State.HAS_A_CARD) {
             showProgress(true)
             disposables.add(
@@ -396,10 +402,10 @@ class PaymentFragment : Fragment() {
             }
             context?.let { c ->
                 Toasty.success(c, getString(R.string.payment_succeeded))
+                DialogHelper(c).showInfoDialog(getString(R.string.pending_post_message)) {
+                    findNavController().navigate(R.id.action_paymentFragment_to_dashboardFragment)
+                }
             }
-            ActivityLaunchHelper.goToPostDetail(
-                activity, pendingPost.objectID, false
-            )
         } else {
             handleError(null)
         }

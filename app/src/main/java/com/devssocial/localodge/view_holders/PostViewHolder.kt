@@ -41,8 +41,10 @@ class PostViewHolder(itemView: View) :
                 itemView.user_post_media_content_container.instaVisible()
             }
 
-            itemView.user_post_timestamp?.text = DateUtils.convertMessageTimestamp(
-                item.timestamp!!.seconds * 1000L)
+            if (item.timestamp != null) {
+                itemView.user_post_timestamp?.text = DateUtils.convertMessageTimestamp(
+                    item.timestamp!!.seconds * 1000L)
+            }
 
             itemView.user_post_description.text = item.postDescription
             itemView.user_post_username.text = item.posterUsername

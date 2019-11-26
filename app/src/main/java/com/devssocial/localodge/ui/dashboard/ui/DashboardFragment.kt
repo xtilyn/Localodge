@@ -852,8 +852,10 @@ class DashboardFragment :
     }
 
     private fun loadMoreDashboardData() {
-        currentPage++
-        postsAdapter.appendToList(retrievedPosts[currentPage] ?: arrayListOf())
+        if (this::retrievedPosts.isInitialized) {
+            currentPage++
+            postsAdapter.appendToList(retrievedPosts[currentPage] ?: arrayListOf())
+        }
     }
 
     private fun onRefresh() {

@@ -126,20 +126,20 @@ object CloudFunctionsProvider {
     }
 
     fun chargeNewCustomer(rating: Int, tokenId: String, saveCard: Boolean): Single<JSONObject> {
-        return Single.just(JSONObject("{data: []}"))
+        return Single.just(JSONObject("{data: {}}"))
 
         // todo continue here
         // https://stripe.com/docs/saving-cards
     }
 
     fun chargeExistingCustomer(customerId: String, rating: Int): Single<JSONObject> {
-        return Single.just(JSONObject("{data: []}"))
+        return Single.just(JSONObject("{data: {}}"))
 
         // todo continue here
     }
 
     fun getPaymentMethods(customerId: String): Single<JSONObject> {
-        return Single.just(JSONObject("{data: []}"))
+        return Single.just(JSONObject("{data: {}}"))
 
         // https://stripe.com/docs/api/payment_methods/list
         // todo continue here call a cloud function that performs the following:

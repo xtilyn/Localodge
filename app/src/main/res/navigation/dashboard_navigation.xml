@@ -61,5 +61,12 @@
 																app:nullable="true"
 																android:defaultValue="@null"
 																/>
+								<action
+																android:id="@+id/action_paymentFragment_to_dashboardFragment"
+																app:destination="@id/dashboardFragment"
+																app:launchSingleTop="true"
+																app:popUpTo="@id/dashboard_navigation"
+																app:popUpToInclusive="true"
+																/>
 				</fragment>
 </navigation>

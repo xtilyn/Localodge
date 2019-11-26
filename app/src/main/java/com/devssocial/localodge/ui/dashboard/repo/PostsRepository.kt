@@ -135,11 +135,15 @@ class PostsRepository(context: Context) {
     }
 
     fun createPost(post: Post): Single<String> {
+
+        // TODO CONTINUE HERE UPLOAD MEDIA CONTENT IN STORAGE (IF ANY)
+
         val userId = userRepo.getCurrentUserId() ?: return Single.just("")
         val ref = firestore.collection(COLLECTION_POSTS).document()
         val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))
         post.apply {
             posterUserId = userId
+            objectID = ref.id
         }
 
         return RxFirebaseFirestore.set(ref, post)
