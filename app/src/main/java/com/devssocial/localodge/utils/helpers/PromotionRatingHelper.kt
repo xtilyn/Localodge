@@ -1,10 +1,8 @@
-package com.devssocial.localodge.data_objects
+package com.devssocial.localodge.utils.helpers
 
-import java.lang.Math.floor
 import java.lang.StringBuilder
-import kotlin.math.floor
 
-object Rating {
+object PromotionRatingHelper {
 
     val prices = hashMapOf(
         0 to 0,
@@ -13,6 +11,15 @@ object Rating {
         3 to 1095,
         4 to 2395,
         5 to 9895
+    )
+
+    val titles = hashMapOf(
+        0 to "Free",
+        1 to "Highlighted",
+        2 to "Urgent",
+        3 to "Featured: 3 days",
+        4 to "Featured: 7 days",
+        5 to "Featured: 30 days"
     )
 
     fun getPriceInFormattedString(rating: Int): String {

@@ -9,7 +9,7 @@ import com.devssocial.localodge.extensions.instaVisible
 import com.devssocial.localodge.models.Location
 import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.utils.DateUtils
-import com.devssocial.localodge.utils.LocationHelper
+import com.devssocial.localodge.utils.helpers.LocationHelper
 import kotlinx.android.synthetic.main.list_item_user_post.view.*
 
 class PostViewHolder(itemView: View) :

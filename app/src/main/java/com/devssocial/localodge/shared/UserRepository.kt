@@ -9,7 +9,7 @@ import com.devssocial.localodge.models.CustomerInfo
 import com.devssocial.localodge.models.Meta
 import com.devssocial.localodge.models.Notification
 import com.devssocial.localodge.models.User
-import com.devssocial.localodge.utils.FirebasePathProvider
+import com.devssocial.localodge.utils.providers.FirebasePathProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot

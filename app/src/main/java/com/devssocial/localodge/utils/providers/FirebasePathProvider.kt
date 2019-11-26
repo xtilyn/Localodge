@@ -1,4 +1,4 @@
-package com.devssocial.localodge.utils
+package com.devssocial.localodge.utils.providers
 
 object FirebasePathProvider {
 

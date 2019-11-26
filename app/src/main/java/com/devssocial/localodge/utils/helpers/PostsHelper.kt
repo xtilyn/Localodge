@@ -1,4 +1,4 @@
-package com.devssocial.localodge.utils
+package com.devssocial.localodge.utils.helpers
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -29,12 +29,14 @@ class PostsHelper(private val listener: PostOptionsListener) {
             true
         )
         popupView.popup_user_post_report_post.setOnClickListener {
-            DialogHelper(context).showReportDialog(context, ReportType.POST) { reason, desc ->
+            DialogHelper(context)
+                .showReportDialog(context, ReportType.POST) { reason, desc ->
                 listener.onReportPost(current.objectID, reason, desc)
             }
         }
         popupView.popup_user_post_report_user.setOnClickListener {
-            DialogHelper(context).showReportDialog(context, ReportType.USER) { reason, desc ->
+            DialogHelper(context)
+                .showReportDialog(context, ReportType.USER) { reason, desc ->
                 listener.onReportUser(current.posterUserId, reason, desc)
             }
         }

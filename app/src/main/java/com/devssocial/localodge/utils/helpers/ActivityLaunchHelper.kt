@@ -1,4 +1,4 @@
-package com.devssocial.localodge.utils
+package com.devssocial.localodge.utils.helpers
 
 import android.app.Activity
 import android.content.Intent
@@ -34,7 +34,11 @@ object ActivityLaunchHelper {
     }
 
     fun goToSettings(activity: Activity?) {
-        goToSimpleActivity(activity, null, SettingsActivity::class.java)
+        goToSimpleActivity(
+            activity,
+            null,
+            SettingsActivity::class.java
+        )
     }
 
     private fun goToSimpleActivity(

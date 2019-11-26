@@ -23,7 +23,7 @@ import com.devssocial.localodge.R
 import com.devssocial.localodge.TRIAL_ACCOUNT_REQUESTED
 import com.devssocial.localodge.extensions.isEmail
 import com.devssocial.localodge.ui.login.view_model.LoginViewModel
-import com.devssocial.localodge.utils.ActivityLaunchHelper
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
 import com.google.firebase.auth.FirebaseUser
 import es.dmoral.toasty.Toasty
 import io.reactivex.android.schedulers.AndroidSchedulers

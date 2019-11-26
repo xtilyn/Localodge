@@ -121,7 +121,7 @@
 				<string name="location_needed_to_make_a_post_with_question">Your location is required to publish a post. Turn on location?</string>
 				<string name="promote_your_post">Promote Your Post</string>
 				<string name="exit_info">exit info</string>
-				<string name="rating_5_info">Featured posts are always shown at the top of a page. If there are multiple featured posts, they will ordered by popularity.</string>
+				<string name="rating_5_info">Featured posts are always shown at the top of a page. If there are multiple featured posts, they will be ordered by popularity.</string>
 				<string name="rating_2_info">Urgent posts are posts that require immediate attention. Posts with the urgent icon will have an Urgent ribbon and will stand out from all others.</string>
 				<string name="rating_1_info">Highlighted posts are shown with a highlighted background colour. This makes the post stand out against other posts in a certain location.</string>
 				<string name="featured_posts">Featured Posts</string>
@@ -133,4 +133,8 @@
 				<string name="invalid_card_details">Invalid card details</string>
 				<string name="payment_succeeded">Payment succeeded</string>
 				<string name="payment_failed">Payment failed</string>
+				<string name="order_details">Order Details</string>
+				<string name="promotion_option">Post Promotion Option:</string>
+				<string name="confirm">Confirm</string>
+				<string name="total">Total:</string>
 </resources>

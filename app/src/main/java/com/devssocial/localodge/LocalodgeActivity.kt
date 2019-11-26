@@ -11,9 +11,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.devssocial.localodge.shared.UserRepository
 import com.devssocial.localodge.shared.UserRepository.Companion.AUTH_BROADCAST
-import com.devssocial.localodge.utils.ActivityLaunchHelper
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
 import com.google.firebase.auth.FirebaseAuth
 import es.dmoral.toasty.Toasty
 import io.github.inflationx.viewpump.ViewPumpContextWrapper

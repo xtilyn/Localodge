@@ -1,19 +1,16 @@
 package com.devssocial.localodge.ui.dashboard.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
 import androidx.lifecycle.ViewModelProviders
 import com.devssocial.localodge.*
 import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.room_models.UserRoom
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
-import com.devssocial.localodge.utils.ActivityLaunchHelper
-import com.devssocial.localodge.utils.DialogHelper
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
+import com.devssocial.localodge.utils.helpers.DialogHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy

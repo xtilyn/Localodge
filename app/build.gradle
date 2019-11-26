@@ -136,4 +136,7 @@ dependencies {
 
     // stripe
     implementation 'com.stripe:stripe-android:12.5.0'
+
+    // google pay
+    implementation 'com.google.android.gms:play-services-wallet:18.0.0'
 }

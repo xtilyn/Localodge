@@ -211,7 +211,7 @@
 												android:layout_width="wrap_content"
 												android:layout_height="wrap_content"
 												android:text="Choose a different option:"
-												app:layout_constraintBottom_toTopOf="@id/pay_with_google_pay"
+												app:layout_constraintBottom_toTopOf="@id/pay_with_paypal"
 												app:layout_constraintStart_toStartOf="parent"
 												app:layout_constraintEnd_toEndOf="parent"
 												android:layout_marginBottom="4dp"
@@ -219,7 +219,7 @@
 
 				<ImageButton
 												android:id="@+id/pay_with_paypal"
-												android:layout_width="0dp"
+												android:layout_width="160dp"
 												android:layout_height="50dp"
 												android:background="@drawable/button_default_outline"
 												android:scaleType="fitCenter"
@@ -227,12 +227,11 @@
 												app:layout_constraintBottom_toTopOf="@id/middle_guideline"
 												app:layout_constraintEnd_toEndOf="parent"
 												app:layout_constraintStart_toEndOf="@id/pay_with_google_pay"
-												android:layout_marginEnd="24dp"
 												/>
 
 				<ImageButton
 												android:id="@+id/pay_with_google_pay"
-												android:layout_width="0dp"
+												android:layout_width="160dp"
 												android:layout_height="50dp"
 												android:background="@drawable/button_default_outline"
 												android:padding="10dp"
@@ -241,7 +240,7 @@
 												app:layout_constraintBottom_toTopOf="@id/middle_guideline"
 												app:layout_constraintStart_toStartOf="parent"
 												app:layout_constraintEnd_toStartOf="@id/pay_with_paypal"
-												android:layout_marginStart="24dp"
+												android:visibility="gone"
 												/>
 
 				<ImageView

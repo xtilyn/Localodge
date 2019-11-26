@@ -37,6 +37,10 @@ import com.devssocial.localodge.ui.dashboard.utils.PostsProvider
 import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.*
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
+import com.devssocial.localodge.utils.helpers.DialogHelper
+import com.devssocial.localodge.utils.helpers.PhotoPicker
+import com.devssocial.localodge.utils.helpers.PostsHelper
 import com.esafirm.imagepicker.features.ImagePicker
 import com.esafirm.imagepicker.model.Image
 import com.google.android.gms.common.api.ResolvableApiException
@@ -61,7 +65,6 @@ import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.close_dialog
 import kotlinx.android.synthetic.main.dialog_send_feedback.view.*
 import kotlinx.android.synthetic.main.dialog_send_feedback.view.send_feedback_progress
-import kotlinx.android.synthetic.main.dialog_sign_in_required.view.*
 import kotlinx.android.synthetic.main.dialog_warning.view.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_no_user.view.*
@@ -70,18 +73,12 @@ import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_p
 import kotlinx.android.synthetic.main.layout_empty_state.*
 import kotlinx.android.synthetic.main.layout_empty_state.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.locks.Condition
-import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
-import kotlin.concurrent.withLock
 
 class DashboardFragment :
     Fragment(),
@@ -312,7 +309,8 @@ class DashboardFragment :
 
                     if (!dashboardViewModel.isUserLoggedIn()) {
                         activity?.let { a ->
-                            DialogHelper(a).showSignInRequiredDialog(
+                            DialogHelper(a)
+                                .showSignInRequiredDialog(
                                 a,
                                 resources.getString(R.string.feedback_needs_credentials)
                             )
@@ -320,7 +318,8 @@ class DashboardFragment :
                         return@let
                     }
 
-                    val helper = DialogHelper(it)
+                    val helper =
+                        DialogHelper(it)
                     helper.createDialog(
                         R.layout.dialog_send_feedback,
                         R.style.DefaultDialogAnimation
@@ -399,7 +398,8 @@ class DashboardFragment :
                     }
                     return
                 }
-                PostsHelper(this@DashboardFragment).showMoreOptionsPopup(
+                PostsHelper(this@DashboardFragment)
+                    .showMoreOptionsPopup(
                     context,
                     view,
                     current,
@@ -620,7 +620,8 @@ class DashboardFragment :
 
         headerView.user_profile_pic_image_view.setOnClickListener {
             if (context == null) return@setOnClickListener
-            val dh = DialogHelper(context!!)
+            val dh =
+                DialogHelper(context!!)
             dh.createDialog(R.layout.dialog_choose_photo, R.style.DefaultDialogAnimation)
             dh.dialogView.close_dialog?.setOnClickListener {
                 dh.dialog.dismiss()

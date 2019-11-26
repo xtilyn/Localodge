@@ -20,7 +20,6 @@ import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.activity.addCallback
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
@@ -38,6 +37,9 @@ import com.devssocial.localodge.models.User
 import com.devssocial.localodge.ui.dashboard.interfaces.NewPostFragmentCallback
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
 import com.devssocial.localodge.utils.*
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
+import com.devssocial.localodge.utils.helpers.DialogHelper
+import com.devssocial.localodge.utils.helpers.PhotoPicker
 import com.esafirm.imagepicker.features.ImagePicker
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -97,7 +99,8 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks, NewPost
             }
             R.id.promote_post -> {
                 if (context == null) return@OnClickListener
-                val dh = DialogHelper(context!!)
+                val dh =
+                    DialogHelper(context!!)
                 dh.createDialog(R.layout.dialog_promote_post)
 
                 val rating5 = dh.dialogView.findViewById<CardView>(R.id.rating_5)

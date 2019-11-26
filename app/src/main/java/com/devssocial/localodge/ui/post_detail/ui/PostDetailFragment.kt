@@ -31,8 +31,11 @@ import com.devssocial.localodge.ui.post_detail.adapter.CommentsPagedAdapter
 import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSourceFactory
 import com.devssocial.localodge.ui.post_detail.view_model.PostViewModel
 import com.devssocial.localodge.utils.*
-import com.devssocial.localodge.utils.ActivityLaunchHelper.CONTENT_ID
-import com.devssocial.localodge.utils.ActivityLaunchHelper.REQUEST_COMMENT
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper.CONTENT_ID
+import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper.REQUEST_COMMENT
+import com.devssocial.localodge.utils.helpers.DialogHelper
+import com.devssocial.localodge.utils.helpers.PostsHelper
 import com.devssocial.localodge.view_holders.PostViewHolder
 import es.dmoral.toasty.Toasty
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -64,14 +67,16 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                 R.id.user_post_more_options -> {
                     if (!isLoggedIn()) {
                         activity?.let { a ->
-                            DialogHelper(a).showSignInRequiredDialog(
+                            DialogHelper(a)
+                                .showSignInRequiredDialog(
                                 a,
                                 resources.getString(R.string.sign_in_required_to_perform_actions)
                             )
                         }
                         return@OnClickListener
                     }
-                    PostsHelper(this@PostDetailFragment).showMoreOptionsPopup(
+                    PostsHelper(this@PostDetailFragment)
+                        .showMoreOptionsPopup(
                         context,
                         user_post_more_options,
                         postViewItem,
@@ -88,7 +93,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                 R.id.user_post_comment -> {
                     if (!isLoggedIn()) {
                         activity?.let { a ->
-                            DialogHelper(a).showSignInRequiredDialog(
+                            DialogHelper(a)
+                                .showSignInRequiredDialog(
                                 a,
                                 resources.getString(R.string.sign_in_required_to_comment)
                             )
@@ -101,7 +107,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                 R.id.user_post_like -> {
                     if (!isLoggedIn()) {
                         activity?.let { a ->
-                            DialogHelper(a).showSignInRequiredDialog(
+                            DialogHelper(a)
+                                .showSignInRequiredDialog(
                                 a,
                                 resources.getString(R.string.sign_in_required_to_like_posts)
                             )

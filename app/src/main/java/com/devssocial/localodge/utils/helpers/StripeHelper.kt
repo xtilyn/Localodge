@@ -1,7 +1,8 @@
-package com.devssocial.localodge.utils
+package com.devssocial.localodge.utils.helpers
 
 import android.content.Context
 import com.devssocial.localodge.models.CardDetails
+import com.devssocial.localodge.utils.providers.ApiKeysProviders
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.Card

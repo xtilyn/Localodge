@@ -12,6 +12,7 @@
 				<androidx.constraintlayout.widget.ConstraintLayout
 												android:layout_width="match_parent"
 												android:layout_height="match_parent"
+												android:paddingBottom="8dp"
 												>
 
 								<com.mikhaellopez.circularimageview.CircularImageView
@@ -102,7 +103,6 @@
 																android:layout_width="0dp"
 																android:layout_height="wrap_content"
 																app:layout_constraintTop_toBottomOf="@id/user_post_profile_pic"
-																android:text="post description"
 																android:layout_marginTop="12dp"
 																app:layout_constraintStart_toStartOf="parent"
 																android:layout_marginStart="12dp"
@@ -125,7 +125,7 @@
 																android:layout_marginTop="8dp"
 																app:cardCornerRadius="12dp"
 																app:cardElevation="0dp"
-																android:visibility="gone"
+															android:visibility="gone"
 																android:clickable="true"
 																android:focusable="true"
 																android:foreground="?attr/selectableItemBackground"

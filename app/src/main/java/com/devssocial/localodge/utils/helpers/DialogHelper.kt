@@ -1,20 +1,16 @@
-package com.devssocial.localodge.utils
+package com.devssocial.localodge.utils.helpers
 
 import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
-import com.devssocial.localodge.LocalodgeActivity
 import com.devssocial.localodge.R
 import com.devssocial.localodge.REPORT_REASONS
 import com.devssocial.localodge.enums.ReportType
 import com.devssocial.localodge.extensions.instaGone
 import com.devssocial.localodge.extensions.instaVisible
-import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
 import kotlinx.android.synthetic.main.dialog_confirm_action.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.close_dialog
