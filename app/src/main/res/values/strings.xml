@@ -139,4 +139,6 @@
 				<string name="total">Total:</string>
 				<string name="dismiss">Dismiss</string>
 				<string name="pending_post_message">Your post is being reviewed.  We will notify you when your post has been published. This may take a few minutes.</string>
+				<string name="add_image_attachment">add image attachment</string>
+				<string name="image_attachment">image attachment</string>
 </resources>

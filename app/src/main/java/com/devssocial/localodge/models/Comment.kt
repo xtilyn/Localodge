@@ -7,6 +7,7 @@ data class Comment(
     var objectID: String = "",
     var postedBy: String = "",
     var body: String = "",
+    var photoUrl: String? = null,
     @ServerTimestamp var timestamp: Timestamp? = null
 )
 

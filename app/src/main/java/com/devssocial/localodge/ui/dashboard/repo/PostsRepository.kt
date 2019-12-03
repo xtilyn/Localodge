@@ -127,7 +127,7 @@ class PostsRepository(context: Context) {
             }
     }
 
-    fun postComment(postId: String, comment: String): Completable {
+    fun postComment(postId: String, comment: String, photoUrl: String?): Completable {
         val userId = userRepo.getCurrentUserId() ?: return Completable.complete()
         val ref = firestore
             .collection(COLLECTION_POSTS)
@@ -141,6 +141,9 @@ class PostsRepository(context: Context) {
             body = comment
         )
         return RxFirebaseFirestore.set(ref, commentObj)
+            .andThen {
+                // todo continue here upload photoUrl to storage
+            }
     }
 
     fun createPost(post: Post): Single<String> {

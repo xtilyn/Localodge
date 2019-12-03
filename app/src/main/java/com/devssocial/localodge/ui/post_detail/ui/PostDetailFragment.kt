@@ -1,7 +1,9 @@
 package com.devssocial.localodge.ui.post_detail.ui
 
 
+import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,12 +18,19 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
 import androidx.paging.RxPagedListBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.devssocial.localodge.R
 import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.enums.ReportType
 import com.devssocial.localodge.enums.Status
+import com.devssocial.localodge.extensions.gone
 import com.devssocial.localodge.extensions.popHide
 import com.devssocial.localodge.extensions.popShow
+import com.devssocial.localodge.extensions.visible
 import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.interfaces.PostOptionsListener
 import com.devssocial.localodge.models.Location
@@ -35,8 +44,11 @@ import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
 import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper.CONTENT_ID
 import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper.REQUEST_COMMENT
 import com.devssocial.localodge.utils.helpers.DialogHelper
+import com.devssocial.localodge.utils.helpers.PhotoPicker
 import com.devssocial.localodge.utils.helpers.PostsHelper
 import com.devssocial.localodge.view_holders.PostViewHolder
+import com.esafirm.imagepicker.features.ImagePicker
+import com.esafirm.imagepicker.model.Image
 import es.dmoral.toasty.Toasty
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -60,6 +72,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     private lateinit var postViewItem: PostViewItem
     private lateinit var commentsAdapter: CommentsPagedAdapter
     private lateinit var factory: CommentsDataSourceFactory
+    private var currentCommentPhotoPath: String? = null
 
     private val postItemsListener: View.OnClickListener by lazy {
         View.OnClickListener {
@@ -186,10 +199,52 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                         )
                     )
                 }
+
+                add_photo_comment?.setOnClickListener {
+                    PhotoPicker.pickFromGallery(this)
+                }
             }
 
             setupRecyclerView()
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
+            val images = ImagePicker.getImages(data) as ArrayList<Image>
+            currentCommentPhotoPath = images[0].path
+            comment_image_progress?.visible()
+            context?.let {
+                Glide.with(it)
+                    .load(currentCommentPhotoPath)
+                    .listener(object: RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            comment_image_progress?.gone()
+                            showError()
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            comment_image_progress?.gone()
+                            comment_photo_container?.popShow()
+                            return false
+                        }
+                    })
+                    .into(comment_image_attachment)
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun getPostDetail(onSuccess: (PostViewItem) -> Unit) {
@@ -280,14 +335,14 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
         }
 
         val comment = comment_et?.text.toString()
-        if (comment.isBlank()) {
+        if (comment.isBlank() || currentCommentPhotoPath == null) {
             comment_et?.error = resources.getString(R.string.comment_required)
             return
         }
         disposables.add(
             postViewModel
                 .postsRepo
-                .postComment(postViewItem.objectID, comment)
+                .postComment(postViewItem.objectID, comment, currentCommentPhotoPath)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
