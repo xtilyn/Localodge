@@ -1,6 +1,8 @@
 package com.devssocial.localodge
 
+import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.SingleSource
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import org.junit.Test
@@ -64,4 +66,26 @@ class Playground {
             )
     }
 
+    @Test
+    fun complexCompletablesToSingle() {
+        val disposable = Completable.create {
+            Thread.sleep(1000)
+            println("im first")
+            it.onComplete()
+        }.andThen(SingleSource<String> {
+            it.onSuccess("uwu")
+        }).flatMapCompletable {
+            println(it)
+            Completable.complete()
+        }
+
+        disposable.subscribeOn(Schedulers.trampoline()).observeOn(Schedulers.trampoline())
+            .subscribeBy(
+                onError = {
+                    println("subscribe onError: ${it.message}")
+                },
+                onComplete = {
+                }
+            )
+    }
 }

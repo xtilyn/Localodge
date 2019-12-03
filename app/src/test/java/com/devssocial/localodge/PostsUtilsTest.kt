@@ -17,22 +17,22 @@ class PostsUtilsTest {
     fun ordersPostsCorrectly() {
         val post1 = Post(
             rating = 5,
-            likes = mapOf("haha" to true),
+            likes = hashMapOf("haha" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post2 = Post(
             rating = 1,
-            likes = mapOf("haha" to true, "hoho" to true),
+            likes = hashMapOf("haha" to true, "hoho" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post3 = Post(
             rating = 1,
-            likes = mapOf("haha" to true),
+            likes = hashMapOf("haha" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis()))
         )
         val post4 = Post(
             rating = 1,
-            likes = mapOf("haha" to true),
+            likes = hashMapOf("haha" to true),
             timestamp = Timestamp(Date(System.currentTimeMillis() - 100))
         )
         val unorderedPosts = arrayListOf(

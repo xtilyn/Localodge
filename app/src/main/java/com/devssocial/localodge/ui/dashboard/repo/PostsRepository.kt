@@ -1,15 +1,14 @@
 package com.devssocial.localodge.ui.dashboard.repo
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.location.Location
+import android.util.Log
 import com.androidhuman.rxfirebase2.firestore.RxFirebaseFirestore
 import com.devssocial.localodge.*
 import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.models.*
 import com.devssocial.localodge.shared.UserRepository
 import com.devssocial.localodge.utils.providers.FirebasePathProvider
-import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,14 +16,12 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import io.reactivex.Completable
-import io.reactivex.CompletableSource
 import io.reactivex.Single
 import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.imperiumlabs.geofirestore.GeoFirestore
 import org.imperiumlabs.geofirestore.extension.setLocation
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 
@@ -38,9 +35,7 @@ class PostsRepository(context: Context) {
     val postsDao = LocalodgeRoomDatabase.getDatabase(context).postDao()
     private val firestore = FirebaseFirestore.getInstance()
     private val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))
-    private var bucket2 = FirebaseStorage.getInstance().getReferenceFromUrl(
-        FirebasePathProvider.getSecondBucketPath()
-    ).storage
+    private var bucket2 = FirebaseStorage.getInstance(FirebasePathProvider.getSecondBucketPath())
 
     private val userRepo = UserRepository(context)
 
@@ -143,14 +138,21 @@ class PostsRepository(context: Context) {
         return RxFirebaseFirestore.set(ref, commentObj)
             .andThen {
                 // todo continue here upload photoUrl to storage
+                val uploadTask = bucket2.reference.child(
+                    FirebasePathProvider.getPostsMediaPath(ref.id)
+                )
+
             }
     }
 
     fun createPost(post: Post): Single<String> {
         val userId = userRepo.getCurrentUserId() ?: return Single.error(Throwable(NO_VALUE))
+        val ref = firestore.collection(COLLECTION_POSTS).document()
+        val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))
+
         var uploadTask: UploadTask? = null
         val fileInputStream: FileInputStream?
-        val storageRef = bucket2.reference.child(FirebasePathProvider.getPostsMediaPath(userId))
+        val storageRef = bucket2.reference.child(FirebasePathProvider.getPostsMediaPath(ref.id))
         if (post.photoUrl != null) {
             fileInputStream = FileInputStream(File(post.photoUrl!!))
             uploadTask = storageRef.putBytes(fileInputStream.readBytes())
@@ -159,35 +161,57 @@ class PostsRepository(context: Context) {
             uploadTask = storageRef.putBytes(fileInputStream.readBytes())
         }
 
-        val ref = firestore.collection(COLLECTION_POSTS).document()
-        val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))
         post.apply {
             posterUserId = userId
             objectID = ref.id
         }
 
-        return RxFirebaseFirestore.set(ref, post)
-            .andThen(SingleSource<String> { observer ->
-                if (uploadTask != null) {
-                    try {
-                        Tasks.await(uploadTask)
-                        RxFirebaseFirestore.update(
-                            ref,
-                            if (post.photoUrl != null) mapOf("photoUrl" to storageRef.downloadUrl)
-                            else mapOf("videoUrl" to storageRef.downloadUrl)
-                        ).blockingAwait()
-                    } catch (e: Exception) {
-                        observer.onError(e)
-                    }
+        val uploadTaskCompletable: Completable = if (uploadTask != null) {
+            Completable.create {
+                try {
+                    Tasks.await(uploadTask)
+//                    TODO fileInputStream?.close()
+                    it.onComplete()
+                } catch (e: Exception) {
+                    it.onError(e)
                 }
+            }.subscribeOn(Schedulers.io())
+        } else Completable.complete()
 
+
+        return Completable.mergeArray(
+            uploadTaskCompletable
+                .andThen(SingleSource<String> { singleObserver ->
+                    Log.d(TAG, "UPLOADING TO STORAGE...: ${Thread.currentThread()}")
+                    try {
+                        val downloadUrl = Tasks.await(storageRef.downloadUrl)
+                        singleObserver.onSuccess(downloadUrl.toString())
+                    } catch (e: Exception) {
+                        singleObserver.onError(e)
+                    }
+                }).flatMapCompletable { downloadUrl ->
+                    Log.d(TAG, "GOT DOWNLOAD URL: ${Thread.currentThread()}")
+                    return@flatMapCompletable RxFirebaseFirestore.update(
+                        ref,
+                        if (post.photoUrl != null) mapOf("photoUrl" to downloadUrl)
+                        else mapOf("videoUrl" to downloadUrl)
+                    ).subscribeOn(Schedulers.io())
+                },
+            RxFirebaseFirestore.set(ref, post).subscribeOn(Schedulers.io())
+        )
+            .andThen { completableObserver ->
+                Log.d(TAG, "SETTING LOCATION: ${Thread.currentThread()}")
                 geoFirestore.setLocation(
                     ref.id,
                     GeoPoint(post._geoloc.lat, post._geoloc.lng)
                 ) { exception ->
-                    if (exception != null) observer.onError(Throwable(exception.message))
-                    else observer.onSuccess(ref.id)
+                    if (exception != null) completableObserver.onError(Throwable(exception.message))
+                    else completableObserver.onComplete()
                 }
-            })
+            }
+            .toSingle {
+                Log.d(TAG, "CONVERTING TO SINGLE: ${Thread.currentThread()}")
+                return@toSingle ref.id
+            }
     }
 }
