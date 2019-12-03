@@ -15,9 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
-import io.reactivex.Completable
-import io.reactivex.Single
-import io.reactivex.SingleSource
+import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.imperiumlabs.geofirestore.GeoFirestore
@@ -136,13 +134,34 @@ class PostsRepository(context: Context) {
             body = comment
         )
         return RxFirebaseFirestore.set(ref, commentObj)
-            .andThen {
-                // todo continue here upload photoUrl to storage
-                val uploadTask = bucket2.reference.child(
-                    FirebasePathProvider.getPostsMediaPath(ref.id)
-                )
-
-            }
+            .andThen (
+                if (photoUrl != null) {
+                    Single.create<String> { emitter ->
+                        // upload photoUrl to storage
+                        val storageRef = bucket2.reference.child(
+                            FirebasePathProvider.getCommentsMediaPath(postId, ref.id)
+                        )
+                        val fileInputStream = FileInputStream(File(photoUrl))
+                        val uploadTask = storageRef.putBytes(fileInputStream.readBytes())
+                        try {
+                            Tasks.await(uploadTask)
+                            fileInputStream.close()
+                            val downloadUrl = Tasks.await(storageRef.downloadUrl)
+                            emitter.onSuccess(downloadUrl.toString())
+                        } catch (e: Exception) {
+                            emitter.onError(e)
+                        }
+                    }
+                        .subscribeOn(Schedulers.io())
+                        .flatMapCompletable { downloadUrl ->
+                            return@flatMapCompletable RxFirebaseFirestore.update(
+                                ref, mapOf("photoUrl" to downloadUrl)
+                            ).subscribeOn(Schedulers.io())
+                        }
+                } else {
+                    Completable.complete()
+                }
+            )
     }
 
     fun createPost(post: Post): Single<String> {
@@ -151,7 +170,7 @@ class PostsRepository(context: Context) {
         val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))
 
         var uploadTask: UploadTask? = null
-        val fileInputStream: FileInputStream?
+        var fileInputStream: FileInputStream? = null
         val storageRef = bucket2.reference.child(FirebasePathProvider.getPostsMediaPath(ref.id))
         if (post.photoUrl != null) {
             fileInputStream = FileInputStream(File(post.photoUrl!!))
@@ -170,7 +189,7 @@ class PostsRepository(context: Context) {
             Completable.create {
                 try {
                     Tasks.await(uploadTask)
-//                    TODO fileInputStream?.close()
+                    fileInputStream?.close()
                     it.onComplete()
                 } catch (e: Exception) {
                     it.onError(e)
