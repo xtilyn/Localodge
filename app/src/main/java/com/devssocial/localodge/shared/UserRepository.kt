@@ -30,7 +30,7 @@ class UserRepository(private val context: Context) {
     }
 
     private val firestore = FirebaseFirestore.getInstance()
-    private var storage = FirebaseStorage.getInstance()
+    private var defaultBucket = FirebaseStorage.getInstance()
     private val mAuth = FirebaseAuth.getInstance()
 
     val userDao = LocalodgeRoomDatabase.getDatabase(context).userDao()
@@ -120,13 +120,13 @@ class UserRepository(private val context: Context) {
 
     fun updateProfilePicInStorage(path: String): Observable<Pair<Double, String>> {
         val userId = getCurrentUserId() ?: return Observable.just(Pair(0.0, "error"))
-        val storageRef = storage.reference.child(FirebasePathProvider.getProfilePicPath(userId))
+        val storageRef = defaultBucket.reference.child(FirebasePathProvider.getProfilePicPath(userId))
         val stream = FileInputStream(File(path))
         return Observable.create { emitter ->
             val uploadTask = storageRef.putStream(stream)
             uploadTask
                 .addOnProgressListener {
-                    Log.d(TAG, "bytes transfered ${it.bytesTransferred}")
+                    Log.d(TAG, "bytes transferred ${it.bytesTransferred}")
                     Log.d(TAG, "bytes totalByteCount ${it.totalByteCount}")
                     val percentage =
                         (100.0 * it.bytesTransferred.toDouble()) / it.totalByteCount.toDouble()
