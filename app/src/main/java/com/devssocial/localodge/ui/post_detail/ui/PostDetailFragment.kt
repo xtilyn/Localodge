@@ -3,6 +3,7 @@ package com.devssocial.localodge.ui.post_detail.ui
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
@@ -216,12 +217,13 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
             comment_image_progress?.visible()
             context?.let {
                 Glide.with(it)
+                    .asBitmap()
                     .load(currentCommentPhotoPath)
-                    .listener(object: RequestListener<Drawable> {
+                    .listener(object: RequestListener<Bitmap> {
                         override fun onLoadFailed(
                             e: GlideException?,
                             model: Any?,
-                            target: Target<Drawable>?,
+                            target: Target<Bitmap>?,
                             isFirstResource: Boolean
                         ): Boolean {
                             comment_image_progress?.gone()
@@ -230,12 +232,13 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                         }
 
                         override fun onResourceReady(
-                            resource: Drawable?,
+                            resource: Bitmap?,
                             model: Any?,
-                            target: Target<Drawable>?,
+                            target: Target<Bitmap>?,
                             dataSource: DataSource?,
                             isFirstResource: Boolean
                         ): Boolean {
+                            // TODO CONTINUE HERE. THIS AIN'T GETTING CALLED
                             comment_image_progress?.gone()
                             comment_photo_container?.popShow()
                             return false
