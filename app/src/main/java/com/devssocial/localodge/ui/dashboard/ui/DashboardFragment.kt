@@ -795,7 +795,7 @@ class DashboardFragment :
             blockedUsers = dashboardViewModel.blockedUsers!!
             blockedPosts = this.blockedPosts!!
         }
-        postsProvider.loadInitial(
+        postsProvider.loadInitialWithLocation(
             userLocation = userLocation!!,
             radius = radius,
             blockedUsers = blockedUsers,

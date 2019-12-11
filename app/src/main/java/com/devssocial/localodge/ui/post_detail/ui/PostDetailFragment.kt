@@ -28,10 +28,7 @@ import com.devssocial.localodge.R
 import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.enums.ReportType
 import com.devssocial.localodge.enums.Status
-import com.devssocial.localodge.extensions.gone
-import com.devssocial.localodge.extensions.popHide
-import com.devssocial.localodge.extensions.popShow
-import com.devssocial.localodge.extensions.visible
+import com.devssocial.localodge.extensions.*
 import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.interfaces.PostOptionsListener
 import com.devssocial.localodge.models.Location
@@ -217,33 +214,11 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
             comment_image_progress?.visible()
             context?.let {
                 Glide.with(it)
-                    .asBitmap()
                     .load(currentCommentPhotoPath)
-                    .listener(object: RequestListener<Bitmap> {
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Bitmap>?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            comment_image_progress?.gone()
-                            showError()
-                            return false
-                        }
-
-                        override fun onResourceReady(
-                            resource: Bitmap?,
-                            model: Any?,
-                            target: Target<Bitmap>?,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            // TODO CONTINUE HERE. THIS AIN'T GETTING CALLED
-                            comment_image_progress?.gone()
-                            comment_photo_container?.popShow()
-                            return false
-                        }
-                    })
+                    .onLoadEnded {
+                        comment_image_progress?.gone()
+                        comment_photo_container?.popShow()
+                    }
                     .into(comment_image_attachment)
             }
         }

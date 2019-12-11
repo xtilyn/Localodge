@@ -8,6 +8,7 @@ import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.shared.UserRepository
 import com.devssocial.localodge.ui.dashboard.repo.PostsRepository
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -28,6 +29,26 @@ class PostsProvider(
     }
 
     fun loadInitial(
+        startAfter: Timestamp?,
+        limit: Long?,
+        blockedUsers: HashSet<String>,
+        blockedPosts: HashSet<String>
+    ): Single<ArrayList<PostViewItem>> {
+        return repo.loadFeed(startAfter = startAfter, limit = limit)
+            .flatMap {
+                val iterator = it.iterator()
+                while (iterator.hasNext()) {
+                    val current = iterator.next()
+                    if (blockedUsers.contains(current.posterUserId) ||
+                        blockedPosts.contains(current.objectID)) {
+                        iterator.remove()
+                    }
+                }
+                return@flatMap Single.just(it)
+            }
+    }
+
+    fun loadInitialWithLocation(
         userLocation: Location,
         radius: Double,
         blockedUsers: HashSet<String>,

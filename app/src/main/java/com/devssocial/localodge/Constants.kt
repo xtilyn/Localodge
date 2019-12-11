@@ -14,6 +14,7 @@ const val POSTS_INDEX = "posts"
 // firestore collections
 const val COLLECTION_AVATARS = "avatars"
 const val COLLECTION_USERS = "users"
+const val COLLECTION_FEED = "feed"
 const val COLLECTION_CITIES = "cities"
 const val COLLECTION_POSTS = "posts"
 const val COLLECTION_FEEDBACK = "feedback"

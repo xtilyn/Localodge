@@ -11,12 +11,15 @@ import com.devssocial.localodge.shared.UserRepository
 import com.devssocial.localodge.utils.providers.FirebasePathProvider
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import org.imperiumlabs.geofirestore.GeoFirestore
 import org.imperiumlabs.geofirestore.extension.setLocation
@@ -47,6 +50,48 @@ class PostsRepository(context: Context) {
             radius,
             callback
         )
+    }
+
+    fun loadFeed(startAfter: Timestamp?, limit: Long?): Single<ArrayList<PostViewItem>> {
+        val userId = userRepo.getCurrentUserId() ?: return Single.just(arrayListOf())
+        var ref = firestore
+            .collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_FEED)
+            .orderBy(FIELD_TIMESTAMP, Query.Direction.DESCENDING)
+
+        if (startAfter != null) ref = ref.startAfter(startAfter)
+        if (limit != null) ref = ref.limit(limit)
+
+        return RxFirebaseFirestore.data(ref)
+            .flatMap {
+                val result = it.value().documents.filterNotNull()
+                    .map { documentSnapshot: DocumentSnapshot ->
+                        documentSnapshot.toObject(Post::class.java)
+                    }
+                val getUserDocSingles = result.filterNotNull()
+                    .map { post ->
+                        userRepo.getUserData(post.posterUserId)
+                            .onErrorReturnItem(User())
+                    }
+
+                val finalResult = arrayListOf<PostViewItem>()
+                return@flatMap Single.merge(getUserDocSingles).toList(it.value().size())
+                    .subscribeOn(Schedulers.io())
+                    .flatMap { users: MutableList<User> ->
+                        users.forEachIndexed { index, user ->
+                            val postViewItem = result[index]!!.mapProperties(PostViewItem())
+                            postViewItem.posterProfilePic = user.profilePicUrl
+                            postViewItem.posterUsername = user.username
+                            finalResult.add(postViewItem)
+                        }
+                        Single.just(finalResult)
+                    }
+            }
+            .onErrorResumeNext {
+                if (it.message == NO_VALUE) return@onErrorResumeNext Single.just(arrayListOf())
+                else Single.error(it)
+            }
     }
 
     fun updateLikes(postId: String, newLikes: HashMap<String, Boolean>): Completable {
