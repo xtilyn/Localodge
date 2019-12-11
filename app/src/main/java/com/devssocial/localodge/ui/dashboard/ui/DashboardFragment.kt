@@ -466,7 +466,7 @@ class DashboardFragment :
                                 userLocation!!.longitude.toFloat()
                             )
                         }
-                        loadInitialDashboardData()
+                        loadInitialDashboardDataWithLocation()
                     }
                 }
         } else {
@@ -485,7 +485,7 @@ class DashboardFragment :
             val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
 
             task.addOnSuccessListener {
-                loadInitialDashboardData()
+                loadInitialDashboardDataWithLocation()
             }
 
             task.addOnFailureListener { exception ->
@@ -708,7 +708,7 @@ class DashboardFragment :
         ).show()
     }
 
-    private fun loadInitialDashboardData() {
+    private fun loadInitialDashboardDataWithLocation() {
         // setup recycler view
         postsAdapter = PostsAdapter(
             arrayListOf(),
