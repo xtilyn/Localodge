@@ -239,28 +239,28 @@ class PostsRepository(context: Context) {
                 } catch (e: Exception) {
                     it.onError(e)
                 }
-            }.subscribeOn(Schedulers.io())
+            }.andThen(SingleSource<String> { singleObserver ->
+                Log.d(TAG, "UPLOADING TO STORAGE...: ${Thread.currentThread()}")
+                try {
+                    val downloadUrl = Tasks.await(storageRef.downloadUrl)
+                    singleObserver.onSuccess(downloadUrl.toString())
+                } catch (e: Exception) {
+                    singleObserver.onError(e)
+                }
+            }).flatMapCompletable { downloadUrl ->
+                Log.d(TAG, "GOT DOWNLOAD URL: ${Thread.currentThread()}")
+                return@flatMapCompletable RxFirebaseFirestore.update(
+                    ref,
+                    if (post.photoUrl != null) mapOf("photoUrl" to downloadUrl)
+                    else mapOf("videoUrl" to downloadUrl)
+                ).subscribeOn(Schedulers.io())
+            }
+                .subscribeOn(Schedulers.io())
         } else Completable.complete()
 
 
         return Completable.mergeArray(
-            uploadTaskCompletable
-                .andThen(SingleSource<String> { singleObserver ->
-                    Log.d(TAG, "UPLOADING TO STORAGE...: ${Thread.currentThread()}")
-                    try {
-                        val downloadUrl = Tasks.await(storageRef.downloadUrl)
-                        singleObserver.onSuccess(downloadUrl.toString())
-                    } catch (e: Exception) {
-                        singleObserver.onError(e)
-                    }
-                }).flatMapCompletable { downloadUrl ->
-                    Log.d(TAG, "GOT DOWNLOAD URL: ${Thread.currentThread()}")
-                    return@flatMapCompletable RxFirebaseFirestore.update(
-                        ref,
-                        if (post.photoUrl != null) mapOf("photoUrl" to downloadUrl)
-                        else mapOf("videoUrl" to downloadUrl)
-                    ).subscribeOn(Schedulers.io())
-                },
+            uploadTaskCompletable,
             RxFirebaseFirestore.set(ref, post).subscribeOn(Schedulers.io())
         )
             .andThen { completableObserver ->

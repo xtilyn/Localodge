@@ -25,6 +25,23 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+				<Button
+												android:id="@+id/curr_location_btn"
+												android:layout_width="wrap_content"
+												android:layout_height="38dp"
+												app:layout_behavior="@string/appbar_scrolling_view_behavior"
+												android:layout_gravity="center_horizontal|top"
+												android:layout_marginTop="8dp"
+												android:background="@drawable/toast_border"
+												android:drawableEnd="@drawable/ic_location_primary"
+												android:drawablePadding="8dp"
+												android:paddingEnd="8dp"
+												android:paddingStart="18dp"
+												android:text="Current Location"
+												android:textAllCaps="false"
+												android:textColor="@color/hazelnut"
+												/>
+
 				<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 												android:id="@+id/swipe_refresh_dashboard"
 												android:layout_width="match_parent"
@@ -35,6 +52,8 @@
 																android:id="@+id/dashboard_recyclerview"
 																android:layout_width="match_parent"
 																android:layout_height="match_parent"
+																android:paddingTop="58dp"
+																android:clipToPadding="false"
 																>
 
 								</androidx.recyclerview.widget.RecyclerView>
