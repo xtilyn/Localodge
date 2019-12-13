@@ -111,8 +111,8 @@ class PostsProvider(
                                                         Log.e(TAG, it.message, it)
                                                     },
                                                     onNext = {
-                                                        orderedPosts[0].posterUsername = it.username
-                                                        orderedPosts[0].posterProfilePic =
+                                                        orderedPosts[counter].posterUsername = it.username
+                                                        orderedPosts[counter].posterProfilePic =
                                                             it.profilePicUrl
                                                         counter++
                                                     },
