@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android" >
-
-				<solid android:color="@android:color/white" />
-
-				<corners
-												android:radius="18dp"
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+								android:color="?attr/colorControlHighlight"
+								>
+				<item
+												android:id="@android:id/mask"
+												android:drawable="@drawable/button_mask"
 												/>
-
-				<stroke android:color="#80e9e9e9" android:width="2dp"/>
-
-</shape>
+				<item>
+								<shape>
+												<solid android:color="@android:color/white" />
+												<corners android:radius="18dp"	/>
+												<stroke android:color="#80e9e9e9" android:width="2dp"/>
+								</shape>
+				</item>
+</ripple>
