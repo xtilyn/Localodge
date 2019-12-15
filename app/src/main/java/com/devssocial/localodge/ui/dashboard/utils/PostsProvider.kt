@@ -25,7 +25,8 @@ class PostsProvider(
 
     companion object {
         private const val TAG = "PostsProvider"
-        const val INITIAL_RADIUS = 20.0
+        const val INITIAL_RADIUS = 50.0
+        const val RADIUS_INCREMENT = 50.0
     }
 
     fun loadInitial(

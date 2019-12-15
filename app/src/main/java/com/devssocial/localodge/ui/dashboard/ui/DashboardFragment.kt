@@ -146,6 +146,10 @@ class DashboardFragment :
         // setup static widgets
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
+        curr_location_btn.setOnClickListener {
+            // TODO CONTINUE HERE
+        }
+
         val toggle = ActionBarDrawerToggle(
             activity!!,
             drawer_layout,
@@ -179,7 +183,7 @@ class DashboardFragment :
             )
         )
         swipe_refresh_dashboard.setOnRefreshListener(::onRefresh)
-        swipe_refresh_dashboard.isRefreshing = true
+        showSwipeRefreshProgress(true)
 
         nav_view.setNavigationItemSelectedListener(this)
 
@@ -808,11 +812,11 @@ class DashboardFragment :
                 )
             },
             onSuccess = { posts: ArrayList<PostViewItem> ->
-                if ((posts.isEmpty() || posts.size < 3) && expandSearchCount < 3) {
+                if ((posts.isEmpty() || posts.size < 5) && expandSearchCount < 3) {
                     expandSearchCount++
-                    loadInitialDataFromFirebase(radius + 10.0)
+                    loadInitialDataFromFirebase(radius + PostsProvider.RADIUS_INCREMENT)
                 } else {
-                    swipe_refresh_dashboard?.isRefreshing = false
+                    showSwipeRefreshProgress(false)
                     toggleEmptyState(posts.isEmpty())
 
                     retrievedPosts = PostsUtil.constructMapBasedOnHitsPerPage(HITS_PER_PAGE, posts)
@@ -861,6 +865,7 @@ class DashboardFragment :
     private fun onRefresh() {
         if (!this::retrievedPosts.isInitialized) return
         toggleEmptyState(false)
+        showSwipeRefreshProgress(true)
         postsAdapter.clear()
         expandSearchCount = 0
         currentPage = 0
@@ -915,6 +920,16 @@ class DashboardFragment :
             headerView.upload_progress.visible()
         } else {
             headerView.upload_progress.gone()
+        }
+    }
+
+    private fun showSwipeRefreshProgress(show: Boolean) {
+        if (show) {
+            curr_location_cardview?.popHide()
+            swipe_refresh_dashboard?.isRefreshing = true
+        } else {
+            curr_location_cardview?.popShow()
+            swipe_refresh_dashboard?.isRefreshing = false
         }
     }
 
