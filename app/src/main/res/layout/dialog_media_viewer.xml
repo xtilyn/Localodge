@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+								xmlns:app="http://schemas.android.com/apk/res-auto"
+								android:layout_width="match_parent"
+								android:layout_height="match_parent"
+								>
+
+				<com.google.android.exoplayer2.ui.PlayerView
+												android:id="@+id/dialog_post_video"
+												android:layout_width="match_parent"
+												android:layout_height="match_parent"
+												android:visibility="gone"
+												app:use_controller="false"
+												/>
+
+				<com.github.chrisbanes.photoview.PhotoView
+												android:id="@+id/dialog_post_photo"
+												android:layout_width="match_parent"
+												android:layout_height="match_parent"
+												android:visibility="gone"
+												/>
+
+				<TextView
+												android:id="@+id/error_msg"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												android:layout_gravity="center"
+												android:text="Could not play video at the moment."
+												android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+												android:visibility="gone"
+												/>
+
+				<ProgressBar
+												android:id="@+id/dialog_video_progress"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												android:layout_gravity="center"
+												android:visibility="gone"/>
+
+</FrameLayout>

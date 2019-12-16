@@ -6,13 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
+import com.bumptech.glide.Glide
 import com.devssocial.localodge.R
 import com.devssocial.localodge.REPORT_REASONS
 import com.devssocial.localodge.enums.ReportType
-import com.devssocial.localodge.extensions.instaGone
-import com.devssocial.localodge.extensions.instaVisible
+import com.devssocial.localodge.extensions.*
 import kotlinx.android.synthetic.main.dialog_confirm_action.view.*
 import kotlinx.android.synthetic.main.dialog_info.view.*
+import kotlinx.android.synthetic.main.dialog_media_viewer.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.close_dialog
 import kotlinx.android.synthetic.main.dialog_sign_in_required.view.*
@@ -21,6 +22,36 @@ class DialogHelper(private val context: Context) {
 
     lateinit var dialogView: View
     lateinit var dialog: AlertDialog
+
+    fun showMediaDialog(
+        photoUrl: String?,
+        videoUrl: String?
+    ) {
+        createDialog(R.layout.dialog_media_viewer)
+        if (photoUrl != null) {
+            dialogView.dialog_post_photo.instaVisible()
+            Glide.with(context)
+                .load(photoUrl)
+                .onLoadEnded { dialog.show() }
+                .into(dialogView.dialog_post_photo)
+        } else {
+            dialogView.dialog_post_video.instaVisible()
+            val exoPlayerHelper = ExoPlayerHelper(
+                playerView = dialogView.dialog_post_video,
+                onError = {
+                    dialogView.error_msg?.popShow()
+                },
+                onPlayerBuffer = { isBuffering ->
+                    if (isBuffering) dialogView.dialog_video_progress?.popShow()
+                    else dialogView.dialog_video_progress?.popHide()
+                }
+            )
+            exoPlayerHelper.initializePlayer(videoUrl!!)
+            dialog.setOnDismissListener {
+                exoPlayerHelper.killPlayer()
+            }
+        }
+    }
 
     fun createDialog(resourceId: Int, style: Int = R.style.DefaultDialogAnimation) {
         dialog = AlertDialog.Builder(context).create()

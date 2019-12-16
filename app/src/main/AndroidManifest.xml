@@ -25,7 +25,6 @@
 																android:name=".ui.settings.SettingsActivity"
 																android:label="@string/title_activity_settings"
 																></activity>
-								<activity android:name=".ui.post_detail.ui.PostDetailActivity" />
 								<activity
 																android:name=".ui.dashboard.ui.DashboardActivity"
 																android:label="@string/title_activity_dashboard"

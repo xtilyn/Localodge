@@ -416,18 +416,20 @@ class DashboardFragment :
                     )
             }
             R.id.user_post_comment -> {
-                ActivityLaunchHelper.goToPostDetail(
-                    activity,
-                    current.objectID,
-                    view.id == R.id.user_post_comment
-                )
+                val directions = DashboardFragmentDirections
+                    .actionDashboardFragmentToPostDetailFragment(
+                        contentId = current.objectID,
+                        requestComment = view.id == R.id.user_post_comment
+                    )
+                findNavController().navigate(directions)
             }
             R.id.user_post_media_content_container -> {
-                ActivityLaunchHelper.goToMediaViewer(
-                    activity,
-                    current.photoUrl,
-                    current.videoUrl
-                )
+                context?.let { c ->
+                    DialogHelper(c).showMediaDialog(
+                        photoUrl = current.photoUrl,
+                        videoUrl = current.videoUrl
+                    )
+                }
             }
             R.id.user_post_like -> {
                 if (!dashboardViewModel.isUserLoggedIn()) {
