@@ -144,7 +144,7 @@ class DashboardFragment :
         }
 
         // setup static widgets
-        (activity as AppCompatActivity).setSupportActionBar(toolbar)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar_dashboard)
 
         curr_location_btn.setOnClickListener {
             // TODO CONTINUE HERE
@@ -153,7 +153,7 @@ class DashboardFragment :
         val toggle = ActionBarDrawerToggle(
             activity!!,
             drawer_layout,
-            toolbar,
+            toolbar_dashboard,
             R.string.navigation_drawer_open,
             R.string.navigation_drawer_close
         )
@@ -197,6 +197,15 @@ class DashboardFragment :
                 setupUserWidgets(user)
             }
         }
+
+
+        getBlockedUsers()
+        getBlockedPosts()
+        if (userLocation != null) {
+            loadInitialDashboardDataWithLocation()
+        } else {
+            getLocation()
+        }
     }
 
     override fun onStart() {
@@ -215,10 +224,6 @@ class DashboardFragment :
                     }
                 }
         )
-
-        getBlockedUsers()
-        getBlockedPosts()
-        getLocation()
     }
 
     override fun onStop() {
@@ -315,9 +320,9 @@ class DashboardFragment :
                         activity?.let { a ->
                             DialogHelper(a)
                                 .showSignInRequiredDialog(
-                                a,
-                                resources.getString(R.string.feedback_needs_credentials)
-                            )
+                                    a,
+                                    resources.getString(R.string.feedback_needs_credentials)
+                                )
                         }
                         return@let
                     }
@@ -404,11 +409,11 @@ class DashboardFragment :
                 }
                 PostsHelper(this@DashboardFragment)
                     .showMoreOptionsPopup(
-                    context,
-                    view,
-                    current,
-                    position
-                )
+                        context,
+                        view,
+                        current,
+                        position
+                    )
             }
             R.id.user_post_comment -> {
                 ActivityLaunchHelper.goToPostDetail(
@@ -736,18 +741,25 @@ class DashboardFragment :
                             Pair(s1, s2)
                         }
                     )
-                        .subscribe { results ->
-                            if (results.first == Status.ERROR
-                                || results.second == Status.ERROR) {
-                                handleError(null)
-                                return@subscribe
+                        .subscribeBy(
+                            onError = {
+                                handleError(it)
+                            },
+                            onNext = { results: Pair<Status, Status> ->
+                                if (results.first == Status.ERROR
+                                    || results.second == Status.ERROR) {
+                                    handleError(null)
+                                    return@subscribeBy
+                                }
+                                if (results.first == Status.SUCCESS_WITH_DATA
+                                    && results.second == Status.SUCCESS_WITH_DATA) {
+                                    loadDashboardDataFromRoom()
+                                }
                             }
-                            if (results.first == Status.SUCCESS_WITH_DATA
-                                && results.second == Status.SUCCESS_WITH_DATA) {
-                                loadDashboardDataFromRoom()
-                            }
-                        }
+                        )
                 )
+            } else {
+                loadDashboardDataFromRoom()
             }
         } else {
             blockedPosts = hashSetOf()
@@ -835,21 +847,18 @@ class DashboardFragment :
                             timestamp = postFirebase.timestamp?.seconds?.times(1000)
                         }
                     }
-                    disposables.add(
-                        dashboardViewModel.postsRepo.postsDao
-                            .deleteAll()
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeOn(Schedulers.io())
-                            .subscribe {
-                                disposables.add(
-                                    dashboardViewModel.postsRepo.postsDao
-                                        .insertAll(postsRoom)
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribeOn(Schedulers.io())
-                                        .subscribe()
-                                )
-                            }
-                    )
+                    dashboardViewModel.postsRepo.postsDao
+                        .deleteAll()
+                        .subscribeOn(Schedulers.io())
+                        .subscribe {
+                            disposables.add(
+                                dashboardViewModel.postsRepo.postsDao
+                                    .insertAll(postsRoom)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeOn(Schedulers.io())
+                                    .subscribe()
+                            )
+                        }
                 }
             }
         )

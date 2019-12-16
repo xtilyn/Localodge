@@ -1,10 +1,10 @@
 package com.devssocial.localodge.ui.post_detail.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.devssocial.localodge.LocalodgeActivity
 import com.devssocial.localodge.R
 
-class PostDetailActivity : AppCompatActivity() {
+class PostDetailActivity : LocalodgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
