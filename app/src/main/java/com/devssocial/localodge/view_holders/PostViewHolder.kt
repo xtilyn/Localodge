@@ -27,6 +27,9 @@ class PostViewHolder(itemView: View) :
                 .load(item.posterProfilePic)
                 .into(itemView.user_post_profile_pic)
 
+            if (item.photoUrl == null && item.videoUrl == null)
+                itemView.user_post_media_content_container.instaGone()
+
             item.photoUrl?.let {
                 Glide.with(itemView.context)
                     .load(it)
@@ -46,7 +49,10 @@ class PostViewHolder(itemView: View) :
                     item.timestamp!!.seconds * 1000L)
             }
 
-            itemView.user_post_description.text = item.postDescription
+            if (item.postDescription.isNotBlank()) {
+                itemView.user_post_description.text = item.postDescription
+                itemView.user_post_description.instaVisible()
+            }
             itemView.user_post_username.text = item.posterUsername
             itemView.user_post_comment.text = itemView.context
                 .resources.getString(R.string.user_post_comments, item.comments.size.toString())

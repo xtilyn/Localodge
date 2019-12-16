@@ -48,6 +48,7 @@ open class LocalodgeActivity : AppCompatActivity() {
     }
 
     fun logOut() {
+        LocalodgeRoomDatabase.getDatabase(this).clearAllTables()
         FirebaseAuth.getInstance().signOut()
         ActivityLaunchHelper.goToLogin(this)
         val sharedPref = getSharedPreferences(LOCALODGE_SHARED_PREF, Context.MODE_PRIVATE) ?: return

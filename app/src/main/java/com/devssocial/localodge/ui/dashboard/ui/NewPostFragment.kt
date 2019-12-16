@@ -82,11 +82,19 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks, NewPost
                 PhotoPicker.pickFromGallery(this, true)
             }
             R.id.user_post_media_content_container -> {
+                var photoUrl: String? = null
+                var videoUrl: String? = null
                 if (PhotoPicker.isVideoFile(currentMediaPath)) {
-                    ActivityLaunchHelper.goToMediaViewer(activity, null, currentMediaPath)
+                    videoUrl = currentMediaPath
                 } else {
-                    ActivityLaunchHelper.goToMediaViewer(activity, currentMediaPath, null)
+                    photoUrl = currentMediaPath
                 }
+                val directions = NewPostFragmentDirections
+                    .actionNewPostFragmentToMediaViewer(
+                        photoUrl = photoUrl,
+                        videoUrl = videoUrl
+                    )
+                findNavController().navigate(directions)
             }
             R.id.delete_media -> {
                 currentMediaPath = null
@@ -485,12 +493,12 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks, NewPost
                     onSuccess = { postId ->
                         showProgress(false)
                         if (postId.isEmpty()) return@subscribeBy
-                        ActivityLaunchHelper.goToPostDetail(
-                            activity,
-                            postId,
-                            false
+                        findNavController().navigate(
+                            NewPostFragmentDirections
+                                .actionNewPostFragmentToPostDetailFragment(
+                                    contentId = postId
+                                )
                         )
-                        activity?.finish()
                     }
                 )
         )

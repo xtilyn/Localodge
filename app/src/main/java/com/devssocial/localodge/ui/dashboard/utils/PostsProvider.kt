@@ -25,7 +25,8 @@ class PostsProvider(
 
     companion object {
         private const val TAG = "PostsProvider"
-        const val INITIAL_RADIUS = 20.0
+        const val INITIAL_RADIUS = 50.0
+        const val RADIUS_INCREMENT = 50.0
     }
 
     fun loadInitial(
@@ -101,7 +102,6 @@ class PostsProvider(
                                                 .onErrorReturnItem(User())
                                         }
 
-                                        var counter = 0
                                         disposables.add(
                                             Single.merge(singles)
                                                 .observeOn(AndroidSchedulers.mainThread())
@@ -110,11 +110,13 @@ class PostsProvider(
                                                     onError = {
                                                         Log.e(TAG, it.message, it)
                                                     },
-                                                    onNext = {
-                                                        orderedPosts[counter].posterUsername = it.username
-                                                        orderedPosts[counter].posterProfilePic =
-                                                            it.profilePicUrl
-                                                        counter++
+                                                    onNext = { user ->
+                                                        orderedPosts.forEach { postViewItem: PostViewItem ->
+                                                            if (postViewItem.posterUserId == user.userId) {
+                                                                postViewItem.posterUsername = user.username
+                                                                postViewItem.posterProfilePic = user.profilePicUrl
+                                                            }
+                                                        }
                                                     },
                                                     onComplete = {
                                                         // remove empty users

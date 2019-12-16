@@ -5,14 +5,20 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
 import com.devssocial.localodge.R
 import com.devssocial.localodge.REPORT_REASONS
 import com.devssocial.localodge.enums.ReportType
-import com.devssocial.localodge.extensions.instaGone
-import com.devssocial.localodge.extensions.instaVisible
+import com.devssocial.localodge.extensions.*
+import com.github.chrisbanes.photoview.PhotoView
 import kotlinx.android.synthetic.main.dialog_confirm_action.view.*
 import kotlinx.android.synthetic.main.dialog_info.view.*
+import kotlinx.android.synthetic.main.dialog_media_viewer.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.close_dialog
 import kotlinx.android.synthetic.main.dialog_sign_in_required.view.*
@@ -22,12 +28,52 @@ class DialogHelper(private val context: Context) {
     lateinit var dialogView: View
     lateinit var dialog: AlertDialog
 
+    fun showMediaDialog(
+        photoUrl: String?,
+        videoUrl: String?
+    ) {
+        createFullScreenDialog(R.layout.dialog_media_viewer)
+        if (photoUrl != null) {
+            dialogView.dialog_post_photo.instaVisible()
+            Glide.with(context)
+                .load(photoUrl)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(dialogView.findViewById<ImageView>(R.id.dialog_post_photo))
+        } else {
+            dialogView.dialog_post_photo.instaGone()
+            dialogView.dialog_post_video.instaVisible()
+            dialogView.dialog_video_progress.instaVisible()
+            val exoPlayerHelper = ExoPlayerHelper(
+                playerView = dialogView.dialog_post_video,
+                onError = {
+                    dialogView.error_msg?.popShow()
+                },
+                onPlayerBuffer = { isBuffering ->
+                    if (isBuffering) dialogView.dialog_video_progress?.popShow()
+                    else dialogView.dialog_video_progress?.popHide()
+                }
+            )
+            exoPlayerHelper.initializePlayer(videoUrl!!)
+            dialog.setOnDismissListener {
+                exoPlayerHelper.killPlayer()
+            }
+        }
+        dialog.show()
+    }
+
     fun createDialog(resourceId: Int, style: Int = R.style.DefaultDialogAnimation) {
         dialog = AlertDialog.Builder(context).create()
         dialogView = LayoutInflater.from(context).inflate(resourceId, null)
         dialog.setView(dialogView)
         dialog.window?.attributes?.windowAnimations = style
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    }
+
+    private fun createFullScreenDialog(resourceId: Int, style: Int = R.style.DefaultDialogAnimation) {
+        dialog = AlertDialog.Builder(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen).create()
+        dialogView = LayoutInflater.from(context).inflate(resourceId, null)
+        dialog.setView(dialogView)
+        dialog.window?.attributes?.windowAnimations = style
     }
 
     fun setCancelable(cancelable: Boolean) {

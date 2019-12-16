@@ -144,12 +144,16 @@ class DashboardFragment :
         }
 
         // setup static widgets
-        (activity as AppCompatActivity).setSupportActionBar(toolbar)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar_dashboard)
+
+        curr_location_btn.setOnClickListener {
+            // TODO CONTINUE HERE
+        }
 
         val toggle = ActionBarDrawerToggle(
             activity!!,
             drawer_layout,
-            toolbar,
+            toolbar_dashboard,
             R.string.navigation_drawer_open,
             R.string.navigation_drawer_close
         )
@@ -179,7 +183,7 @@ class DashboardFragment :
             )
         )
         swipe_refresh_dashboard.setOnRefreshListener(::onRefresh)
-        swipe_refresh_dashboard.isRefreshing = true
+        showSwipeRefreshProgress(true)
 
         nav_view.setNavigationItemSelectedListener(this)
 
@@ -192,6 +196,15 @@ class DashboardFragment :
             } else {
                 setupUserWidgets(user)
             }
+        }
+
+
+        getBlockedUsers()
+        getBlockedPosts()
+        if (userLocation != null) {
+            loadInitialDashboardDataWithLocation()
+        } else {
+            getLocation()
         }
     }
 
@@ -211,10 +224,6 @@ class DashboardFragment :
                     }
                 }
         )
-
-        getBlockedUsers()
-        getBlockedPosts()
-        getLocation()
     }
 
     override fun onStop() {
@@ -311,9 +320,9 @@ class DashboardFragment :
                         activity?.let { a ->
                             DialogHelper(a)
                                 .showSignInRequiredDialog(
-                                a,
-                                resources.getString(R.string.feedback_needs_credentials)
-                            )
+                                    a,
+                                    resources.getString(R.string.feedback_needs_credentials)
+                                )
                         }
                         return@let
                     }
@@ -400,25 +409,27 @@ class DashboardFragment :
                 }
                 PostsHelper(this@DashboardFragment)
                     .showMoreOptionsPopup(
-                    context,
-                    view,
-                    current,
-                    position
-                )
+                        context,
+                        view,
+                        current,
+                        position
+                    )
             }
             R.id.user_post_comment -> {
-                ActivityLaunchHelper.goToPostDetail(
-                    activity,
-                    current.objectID,
-                    view.id == R.id.user_post_comment
-                )
+                val directions = DashboardFragmentDirections
+                    .actionDashboardFragmentToPostDetailFragment(
+                        contentId = current.objectID,
+                        requestComment = view.id == R.id.user_post_comment
+                    )
+                findNavController().navigate(directions)
             }
             R.id.user_post_media_content_container -> {
-                ActivityLaunchHelper.goToMediaViewer(
-                    activity,
-                    current.photoUrl,
-                    current.videoUrl
-                )
+                context?.let { c ->
+                    DialogHelper(c).showMediaDialog(
+                        photoUrl = current.photoUrl,
+                        videoUrl = current.videoUrl
+                    )
+                }
             }
             R.id.user_post_like -> {
                 if (!dashboardViewModel.isUserLoggedIn()) {
@@ -732,18 +743,25 @@ class DashboardFragment :
                             Pair(s1, s2)
                         }
                     )
-                        .subscribe { results ->
-                            if (results.first == Status.ERROR
-                                || results.second == Status.ERROR) {
-                                handleError(null)
-                                return@subscribe
+                        .subscribeBy(
+                            onError = {
+                                handleError(it)
+                            },
+                            onNext = { results: Pair<Status, Status> ->
+                                if (results.first == Status.ERROR
+                                    || results.second == Status.ERROR) {
+                                    handleError(null)
+                                    return@subscribeBy
+                                }
+                                if (results.first == Status.SUCCESS_WITH_DATA
+                                    && results.second == Status.SUCCESS_WITH_DATA) {
+                                    loadDashboardDataFromRoom()
+                                }
                             }
-                            if (results.first == Status.SUCCESS_WITH_DATA
-                                && results.second == Status.SUCCESS_WITH_DATA) {
-                                loadDashboardDataFromRoom()
-                            }
-                        }
+                        )
                 )
+            } else {
+                loadDashboardDataFromRoom()
             }
         } else {
             blockedPosts = hashSetOf()
@@ -808,11 +826,11 @@ class DashboardFragment :
                 )
             },
             onSuccess = { posts: ArrayList<PostViewItem> ->
-                if ((posts.isEmpty() || posts.size < 3) && expandSearchCount < 3) {
+                if ((posts.isEmpty() || posts.size < 5) && expandSearchCount < 3) {
                     expandSearchCount++
-                    loadInitialDataFromFirebase(radius + 10.0)
+                    loadInitialDataFromFirebase(radius + PostsProvider.RADIUS_INCREMENT)
                 } else {
-                    swipe_refresh_dashboard?.isRefreshing = false
+                    showSwipeRefreshProgress(false)
                     toggleEmptyState(posts.isEmpty())
 
                     retrievedPosts = PostsUtil.constructMapBasedOnHitsPerPage(HITS_PER_PAGE, posts)
@@ -831,21 +849,18 @@ class DashboardFragment :
                             timestamp = postFirebase.timestamp?.seconds?.times(1000)
                         }
                     }
-                    disposables.add(
-                        dashboardViewModel.postsRepo.postsDao
-                            .deleteAll()
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeOn(Schedulers.io())
-                            .subscribe {
-                                disposables.add(
-                                    dashboardViewModel.postsRepo.postsDao
-                                        .insertAll(postsRoom)
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribeOn(Schedulers.io())
-                                        .subscribe()
-                                )
-                            }
-                    )
+                    dashboardViewModel.postsRepo.postsDao
+                        .deleteAll()
+                        .subscribeOn(Schedulers.io())
+                        .subscribe {
+                            disposables.add(
+                                dashboardViewModel.postsRepo.postsDao
+                                    .insertAll(postsRoom)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeOn(Schedulers.io())
+                                    .subscribe()
+                            )
+                        }
                 }
             }
         )
@@ -861,6 +876,7 @@ class DashboardFragment :
     private fun onRefresh() {
         if (!this::retrievedPosts.isInitialized) return
         toggleEmptyState(false)
+        showSwipeRefreshProgress(true)
         postsAdapter.clear()
         expandSearchCount = 0
         currentPage = 0
@@ -915,6 +931,16 @@ class DashboardFragment :
             headerView.upload_progress.visible()
         } else {
             headerView.upload_progress.gone()
+        }
+    }
+
+    private fun showSwipeRefreshProgress(show: Boolean) {
+        if (show) {
+            curr_location_cardview?.popHide()
+            swipe_refresh_dashboard?.isRefreshing = true
+        } else {
+            curr_location_cardview?.popShow()
+            swipe_refresh_dashboard?.isRefreshing = false
         }
     }
 

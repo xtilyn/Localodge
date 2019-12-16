@@ -3,8 +3,6 @@ package com.devssocial.localodge.ui.post_detail.ui
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,14 +14,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.navArgs
 import androidx.paging.PagedList
 import androidx.paging.RxPagedListBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.devssocial.localodge.R
 import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.enums.ReportType
@@ -37,10 +32,8 @@ import com.devssocial.localodge.models.Report
 import com.devssocial.localodge.ui.post_detail.adapter.CommentsPagedAdapter
 import com.devssocial.localodge.ui.post_detail.data_source.CommentsDataSourceFactory
 import com.devssocial.localodge.ui.post_detail.view_model.PostViewModel
-import com.devssocial.localodge.utils.*
-import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
-import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper.CONTENT_ID
-import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper.REQUEST_COMMENT
+import com.devssocial.localodge.utils.KeyboardUtils
+import com.devssocial.localodge.utils.SharedPrefManager
 import com.devssocial.localodge.utils.helpers.DialogHelper
 import com.devssocial.localodge.utils.helpers.PhotoPicker
 import com.devssocial.localodge.utils.helpers.PostsHelper
@@ -72,6 +65,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     private lateinit var factory: CommentsDataSourceFactory
     private var currentCommentPhotoPath: String? = null
 
+    private val args: PostDetailFragmentArgs by navArgs()
+
     private val postItemsListener: View.OnClickListener by lazy {
         View.OnClickListener {
             when (it.id) {
@@ -95,11 +90,12 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                     )
                 }
                 R.id.user_post_media_content_container -> {
-                    ActivityLaunchHelper.goToMediaViewer(
-                        activity,
-                        postViewItem.photoUrl,
-                        postViewItem.videoUrl
-                    )
+                    context?.let { c ->
+                        DialogHelper(c).showMediaDialog(
+                            photoUrl = postViewItem.photoUrl,
+                            videoUrl = postViewItem.videoUrl
+                        )
+                    }
                 }
                 R.id.user_post_comment -> {
                     if (!isLoggedIn()) {
@@ -143,8 +139,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val isComment = activity?.intent?.extras?.getBoolean(REQUEST_COMMENT, false)
-        if (isComment == true && postViewModel.userRepo.getCurrentUser() != null) {
+        val isComment = args.requestComment
+        if (isComment && postViewModel.userRepo.getCurrentUser() != null) {
             comment_et.requestFocus()
             context?.let { KeyboardUtils.showKeyboard(it) }
         }
@@ -153,9 +149,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        postId = activity?.intent?.extras?.getString(CONTENT_ID)
-            ?: throw Exception("Missing intent extras")
-
+        postId = args.contentId
         activity?.let {
             postViewModel = ViewModelProviders.of(it)[PostViewModel::class.java]
         }
