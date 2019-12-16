@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
 								xmlns:app="http://schemas.android.com/apk/res-auto"
 								android:layout_width="match_parent"
 								android:layout_height="match_parent"
@@ -13,13 +13,6 @@
 												app:use_controller="false"
 												/>
 
-				<com.github.chrisbanes.photoview.PhotoView
-												android:id="@+id/dialog_post_photo"
-												android:layout_width="match_parent"
-												android:layout_height="match_parent"
-												android:visibility="gone"
-												/>
-
 				<TextView
 												android:id="@+id/error_msg"
 												android:layout_width="wrap_content"
@@ -28,6 +21,10 @@
 												android:text="Could not play video at the moment."
 												android:textAppearance="@style/TextAppearance.AppCompat.Medium"
 												android:visibility="gone"
+												app:layout_constraintTop_toTopOf="parent"
+												app:layout_constraintBottom_toBottomOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintEnd_toEndOf="parent"
 												/>
 
 				<ProgressBar
@@ -35,6 +32,21 @@
 												android:layout_width="wrap_content"
 												android:layout_height="wrap_content"
 												android:layout_gravity="center"
-												android:visibility="gone"/>
+												android:visibility="gone"
+												app:layout_constraintTop_toTopOf="parent"
+												app:layout_constraintBottom_toBottomOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintEnd_toEndOf="parent"
+												/>
 
-</FrameLayout>
+				<ImageView
+												android:id="@+id/dialog_post_photo"
+												android:layout_width="match_parent"
+												android:layout_height="match_parent"
+												app:layout_constraintTop_toTopOf="parent"
+												app:layout_constraintBottom_toBottomOf="parent"
+												app:layout_constraintStart_toStartOf="parent"
+												app:layout_constraintEnd_toEndOf="parent"
+												/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
