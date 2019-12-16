@@ -16,12 +16,19 @@ import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
 import com.google.firebase.auth.FirebaseAuth
 import es.dmoral.toasty.Toasty
 import io.github.inflationx.viewpump.ViewPumpContextWrapper
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
+import java.lang.Exception
 
 /**
  * Parent activity for all activities except LoginActivity
  */
 @SuppressLint("Registered")
 open class LocalodgeActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "LocalodgeActivity"
+    }
 
     private val broadcastReceiver by lazy {
         object: BroadcastReceiver() {
@@ -48,7 +55,17 @@ open class LocalodgeActivity : AppCompatActivity() {
     }
 
     fun logOut() {
-        LocalodgeRoomDatabase.getDatabase(this).clearAllTables()
+        Completable.create {  e ->
+            try {
+                LocalodgeRoomDatabase.getDatabase(this).clearAllTables()
+                e.onComplete()
+            } catch (error: Exception) {
+                Log.e(TAG, error.message, error)
+                e.onError(error)
+            }
+        }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
         FirebaseAuth.getInstance().signOut()
         ActivityLaunchHelper.goToLogin(this)
         val sharedPref = getSharedPreferences(LOCALODGE_SHARED_PREF, Context.MODE_PRIVATE) ?: return

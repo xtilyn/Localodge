@@ -2,19 +2,20 @@ package com.devssocial.localodge.utils.helpers
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestOptions
 import com.devssocial.localodge.R
 import com.devssocial.localodge.REPORT_REASONS
 import com.devssocial.localodge.enums.ReportType
-import com.devssocial.localodge.extensions.*
+import com.devssocial.localodge.extensions.instaGone
+import com.devssocial.localodge.extensions.instaVisible
+import com.devssocial.localodge.extensions.popHide
+import com.devssocial.localodge.extensions.popShow
 import com.github.chrisbanes.photoview.PhotoView
 import kotlinx.android.synthetic.main.dialog_confirm_action.view.*
 import kotlinx.android.synthetic.main.dialog_info.view.*
@@ -22,6 +23,7 @@ import kotlinx.android.synthetic.main.dialog_media_viewer.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.*
 import kotlinx.android.synthetic.main.dialog_report.view.close_dialog
 import kotlinx.android.synthetic.main.dialog_sign_in_required.view.*
+
 
 class DialogHelper(private val context: Context) {
 
@@ -32,13 +34,13 @@ class DialogHelper(private val context: Context) {
         photoUrl: String?,
         videoUrl: String?
     ) {
-        createFullScreenDialog(R.layout.dialog_media_viewer)
+        createDialog(R.layout.dialog_media_viewer)
         if (photoUrl != null) {
             dialogView.dialog_post_photo.instaVisible()
             Glide.with(context)
                 .load(photoUrl)
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .into(dialogView.findViewById<ImageView>(R.id.dialog_post_photo))
+                .into(dialogView.findViewById<PhotoView>(R.id.dialog_post_photo))
         } else {
             dialogView.dialog_post_photo.instaGone()
             dialogView.dialog_post_video.instaVisible()
@@ -74,6 +76,10 @@ class DialogHelper(private val context: Context) {
         dialogView = LayoutInflater.from(context).inflate(resourceId, null)
         dialog.setView(dialogView)
         dialog.window?.attributes?.windowAnimations = style
+//        val height = context.resources.displayMetrics.heightPixels
+//        val width = context.resources.displayMetrics.widthPixels
+//
+//        dialog.window?.setLayout(width, height)
     }
 
     fun setCancelable(cancelable: Boolean) {
