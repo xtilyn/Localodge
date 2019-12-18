@@ -8,4 +8,5 @@ object FirebasePathProvider {
     fun getSecondBucketPath(): String = "gs://localodge"
     fun getPostsMediaPath(postId: String) = "posts/$postId"
     fun getCommentsMediaPath(postId: String, commentId: String) = "comments/$postId/$commentId"
+    fun getPostStatisticsPath(postId: String) = "posts/$postId/"
 }

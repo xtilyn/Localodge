@@ -55,7 +55,7 @@ class PostViewHolder(itemView: View) :
             }
             itemView.user_post_username.text = item.posterUsername
             itemView.user_post_comment.text = itemView.context
-                .resources.getString(R.string.user_post_comments, item.comments.size.toString())
+                .resources.getString(R.string.user_post_comments, item.commentsCount.toString())
 
             if (item.rating > 0) {
                 itemView.user_post_promoted_text.instaVisible()

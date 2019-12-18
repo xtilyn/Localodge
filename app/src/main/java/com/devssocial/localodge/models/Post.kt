@@ -29,5 +29,5 @@ data class PostViewItem(
     // adapter fields
     var posterUsername: String = "",
     var posterProfilePic: String = "",
-    var comments: ArrayList<CommentViewItem> = arrayListOf()
+    var commentsCount: Long = 0
 )

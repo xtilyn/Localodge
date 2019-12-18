@@ -307,10 +307,11 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
         }
 
         val comment = comment_et?.text.toString()
-        if (comment.isBlank() || currentCommentPhotoPath == null) {
+        if (comment.isBlank() && currentCommentPhotoPath == null) {
             comment_et?.error = resources.getString(R.string.comment_required)
             return
         }
+        showPostCommentProgress(true)
         disposables.add(
             postViewModel
                 .postsRepo
@@ -320,8 +321,10 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                 .subscribeBy(
                     onError = {
                         handleError(it)
+                        showPostCommentProgress(false)
                     },
                     onComplete = {
+                        showPostCommentProgress(false)
                         context?.let {
                             factory.invalidateDataSource()
                             setupRecyclerView()
@@ -330,6 +333,17 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                     }
                 )
         )
+    }
+
+    private fun showPostCommentProgress(show: Boolean) {
+        post_comment?.isEnabled = !show
+        if (show) {
+            post_comment?.popHide()
+            post_comment_progress?.popShow()
+        } else {
+            post_comment_progress?.popHide()
+            post_comment?.popShow()
+        }
     }
 
     private fun setupRecyclerView() {

@@ -47,6 +47,8 @@
 												android:layout_height="wrap_content"
 												android:layout_gravity="bottom"
 												android:background="@drawable/bottom_sheet_bg"
+												android:paddingTop="8dp"
+												android:paddingBottom="8dp"
 												>
 
 								<ProgressBar
@@ -102,6 +104,17 @@
 																app:layout_constraintBottom_toTopOf="@id/comment_photo_container"
 																app:layout_constraintEnd_toEndOf="parent"
 																app:layout_constraintTop_toBottomOf="@id/comment_image_progress"
+																/>
+
+								<ProgressBar
+																android:id="@+id/post_comment_progress"
+																android:layout_width="40dp"
+																android:layout_height="40dp"
+																app:layout_constraintBottom_toTopOf="@id/comment_photo_container"
+																app:layout_constraintEnd_toEndOf="parent"
+																app:layout_constraintTop_toBottomOf="@id/comment_image_progress"
+																android:layout_marginEnd="6dp"
+																android:visibility="gone"
 																/>
 
 								<androidx.cardview.widget.CardView

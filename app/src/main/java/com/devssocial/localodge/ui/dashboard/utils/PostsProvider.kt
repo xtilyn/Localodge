@@ -13,6 +13,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import org.imperiumlabs.geofirestore.GeoFirestore
@@ -97,13 +98,24 @@ class PostsProvider(
                                         Log.e(TAG, it.message, it)
                                     },
                                     onSuccess = { orderedPosts ->
-                                        val singles = orderedPosts.map {
-                                            userRepo.getUserData(it.posterUserId)
-                                                .onErrorReturnItem(User())
+                                        val combinedSingles = orderedPosts.map {
+                                            Single.zip(
+                                                userRepo.getUserData(it.posterUserId)
+                                                    .onErrorReturnItem(User()),
+                                                repo.getPostStats(it.objectID),
+                                                BiFunction {
+                                                    // TODO CONTINUE HERE CURR
+                                                }
+                                            )
+
+                                        }
+                                        val getStatsSingles = orderedPosts.map {
+
                                         }
 
+                                        // TODO CONTINUE HERE CURR: GET COMMENTS FROM REALTIME DATABASE
                                         disposables.add(
-                                            Single.merge(singles)
+                                            Single.merge(getUsersSingles)
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribeOn(Schedulers.io())
                                                 .subscribeBy(

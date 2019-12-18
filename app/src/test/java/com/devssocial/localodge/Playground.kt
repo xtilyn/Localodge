@@ -3,6 +3,7 @@ package com.devssocial.localodge
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.SingleSource
+import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import org.junit.Test
@@ -23,6 +24,7 @@ class Playground {
                     e.onSuccess("hi im single 1")
                 },
                 Single.create<String> { e ->
+                    Thread.sleep(1000)
                     e.onSuccess("hi im single 2")
                 },
                 Single.create<String> { e ->
@@ -87,5 +89,38 @@ class Playground {
                 onComplete = {
                 }
             )
+    }
+
+    @Test
+    fun clientSideJoins() {
+        val combinedSingles = arrayListOf(
+            Single.zip(
+                Single.create { e ->
+                    Thread.sleep(1000)
+                    e.onSuccess(arrayListOf("A. comment 1", "A. comment 2"))
+                },
+                Single.just(1),
+                BiFunction<ArrayList<String>, Int, String> { comments, user ->
+                    return@BiFunction "comments: $comments, user: $user"
+                }
+            ),
+            Single.zip(
+                Single.create { e ->
+                    e.onSuccess(arrayListOf("B. comment 1", "B. comment 2"))
+                },
+                Single.just(2),
+                BiFunction<ArrayList<String>, Int, String> { comments, user ->
+                    return@BiFunction "comments: $comments, user: $user"
+                }
+            )
+        )
+
+        val disposable = Single.merge(combinedSingles)
+            .subscribeOn(Schedulers.trampoline())
+            .observeOn(Schedulers.trampoline())
+
+        disposable.subscribeBy {
+            println(it)
+        }
     }
 }
