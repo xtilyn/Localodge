@@ -4,6 +4,7 @@ import android.location.Location
 import android.util.Log
 import com.devssocial.localodge.extensions.mapProperties
 import com.devssocial.localodge.models.Post
+import com.devssocial.localodge.models.PostStatistics
 import com.devssocial.localodge.models.PostViewItem
 import com.devssocial.localodge.models.User
 import com.devssocial.localodge.shared.UserRepository
@@ -100,34 +101,33 @@ class PostsProvider(
                                     onSuccess = { orderedPosts ->
                                         val combinedSingles = orderedPosts.map {
                                             Single.zip(
-                                                userRepo.getUserData(it.posterUserId)
-                                                    .onErrorReturnItem(User()),
+                                                userRepo.getUserData(it.posterUserId).onErrorReturnItem(User()),
                                                 repo.getPostStats(it.objectID),
-                                                BiFunction {
-                                                    // TODO CONTINUE HERE CURR
+                                                BiFunction<User, PostStatistics, Pair<User, PostStatistics>> {
+                                                    user, stats ->
+                                                    Pair(user, stats)
                                                 }
                                             )
 
                                         }
-                                        val getStatsSingles = orderedPosts.map {
 
-                                        }
-
-                                        // TODO CONTINUE HERE CURR: GET COMMENTS FROM REALTIME DATABASE
                                         disposables.add(
-                                            Single.merge(getUsersSingles)
+                                            Single.merge(combinedSingles)
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribeOn(Schedulers.io())
                                                 .subscribeBy(
                                                     onError = {
                                                         Log.e(TAG, it.message, it)
                                                     },
-                                                    onNext = { user ->
+                                                    onNext = { result: Pair<User, PostStatistics> ->
+                                                        val user = result.first
+                                                        val stats = result.second
                                                         orderedPosts.forEach { postViewItem: PostViewItem ->
                                                             if (postViewItem.posterUserId == user.userId) {
                                                                 postViewItem.posterUsername = user.username
                                                                 postViewItem.posterProfilePic = user.profilePicUrl
                                                             }
+                                                            postViewItem.commentsCount = stats.commentsCount
                                                         }
                                                     },
                                                     onComplete = {
