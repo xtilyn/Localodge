@@ -1,6 +1,5 @@
 package com.devssocial.localodge
 
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,8 +22,7 @@ import java.lang.Exception
 /**
  * Parent activity for all activities except LoginActivity
  */
-@SuppressLint("Registered")
-open class LocalodgeActivity : AppCompatActivity() {
+abstract class LocalodgeActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "LocalodgeActivity"
