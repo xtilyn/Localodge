@@ -119,9 +119,9 @@ dependencies {
     implementation 'com.github.imperiumlabs:GeoFirestore-Android:v1.5.0'
 
     // Exo player
-    implementation 'com.google.android.exoplayer:exoplayer-core:2.10.1'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.1'
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.50"
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.11.1'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.11.1'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.61"
 
     // ROOM
     implementation 'androidx.room:room-runtime:2.2.2'
