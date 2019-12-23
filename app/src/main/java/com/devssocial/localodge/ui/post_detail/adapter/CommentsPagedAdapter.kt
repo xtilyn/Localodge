@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -13,6 +14,7 @@ import com.devssocial.localodge.R
 import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.extensions.instaGone
 import com.devssocial.localodge.extensions.instaVisible
+import com.devssocial.localodge.extensions.popShow
 import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.models.CommentViewItem
 import com.devssocial.localodge.shared.DiffCallback
@@ -35,12 +37,35 @@ class CommentsPagedAdapter(
             val profilePic = itemView.findViewById<ImageView>(R.id.comment_profile_pic)
             val toggleCommentButton = itemView.findViewById<TextView>(R.id.comment_toggle_text)
             val timestamp = itemView.findViewById<TextView>(R.id.comment_timestamp)
+            val commentPhotoContainer = itemView.findViewById<CardView>(R.id.comment_photo_container)
+            val commentPhoto = itemView.findViewById<ImageView>(R.id.comment_photo)
 
             Glide.with(itemView.context)
                 .load(item.postedByProfilePic)
                 .into(profilePic)
+
+            if (item.photoUrl != null) {
+                commentPhotoContainer.instaVisible()
+                Glide.with(itemView.context)
+                    .load(item.photoUrl)
+                    .into(commentPhoto)
+                commentPhotoContainer.setOnClickListener(this)
+            } else {
+                commentPhotoContainer.instaGone()
+                commentPhoto.setImageDrawable(null)
+                commentPhotoContainer.setOnClickListener(null)
+            }
+
             displayName.text = item.postedByUsername
-            commentTextView.text = item.body
+
+            if (item.body.isNotBlank()) {
+                commentTextView.text = item.body
+                commentTextView.instaVisible()
+            } else {
+                commentTextView.text = ""
+                commentTextView.instaGone()
+            }
+
             timestamp.instaVisible()
             timestamp.text = DateUtils.convertMessageTimestamp(item.timestamp!!.seconds * 1000L)
 

@@ -144,25 +144,12 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
             comment_et.requestFocus()
             context?.let { KeyboardUtils.showKeyboard(it) }
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        postId = args.contentId
-        activity?.let {
-            postViewModel = ViewModelProviders.of(it)[PostViewModel::class.java]
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         showProgress(true)
         getUserLocation { userLocation: Location? ->
             getPostDetail { postViewItem: PostViewItem ->
                 this.postViewItem = postViewItem
-                showProgress(false)
+
                 if (userLocation == null || context == null) return@getPostDetail
                 PostViewHolder.bindItem(
                     postViewItem,
@@ -195,9 +182,22 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                 add_photo_comment?.setOnClickListener {
                     PhotoPicker.pickFromGallery(this)
                 }
+
+                delete_media?.setOnClickListener {
+                    toggleCommentAttachment(false)
+                }
             }
 
             setupRecyclerView()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        postId = args.contentId
+        activity?.let {
+            postViewModel = ViewModelProviders.of(it)[PostViewModel::class.java]
         }
     }
 
@@ -205,16 +205,19 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
         if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
             val images = ImagePicker.getImages(data) as ArrayList<Image>
             currentCommentPhotoPath = images[0].path
-            comment_image_progress?.visible()
+            toggleCommentAttachment(true)
             context?.let {
                 Glide.with(it)
                     .load(currentCommentPhotoPath)
-                    .onLoadEnded {
-                        comment_image_progress?.gone()
-                        comment_photo_container?.popShow()
-                    }
                     .into(comment_image_attachment)
             }
+            comment_et?.error = null
+            post_comment?.imageTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    context!!,
+                    R.color.colorPrimary
+                )
+            )
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
@@ -254,7 +257,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
 
     private fun showProgress(show: Boolean) {
         if (show) loading_overlay?.popShow()
-        else loading_overlay?.popHide()
+        else loading_overlay?.gone()
     }
 
     private fun toggleLike() {
@@ -329,16 +332,33 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                             factory.invalidateDataSource()
                             setupRecyclerView()
                             comment_et?.setText("")
+                            toggleCommentAttachment(false)
                         }
                     }
                 )
         )
     }
 
+    private fun toggleCommentAttachment(show: Boolean) {
+        if (show) {
+            post_comment_photo_container?.instaVisible()
+        } else {
+            comment_image_attachment?.setImageDrawable(null)
+            post_comment_photo_container?.instaGone()
+            currentCommentPhotoPath = null
+            post_comment?.imageTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    context!!,
+                    R.color.lightGray
+                )
+            )
+        }
+    }
+
     private fun showPostCommentProgress(show: Boolean) {
         post_comment?.isEnabled = !show
         if (show) {
-            post_comment?.popHide()
+            post_comment?.instaInvisible()
             post_comment_progress?.popShow()
         } else {
             post_comment_progress?.popHide()
@@ -374,7 +394,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
             commentsInitialLoadResult
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    swipe_refresh_comments?.isRefreshing = it == Status.LOADING
+                    showProgress(it == Status.LOADING)
                     if (it == Status.ERROR) showError()
                 }
         )
@@ -387,9 +407,18 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
     }
 
     override fun onItemClick(view: View, position: Int) {
+        val current = commentsAdapter.currentList?.get(position) ?: return
         when (view.id) {
             R.id.comment_toggle_text -> {
                 commentsAdapter.notifyItemChanged(position, AdapterPayload.EXPAND_OR_COLLAPSE)
+            }
+            R.id.comment_photo_container -> {
+                context?.let {
+                    DialogHelper(it).showMediaDialog(
+                        photoUrl = current.photoUrl,
+                        videoUrl = null
+                    )
+                }
             }
         }
     }

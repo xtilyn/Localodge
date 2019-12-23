@@ -14,6 +14,7 @@ data class Comment(
 data class CommentViewItem(
     var objectID: String = "",
     var postedBy: String = "",
+    var photoUrl: String? = null,
     @ServerTimestamp var timestamp: Timestamp? = null,
     var body: String = "",
 

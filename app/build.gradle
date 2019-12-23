@@ -142,4 +142,7 @@ dependencies {
 
     // photo view
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    // prety time
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
 }
