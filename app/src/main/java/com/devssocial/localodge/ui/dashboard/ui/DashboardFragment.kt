@@ -9,7 +9,10 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -23,20 +26,20 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.devssocial.localodge.*
+import com.devssocial.localodge.LocalodgeActivity
+import com.devssocial.localodge.NO_VALUE
 import com.devssocial.localodge.R
-import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.data_objects.AdapterPayload
 import com.devssocial.localodge.enums.Status
 import com.devssocial.localodge.extensions.*
+import com.devssocial.localodge.interfaces.ListItemListener
 import com.devssocial.localodge.interfaces.PostOptionsListener
 import com.devssocial.localodge.models.*
-import com.devssocial.localodge.room_models.PostRoom
 import com.devssocial.localodge.ui.dashboard.adapter.PostsAdapter
-import com.devssocial.localodge.ui.dashboard.utils.PostsProvider
-import com.devssocial.localodge.ui.dashboard.utils.PostsUtil
 import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel
-import com.devssocial.localodge.utils.*
+import com.devssocial.localodge.ui.dashboard.view_model.DashboardViewModel.Companion.INITIAL_RADIUS
+import com.devssocial.localodge.utils.KeyboardUtils
+import com.devssocial.localodge.utils.SharedPrefManager
 import com.devssocial.localodge.utils.helpers.ActivityLaunchHelper
 import com.devssocial.localodge.utils.helpers.DialogHelper
 import com.devssocial.localodge.utils.helpers.PhotoPicker
@@ -48,37 +51,28 @@ import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.Timestamp
 import es.dmoral.toasty.Toasty
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.content_dashboard.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.*
 import kotlinx.android.synthetic.main.dialog_choose_photo.view.close_dialog
 import kotlinx.android.synthetic.main.dialog_send_feedback.view.*
-import kotlinx.android.synthetic.main.dialog_send_feedback.view.send_feedback_progress
 import kotlinx.android.synthetic.main.dialog_warning.view.*
 import kotlinx.android.synthetic.main.fragment_dashboard.*
-import kotlinx.android.synthetic.main.nav_header_dashboard_no_user.view.*
-import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.*
-import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_profile_pic_image_view
 import kotlinx.android.synthetic.main.layout_empty_state.*
 import kotlinx.android.synthetic.main.layout_empty_state.view.*
+import kotlinx.android.synthetic.main.nav_header_dashboard_no_user.view.*
 import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.*
+import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.*
+import kotlinx.android.synthetic.main.nav_header_dashboard_signed_in.view.user_profile_pic_image_view
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 
 class DashboardFragment :
     Fragment(),
@@ -101,11 +95,6 @@ class DashboardFragment :
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var postsAdapter: PostsAdapter
-    private lateinit var postsProvider: PostsProvider
-    private var blockedPosts: HashSet<String>? = null
-    private val blockedPostsResult = BehaviorSubject.create<Status>()
-
-    private lateinit var retrievedPosts: HashMap<Int, ArrayList<PostViewItem>>
     private var currentPage = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,8 +102,6 @@ class DashboardFragment :
 
         dashboardViewModel = ViewModelProviders.of(activity!!)[DashboardViewModel::class.java]
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-        postsProvider =
-            PostsProvider(disposables, dashboardViewModel.postsRepo, dashboardViewModel.userRepo)
     }
 
     override fun onCreateView(
@@ -198,9 +185,6 @@ class DashboardFragment :
             }
         }
 
-
-        getBlockedUsers()
-        getBlockedPosts()
         if (userLocation != null) {
             loadInitialDashboardDataWithLocation()
         } else {
@@ -215,12 +199,29 @@ class DashboardFragment :
             KeyboardUtils.hideKeyboard(context!!, view!!)
 
         // observe activity's onBackPressed event
-        disposables.add(
+        disposables.addAll(
             dashboardViewModel.onBackPressed
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     if (drawer_layout?.isDrawerOpen(GravityCompat.START) == true) {
                         drawer_layout?.closeDrawer(GravityCompat.START)
+                    }
+                },
+            dashboardViewModel.data
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    when (it.status) {
+                        Status.SUCCESS -> {
+                            swipe_refresh_dashboard.isRefreshing = false
+                            postsAdapter.updateList(it.data ?: arrayListOf())
+                        }
+                        Status.ERROR -> {
+                            showError(it.error!!)
+                        }
+                        Status.LOADING -> {
+                            swipe_refresh_dashboard.isRefreshing = true
+                        }
+                        else -> {}
                     }
                 }
         )
@@ -441,17 +442,15 @@ class DashboardFragment :
                     }
                     return
                 }
-                val shouldUpdateInitialDataInRoom =
-                    retrievedPosts[0]?.any { it.objectID == current.objectID } == true
                 if (current.likes.contains(dashboardViewModel.userRepo.getCurrentUser()?.uid)) {
-                    unlikePost(current, shouldUpdateInitialDataInRoom) {
+                    unlikePost(current) {
                         postsAdapter.notifyItemChanged(
                             position,
                             AdapterPayload.LIKED_OR_UNLIKED_POST
                         )
                     }
                 } else {
-                    likePost(current, shouldUpdateInitialDataInRoom) {
+                    likePost(current) {
                         postsAdapter.notifyItemChanged(
                             position,
                             AdapterPayload.LIKED_OR_UNLIKED_POST
@@ -731,174 +730,39 @@ class DashboardFragment :
         )
         dashboard_recyclerview.adapter = postsAdapter
         dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
-        dashboard_recyclerview.onScrolledToBottom(::loadMoreDashboardData)
 
-        if (dashboardViewModel.isUserLoggedIn()) {
-            if (blockedPosts == null || dashboardViewModel.blockedUsers == null) {
-                disposables.addAll(
-                    Observable.zip(
-                        blockedPostsResult,
-                        dashboardViewModel.blockedUsersResult,
-                        BiFunction<Status, Status, Pair<Status, Status>> { s1, s2 ->
-                            Pair(s1, s2)
-                        }
-                    )
-                        .subscribeBy(
-                            onError = {
-                                handleError(it)
-                            },
-                            onNext = { results: Pair<Status, Status> ->
-                                if (results.first == Status.ERROR
-                                    || results.second == Status.ERROR) {
-                                    handleError(null)
-                                    return@subscribeBy
-                                }
-                                if (results.first == Status.SUCCESS_WITH_DATA
-                                    && results.second == Status.SUCCESS_WITH_DATA) {
-                                    loadDashboardDataFromRoom()
-                                }
-                            }
-                        )
-                )
-            } else {
-                loadDashboardDataFromRoom()
-            }
-        } else {
-            blockedPosts = hashSetOf()
-            dashboardViewModel.blockedUsers = hashSetOf()
-            loadDashboardDataFromRoom()
-        }
-    }
-
-    private fun loadDashboardDataFromRoom() {
-        disposables.add(
-            dashboardViewModel.postsRepo.postsDao
-                .getPosts()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribeBy(
-                    onError = {
-                        Log.e(TAG, it.message, it)
-                    },
-                    onSuccess = {
-                        val posts = it.map { roomPost ->
-                            roomPost.mapProperties(PostViewItem()).apply {
-                                if (roomPost.timestamp != null) {
-                                    timestamp = Timestamp(Date(roomPost.timestamp!!))
-                                }
-                                if (roomPost.lat != null && roomPost.lng != null) {
-                                    _geoloc = Location(
-                                        lat = roomPost.lat!!,
-                                        lng = roomPost.lng!!
-                                    )
-                                }
-                            }
-                        } as ArrayList<PostViewItem>
-                        postsAdapter.updateList(posts)
-                        if (userLocation == null) {
-                            showError(resources.getString(R.string.could_not_get_location))
-                            return@subscribeBy
-                        }
-                        loadInitialDataFromFirebase(PostsProvider.INITIAL_RADIUS)
-                    }
-                )
-        )
+        loadInitialDataFromFirebase(INITIAL_RADIUS)
     }
 
     private fun loadInitialDataFromFirebase(radius: Double) {
         Log.d(this::class.java.simpleName, "searching for posts with radius: $radius")
-        var blockedUsers = hashSetOf<String>()
-        var blockedPosts = hashSetOf<String>()
-        if (dashboardViewModel.isUserLoggedIn()) {
-            blockedUsers = dashboardViewModel.blockedUsers!!
-            blockedPosts = this.blockedPosts!!
-        }
-        postsProvider.loadInitialWithLocation(
-            userLocation = userLocation!!,
-            radius = radius,
-            blockedUsers = blockedUsers,
-            blockedPosts = blockedPosts,
-            onError = { exception ->
-                (activity as LocalodgeActivity).logAndShowError(
-                    TAG,
-                    exception,
-                    resources.getString(R.string.error_retrieving_data)
-                )
-            },
-            onSuccess = { posts: ArrayList<PostViewItem> ->
-                if ((posts.isEmpty() || posts.size < 5) && expandSearchCount < 3) {
-                    expandSearchCount++
-                    loadInitialDataFromFirebase(radius + PostsProvider.RADIUS_INCREMENT)
-                } else {
-                    showSwipeRefreshProgress(false)
-                    toggleEmptyState(posts.isEmpty())
-
-                    retrievedPosts = PostsUtil.constructMapBasedOnHitsPerPage(HITS_PER_PAGE, posts)
-                    val initialPosts = if (posts.size > HITS_PER_PAGE) {
-                        retrievedPosts[0]
-                    } else {
-                        posts
-                    } ?: arrayListOf()
-                    postsAdapter.updateList(initialPosts)
-
-                    // save initial data to room
-                    val postsRoom = initialPosts.map { postFirebase ->
-                        postFirebase.mapProperties(PostRoom()).apply {
-                            lat = postFirebase._geoloc.lat
-                            lng = postFirebase._geoloc.lng
-                            timestamp = postFirebase.timestamp?.seconds?.times(1000)
-                        }
-                    }
-                    dashboardViewModel.postsRepo.postsDao
-                        .deleteAll()
-                        .subscribeOn(Schedulers.io())
-                        .subscribe {
-                            disposables.add(
-                                dashboardViewModel.postsRepo.postsDao
-                                    .insertAll(postsRoom)
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribeOn(Schedulers.io())
-                                    .subscribe()
-                            )
-                        }
-                }
-            }
-        )
-    }
-
-    private fun loadMoreDashboardData() {
-        if (this::retrievedPosts.isInitialized) {
-            currentPage++
-            postsAdapter.appendToList(retrievedPosts[currentPage] ?: arrayListOf())
-        }
+        dashboardViewModel.loadInitialWithLocation(userLocation!!, radius)
     }
 
     private fun onRefresh() {
-        if (!this::retrievedPosts.isInitialized) return
         toggleEmptyState(false)
         showSwipeRefreshProgress(true)
         postsAdapter.clear()
         expandSearchCount = 0
         currentPage = 0
-        loadInitialDataFromFirebase(PostsProvider.INITIAL_RADIUS)
+        loadInitialDataFromFirebase(INITIAL_RADIUS)
     }
 
-    private fun unlikePost(post: PostViewItem, updateInRoom: Boolean, onComplete: () -> Unit) {
+    private fun unlikePost(post: PostViewItem, onComplete: () -> Unit) {
         val currUserId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
         post.likes.remove(currUserId)
-        updateLikes(post.objectID, post.likes, updateInRoom, onComplete)
+        updateLikes(post.objectID, post.likes, onComplete)
     }
 
-    private fun likePost(post: PostViewItem, updateInRoom: Boolean, onComplete: () -> Unit) {
+    private fun likePost(post: PostViewItem, onComplete: () -> Unit) {
         val currUserId = dashboardViewModel.userRepo.getCurrentUser()?.uid ?: return
         post.likes[currUserId] = true
-        updateLikes(post.objectID, post.likes, updateInRoom, onComplete)
+        updateLikes(post.objectID, post.likes, onComplete)
     }
 
     private fun updateLikes(
         postId: String,
         newLikes: HashMap<String, Boolean>,
-        updateInRoom: Boolean,
         onComplete: () -> Unit
     ) {
         disposables.add(
@@ -919,10 +783,6 @@ class DashboardFragment :
                     }
                 )
         )
-
-        if (updateInRoom) {
-            dashboardViewModel.postsRepo.postsDao.updateLikes(postId, newLikes.keys.toHashSet())
-        }
     }
 
     private fun showProfilePicProgress(show: Boolean) {
@@ -984,46 +844,6 @@ class DashboardFragment :
 
             dh.dialog.show()
         }
-    }
-
-    private fun getBlockedUsers() {
-        if (!dashboardViewModel.isUserLoggedIn()) return
-        disposables.add(
-            dashboardViewModel
-                .userRepo
-                .getBlocking()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribeBy(
-                    onError = {
-                        handleError(it)
-                    },
-                    onSuccess = {
-                        dashboardViewModel.blockedUsers = it
-                        dashboardViewModel.blockedUsersResult.onNext(Status.SUCCESS_WITH_DATA)
-                    }
-                )
-        )
-    }
-
-    private fun getBlockedPosts() {
-        if (!dashboardViewModel.isUserLoggedIn()) return
-        disposables.add(
-            dashboardViewModel
-                .userRepo
-                .getBlockedPosts()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribeBy(
-                    onError = {
-                        handleError(it)
-                    },
-                    onSuccess = {
-                        blockedPosts = it
-                        blockedPostsResult.onNext(Status.SUCCESS_WITH_DATA)
-                    }
-                )
-        )
     }
 
     override fun onReportUser(userIdToReport: String, reason: String, desc: String) {
@@ -1115,8 +935,6 @@ class DashboardFragment :
 
     override fun onBlockPost(postViewItem: PostViewItem, position: Int?) {
         showProgress(true)
-        blockedPosts!!.add(postViewItem.objectID)
-        val userId = dashboardViewModel.userRepo.getCurrentUserId() ?: return
         disposables.addAll(
             dashboardViewModel
                 .userRepo
@@ -1137,13 +955,5 @@ class DashboardFragment :
                     }
                 )
         )
-
-        dashboardViewModel
-            .userRepo
-            .userDao
-            .updateBlockedPosts(userId, blockedPosts!!)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe()
     }
 }

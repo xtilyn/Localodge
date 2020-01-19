@@ -37,7 +37,6 @@ class PostsRepository(context: Context) {
         private const val TAG = "PostsRepository"
     }
 
-    val postsDao = LocalodgeRoomDatabase.getDatabase(context).postDao()
     private val firestore = FirebaseFirestore.getInstance()
     private val realtimeDatabase = FirebaseDatabase.getInstance()
     private val geoFirestore = GeoFirestore(firestore.collection(COLLECTION_POSTS))

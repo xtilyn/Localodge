@@ -111,139 +111,10 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks, NewPost
                     DialogHelper(context!!)
                 dh.createDialog(R.layout.dialog_promote_post)
 
-                val rating5 = dh.dialogView.findViewById<CardView>(R.id.rating_5)
-                val rating4 = dh.dialogView.findViewById<CardView>(R.id.rating_4)
-                val rating3 = dh.dialogView.findViewById<CardView>(R.id.rating_3)
-                val rating2 = dh.dialogView.findViewById<CardView>(R.id.rating_2)
-                val rating1 = dh.dialogView.findViewById<CardView>(R.id.rating_1)
-
-                var layoutExpanded = false
-                var currRatingInfoShown = 0
-                val root = dh.dialogView.findViewById<ConstraintLayout>(R.id.promote_root)
-
-                val onClick = View.OnClickListener {
-                    if (context == null) return@OnClickListener
-                    when (it.id) {
-                        R.id.close_dialog -> dh.dialog.dismiss()
-                        R.id.rating_5 -> {
-                            if (layoutExpanded) {
-                                currRatingInfoShown = toggleRatingInfo(it, 5, root, dh.dialogView)
-                            } else {
-                                updateConstraints(R.layout.dialog_promote_post_alt, root)
-                                layoutExpanded = true
-                            }
-                        }
-                        R.id.rating_4 -> {
-                            currRatingInfoShown = toggleRatingInfo(it, 4, root, dh.dialogView)
-                        }
-                        R.id.rating_3 -> {
-                            currRatingInfoShown = toggleRatingInfo(it, 3, root, dh.dialogView)
-                        }
-                        R.id.rating_2 -> {
-                            currRatingInfoShown = toggleRatingInfo(it, 2, root, dh.dialogView)
-                        }
-                        R.id.rating_1 -> {
-                            currRatingInfoShown = toggleRatingInfo(it, 1, root, dh.dialogView)
-                        }
-                        R.id.rating_info_back_btn -> {
-                            currRatingInfoShown = 0
-                            rating5.tag = false
-                            rating4.tag = false
-                            rating3.tag = false
-                            rating2.tag = false
-                            rating1.tag = false
-
-                            if (layoutExpanded) updateConstraints(
-                                R.layout.dialog_promote_post_alt,
-                                root
-                            )
-                            else updateConstraints(R.layout.dialog_promote_post, root)
-                        }
-                        R.id.rating_info_choose_this_btn -> {
-                            chosenPostRating = currRatingInfoShown
-                            dh.dialog.dismiss()
-                            toggleViewsBasedOnRating(chosenPostRating)
-                        }
-                    }
-                }
-
-                dh.dialogView.findViewById<ImageButton>(R.id.close_dialog)
-                    .setOnClickListener(onClick)
-                dh.dialogView.findViewById<ImageButton>(R.id.rating_info_back_btn)
-                    .setOnClickListener(onClick)
-                dh.dialogView.findViewById<Button>(R.id.rating_info_choose_this_btn)
-                    .setOnClickListener(onClick)
-                rating5.setOnClickListener(onClick)
-                rating4.setOnClickListener(onClick)
-                rating3.setOnClickListener(onClick)
-                rating2.setOnClickListener(onClick)
-                rating1.setOnClickListener(onClick)
-
+                // TODO CONTINUE HERE CURR CONFIGURE NEW PROMOTE DIALOG
                 dh.dialog.show()
             }
         }
-    }
-
-    private fun updateConstraints(@LayoutRes id: Int, root: ConstraintLayout) {
-        if (context == null) return
-        val newConstraintSet = ConstraintSet()
-        newConstraintSet.clone(context, id)
-        newConstraintSet.applyTo(root)
-        val transition = ChangeBounds()
-        transition.interpolator = OvershootInterpolator()
-        TransitionManager.beginDelayedTransition(root, transition)
-    }
-
-    private fun toggleRatingInfo(
-        ratingView: View,
-        rating: Int,
-        root: ConstraintLayout,
-        dialogView: View
-    ): Int {
-        if (context == null) return 0
-        val currRatingInfoShown: Int
-        val isInfoShowing = if (ratingView.tag is String) (ratingView.tag as String).toBoolean()
-        else ratingView.tag as Boolean
-        if (isInfoShowing) {
-            updateConstraints(R.layout.dialog_promote_post_alt, root)
-            ratingView.tag = false
-            currRatingInfoShown = 0
-        } else {
-            currRatingInfoShown = rating
-            showRatingInfo(rating, dialogView)
-            ratingView.tag = true
-        }
-        return currRatingInfoShown
-    }
-
-    private fun showRatingInfo(rating: Int, dialogView: View) {
-        if (context == null) return
-        val title = dialogView.findViewById<TextView>(R.id.rating_info_title)
-        val desc = dialogView.findViewById<TextView>(R.id.rating_info_desc)
-        val ratingInfo = dialogView.findViewById<CardView>(R.id.rating_info)
-        when (rating) {
-            5 -> {
-                title.text = getString(R.string.featured_posts_30_days)
-                desc.text = getString(R.string.rating_5_info)
-            }
-            4 -> {
-                title.text = getString(R.string.featured_posts_7_days)
-                desc.text = getString(R.string.rating_5_info)
-            }
-            3 -> {
-                title.text = getString(R.string.featured_posts_3_days)
-                desc.text = getString(R.string.rating_5_info)
-            }
-            2 -> {
-                title.text = getString(R.string.urgent_posts)
-                desc.text = getString(R.string.rating_2_info)
-            }
-            1 -> {
-                title.text = getString(R.string.highlighted_posts)
-                desc.text = getString(R.string.rating_1_info)
-            }
-        }
-        ratingInfo.popShow()
     }
 
     private fun proceedToPayment(post: Post) {
@@ -258,23 +129,6 @@ class NewPostFragment : Fragment(), EasyPermissions.PermissionCallbacks, NewPost
                     findNavController().navigate(action)
                 }
         )
-    }
-
-    private fun toggleViewsBasedOnRating(rating: Int) {
-        if (context == null) return
-        if (chosenPostRating == 0) {
-            promotion_method.popHide()
-            return
-        }
-        chosen_rating_text.text = when (rating) {
-            5 -> getString(R.string.featured_posts_30_days)
-            4 -> getString(R.string.featured_posts_7_days)
-            3 -> getString(R.string.featured_posts_3_days)
-            2 -> getString(R.string.urgent_posts)
-            1 -> getString(R.string.highlighted_posts)
-            else -> ""
-        }
-        promotion_method.popShow()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
