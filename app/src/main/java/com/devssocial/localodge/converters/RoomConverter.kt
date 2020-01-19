@@ -15,70 +15,75 @@ public class RoomConverter {
 
     companion object {
         private const val TAG = "CollectionConverter"
-    }
 
-    @TypeConverter
-    public fun fromTimeStamp(timestamp: Timestamp): Long = timestamp.seconds * 1000L
+        @TypeConverter
+        @JvmStatic
+        public fun fromTimeStamp(timestamp: Timestamp): Long = timestamp.seconds * 1000L
 
-    @TypeConverter
-    public fun toTimeStamp(millis: Long): Timestamp = Timestamp(Date(millis))
+        @TypeConverter
+        @JvmStatic
+        public fun toTimeStamp(millis: Long): Timestamp = Timestamp(Date(millis))
 
-    @TypeConverter
-    public fun fromStringSet(strings: Set<String>?): String? {
-        if (strings == null) {
-            return null
-        }
-
-        val result = StringWriter()
-        val json = JsonWriter(result)
-
-        try {
-            json.beginArray()
-
-            for (s in strings) {
-                json.value(s)
+        @TypeConverter
+        @JvmStatic
+        public fun fromStringSet(strings: Set<String>?): String? {
+            if (strings == null) {
+                return null
             }
 
-            json.endArray()
-            json.close()
-        } catch (e: IOException) {
-            Log.e(TAG, "Exception creating JSON", e)
-        }
+            val result = StringWriter()
+            val json = JsonWriter(result)
 
-        return result.toString()
-    }
+            try {
+                json.beginArray()
 
-    @TypeConverter
-    public fun toStringSet(strings: String?): Set<String>? {
-        if (strings == null) {
-            return null
-        }
+                for (s in strings) {
+                    json.value(s)
+                }
 
-        val reader = StringReader(strings)
-        val json = JsonReader(reader)
-        val result = hashSetOf<String>()
-
-        try {
-            json.beginArray()
-
-            while (json.hasNext()) {
-                result.add(json.nextString())
+                json.endArray()
+                json.close()
+            } catch (e: IOException) {
+                Log.e(TAG, "Exception creating JSON", e)
             }
 
-            json.endArray()
-        } catch (e: IOException) {
-            Log.e(TAG, "Exception parsing JSON", e)
+            return result.toString()
         }
 
-        return result
-    }
+        @TypeConverter
+        @JvmStatic
+        public fun toStringSet(strings: String?): Set<String>? {
+            if (strings == null) {
+                return null
+            }
 
-    @TypeConverter
-    public fun fromStringMap(strings: HashMap<String, Boolean>?): HashSet<String>? {
-        if (strings == null) {
-            return null
+            val reader = StringReader(strings)
+            val json = JsonReader(reader)
+            val result = hashSetOf<String>()
+
+            try {
+                json.beginArray()
+
+                while (json.hasNext()) {
+                    result.add(json.nextString())
+                }
+
+                json.endArray()
+            } catch (e: IOException) {
+                Log.e(TAG, "Exception parsing JSON", e)
+            }
+
+            return result
         }
-        return strings.keys.toHashSet()
+
+        @TypeConverter
+        @JvmStatic
+        public fun fromStringMap(strings: HashMap<String, Boolean>?): HashSet<String>? {
+            if (strings == null) {
+                return null
+            }
+            return strings.keys.toHashSet()
+        }
     }
 
 }
