@@ -327,6 +327,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                             setupRecyclerView()
                             comment_et?.setText("")
                             toggleCommentAttachment(false)
+                            KeyboardUtils.hideKeyboard(it, comment_et)
                         }
                     }
                 )

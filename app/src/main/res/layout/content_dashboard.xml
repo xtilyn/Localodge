@@ -1,65 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".ui.dashboard.ui.DashboardActivity">
+<androidx.coordinatorlayout.widget.CoordinatorLayout	xmlns:android="http://schemas.android.com/apk/res/android"
+								xmlns:app="http://schemas.android.com/apk/res-auto"
+								xmlns:tools="http://schemas.android.com/tools"
+								android:layout_width="match_parent"
+								android:layout_height="match_parent"
+								tools:context=".ui.dashboard.ui.DashboardActivity"
+								>
 
-    <com.google.android.material.appbar.AppBarLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:theme="@style/AppTheme.AppBarOverlay"
-            android:elevation="0dp"
-            app:elevation="0dp"
-            >
+				<com.google.android.material.appbar.AppBarLayout
+												android:layout_width="match_parent"
+												android:layout_height="wrap_content"
+												android:elevation="0dp"
+												android:theme="@style/AppTheme.AppBarOverlay"
+												app:elevation="0dp"
+												>
 
-        <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar_dashboard"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@android:color/white"
-                app:titleTextColor="@color/colorPrimary"
+								<androidx.appcompat.widget.Toolbar
+																android:id="@+id/toolbar_dashboard"
+																android:layout_width="match_parent"
+																android:layout_height="?attr/actionBarSize"
+																android:background="#f8f8f8"
 																app:layout_scrollFlags="scroll|enterAlways"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
+																app:popupTheme="@style/AppTheme.PopupOverlay"
+																app:titleTextColor="@color/colorPrimary"
+																/>
 
-    </com.google.android.material.appbar.AppBarLayout>
+				</com.google.android.material.appbar.AppBarLayout>
 
-				<FrameLayout
+				<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+												android:id="@+id/swipe_refresh_dashboard"
 												android:layout_width="match_parent"
 												android:layout_height="match_parent"
-												app:layout_behavior="@string/appbar_scrolling_view_behavior">
+												android:background="#f8f8f8"
+												app:layout_behavior="@string/appbar_scrolling_view_behavior"
+												>
 
-								<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-																android:id="@+id/swipe_refresh_dashboard"
+								<androidx.core.widget.NestedScrollView
 																android:layout_width="match_parent"
-																android:layout_height="match_parent">
+																android:layout_height="match_parent"
+																android:fillViewport="true"
+																>
 
-												<androidx.recyclerview.widget.RecyclerView
-																				android:id="@+id/dashboard_recyclerview"
+												<LinearLayout
 																				android:layout_width="match_parent"
 																				android:layout_height="match_parent"
-																				android:paddingTop="8dp"
-																				android:paddingBottom="28dp"
-																				android:clipToPadding="false"
+																				android:orientation="vertical"
 																				>
 
-												</androidx.recyclerview.widget.RecyclerView>
+																<EditText
+																								android:layout_width="match_parent"
+																								android:layout_height="50dp"
+																								android:background="@drawable/rounded_bg_white"
+																								android:hint="Search"
+																								android:importantForAutofill="no"
+																								android:inputType="text"
+																								android:layout_marginTop="12dp"
+																								android:layout_marginStart="18dp"
+																								android:layout_marginEnd="18dp"
+																								android:drawableStart="@drawable/ic_search"
+																								android:drawablePadding="8dp"
+																								android:paddingStart="12dp"
+																								android:paddingEnd="12dp"
+																								/>
 
-								</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+																<androidx.recyclerview.widget.RecyclerView
+																								android:id="@+id/dashboard_recyclerview"
+																								android:layout_width="match_parent"
+																								android:layout_height="match_parent"
+																								android:clipToPadding="false"
+																								android:paddingTop="8dp"
+																								android:paddingBottom="28dp"
+																								>
 
-				</FrameLayout>
+																</androidx.recyclerview.widget.RecyclerView>
 
-				<include layout="@layout/layout_empty_state" android:visibility="gone"/>
+												</LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_add"
-            />
+								</androidx.core.widget.NestedScrollView>
+
+				</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+				<include
+												layout="@layout/layout_empty_state"
+												android:visibility="gone"
+												/>
+
+				<com.google.android.material.floatingactionbutton.FloatingActionButton
+												android:id="@+id/fab"
+												android:layout_width="wrap_content"
+												android:layout_height="wrap_content"
+												android:layout_gravity="bottom|end"
+												android:layout_margin="@dimen/fab_margin"
+												app:srcCompat="@drawable/ic_add"
+												/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

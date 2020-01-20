@@ -634,6 +634,9 @@ class DashboardFragment :
                 PhotoPicker.pickFromGallery(this)
                 dh.dialog.dismiss()
             }
+            dh.dialogView.view_profile?.setOnClickListener {
+                // TODO CONTINUE HERE PROFILE FRAG
+            }
             dh.dialog.show()
         }
     }

@@ -66,4 +66,25 @@
 												android:layout_marginStart="28dp"
 												/>
 
+				<Button
+												android:id="@+id/view_profile"
+												android:layout_width="0dp"
+												android:layout_height="wrap_content"
+												style="@style/Widget.AppCompat.Button.Borderless"
+												android:text="View Profile"
+												android:textAllCaps="false"
+												android:textAppearance="@style/TextAppearance.AppCompat.Large"
+												android:drawableStart="@drawable/ic_person"
+												android:drawablePadding="8dp"
+												android:gravity="center"
+												android:background="@drawable/button_default_white"
+												app:layout_constraintTop_toBottomOf="@id/choose_photo"
+												app:layout_constraintStart_toStartOf="@id/choose_photo"
+												app:layout_constraintEnd_toEndOf="@id/choose_photo"
+												android:paddingStart="38dp"
+												android:paddingEnd="38dp"
+												android:layout_marginTop="12dp"
+												android:textColor="@color/matteBlack"
+												/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
