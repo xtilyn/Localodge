@@ -13,6 +13,7 @@ import com.devssocial.localodge.view_holders.PostViewHolder
 import kotlinx.android.synthetic.main.list_item_user_post.view.*
 
 class PostsAdapter(
+    val userId: String?,
     val data: ArrayList<PostViewItem>,
     private val listener: ListItemListener,
     private val userLocation: Location
@@ -29,7 +30,7 @@ class PostsAdapter(
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val current = data[position]
-        PostViewHolder.bindItem(current, holder.itemView, userLocation)
+        PostViewHolder.bindItem(current, holder.itemView, userLocation, current.likes.containsKey(userId))
 
         val currPos = holder.adapterPosition
         val onClick = View.OnClickListener { v ->
@@ -41,6 +42,7 @@ class PostsAdapter(
         holder.itemView.user_post_like.setOnClickListener(onClick)
         holder.itemView.user_post_comment.setOnClickListener(onClick)
         holder.itemView.user_post_more_options.setOnClickListener(onClick)
+        holder.itemView.user_post_like_checkbox.setOnClickListener(onClick)
     }
 
     override fun onBindViewHolder(
@@ -50,8 +52,8 @@ class PostsAdapter(
     ) {
         if (payloads.isNotEmpty()) {
             when (payloads[0]) {
-                AdapterPayload.LIKED_OR_UNLIKED_POST -> {
-                    holder.toggleLike()
+                is List<*> -> {
+                    holder.toggleLike(data[position], (payloads[0] as List<*>)[1] as Boolean)
                 }
             }
         } else {

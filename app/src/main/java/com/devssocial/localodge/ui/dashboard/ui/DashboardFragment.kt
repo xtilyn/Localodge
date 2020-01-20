@@ -427,7 +427,12 @@ class DashboardFragment :
                     )
                 }
             }
+            R.id.user_post_like_checkbox,
             R.id.user_post_like -> {
+                postsAdapter.notifyItemChanged(
+                    position,
+                    listOf(AdapterPayload.LIKED_OR_UNLIKED_POST, view.id == R.id.user_post_like)
+                )
                 if (!dashboardViewModel.isUserLoggedIn()) {
                     activity?.let { a ->
                         DialogHelper(a).showSignInRequiredDialog(
@@ -438,19 +443,9 @@ class DashboardFragment :
                     return
                 }
                 if (current.likes.contains(dashboardViewModel.userRepo.getCurrentUser()?.uid)) {
-                    unlikePost(current) {
-                        postsAdapter.notifyItemChanged(
-                            position,
-                            AdapterPayload.LIKED_OR_UNLIKED_POST
-                        )
-                    }
+                    unlikePost(current) {}
                 } else {
-                    likePost(current) {
-                        postsAdapter.notifyItemChanged(
-                            position,
-                            AdapterPayload.LIKED_OR_UNLIKED_POST
-                        )
-                    }
+                    likePost(current) {}
                 }
             }
         }
@@ -716,6 +711,7 @@ class DashboardFragment :
     private fun loadInitialDashboardDataWithLocation() {
         // setup recycler view
         postsAdapter = PostsAdapter(
+            dashboardViewModel.userRepo.getCurrentUserId(),
             arrayListOf(),
             this@DashboardFragment,
             Location(

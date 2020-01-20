@@ -146,48 +146,82 @@
 																android:orientation="vertical"
 																/>
 
-								<Button
-																android:id="@+id/user_post_comment"
-																android:layout_width="0dp"
+								<LinearLayout
+																android:id="@+id/user_post_like"
+																android:layout_width="wrap_content"
 																android:layout_height="50dp"
-																android:text="Comments"
-																app:layout_constraintEnd_toStartOf="@id/guideline3"
-																app:layout_constraintStart_toStartOf="parent"
-																app:layout_constraintBottom_toBottomOf="parent"
-																app:layout_constraintTop_toBottomOf="@id/user_post_media_content_container"
-																android:layout_marginStart="12dp"
-																android:layout_marginTop="12dp"
-																android:textAllCaps="false"
-																style="@style/Widget.AppCompat.Button.Borderless"
-																android:textColor="@color/colorPrimary"
-																android:textSize="16sp"
-																android:drawableStart="@drawable/ic_chat_bubble_outline"
+																android:gravity="center"
 																android:clickable="true"
 																android:focusable="true"
-																android:background="?attr/selectableItemBackground"
-																/>
-
-								<Button
-																android:id="@+id/user_post_like"
-																android:layout_width="0dp"
-																android:layout_height="50dp"
-																android:text="Likes"
-																app:layout_constraintEnd_toEndOf="parent"
+																android:background="@drawable/circle_ripple"
 																app:layout_constraintBottom_toBottomOf="parent"
 																app:layout_constraintTop_toBottomOf="@id/user_post_media_content_container"
 																android:layout_marginTop="12dp"
 																app:layout_constraintStart_toEndOf="@id/guideline3"
-																android:layout_marginEnd="12dp"
-																android:textAllCaps="false"
-																style="@style/Widget.AppCompat.Button.Borderless"
-																android:textColor="@color/colorPrimary"
-																android:textSize="16sp"
-																android:drawableStart="@drawable/ic_favorite_border"
+																android:layout_marginStart="12dp"
+																android:paddingStart="12dp"
+																android:paddingEnd="12dp"
+																>
+
+												<CheckBox
+																				android:id="@+id/user_post_like_checkbox"
+																				android:layout_width="40dp"
+																				android:layout_height="40dp"
+																				android:background="@drawable/like_selector"
+																				android:button="@null"
+																				android:checked="false"
+																				/>
+
+												<TextView
+																				android:id="@+id/likes_text"
+																				android:layout_width="wrap_content"
+																				android:layout_height="50dp"
+																				android:text="0"
+																				android:textColor="@color/colorPrimary"
+																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																				android:gravity="center"
+																				android:textAlignment="center"
+																				/>
+
+								</LinearLayout>
+
+								<LinearLayout
+																android:id="@+id/user_post_comment"
+																android:layout_width="wrap_content"
+																android:layout_height="50dp"
 																android:gravity="center"
 																android:clickable="true"
 																android:focusable="true"
-																android:background="?attr/selectableItemBackground"
-																/>
+																android:background="@drawable/circle_ripple"
+																android:layout_marginTop="12dp"
+																android:layout_marginEnd="12dp"
+																app:layout_constraintEnd_toStartOf="@id/guideline3"
+																app:layout_constraintBottom_toBottomOf="parent"
+																app:layout_constraintTop_toBottomOf="@id/user_post_media_content_container"
+																android:paddingStart="12dp"
+																android:paddingEnd="12dp"
+																>
+
+												<ImageView
+																				android:layout_width="40dp"
+																				android:layout_height="40dp"
+																				android:src="@drawable/ic_chat_bubble_outline"
+																				android:button="@null"
+																				android:checked="false"
+																				/>
+
+												<TextView
+																				android:id="@+id/comments_text"
+																				android:layout_width="wrap_content"
+																				android:layout_height="50dp"
+																				android:text="0"
+																				android:textColor="@color/colorPrimary"
+																				android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+																				android:gravity="center"
+																				android:textAlignment="center"
+																				/>
+
+								</LinearLayout>
 
 				</androidx.constraintlayout.widget.ConstraintLayout>
 

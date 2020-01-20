@@ -19,7 +19,8 @@ class PostViewHolder(itemView: View) :
         fun bindItem(
             item: PostViewItem,
             itemView: View,
-            userLocation: Location
+            userLocation: Location,
+            isLikeFilled: Boolean
         ) {
             if (itemView.context == null) return
 
@@ -54,8 +55,9 @@ class PostViewHolder(itemView: View) :
                 itemView.user_post_description.instaVisible()
             }
             itemView.user_post_username.text = item.posterUsername
-            itemView.user_post_comment.text = itemView.context
-                .resources.getString(R.string.user_post_comments, item.commentsCount.toString())
+            itemView.comments_text.text = item.commentsCount.toString()
+            itemView.likes_text.text = item.likes.size.toString()
+            itemView.user_post_like_checkbox.isChecked = isLikeFilled
 
             if (item.rating > 0) {
                 itemView.user_post_promoted_text.instaVisible()
@@ -75,26 +77,11 @@ class PostViewHolder(itemView: View) :
         }
     }
 
-    fun toggleLike() {
-        val currDrawable =
-            itemView.user_post_like?.compoundDrawables?.get(0)?.constantState ?: return
-        val starOutline =
-            itemView.context.resources.getDrawable(R.drawable.ic_star_border, null)
-                .constantState
-        if (currDrawable == starOutline) {
-            itemView.user_post_like?.setCompoundDrawables(
-                itemView.context.resources.getDrawable(R.drawable.ic_star_filled, null),
-                null,
-                null,
-                null
-            )
-        } else {
-            itemView.user_post_like?.setCompoundDrawables(
-                itemView.context.resources.getDrawable(R.drawable.ic_star_border, null),
-                null,
-                null,
-                null
-            )
+    fun toggleLike(current: PostViewItem, toggleCheck: Boolean) {
+        if (toggleCheck) {
+            val toggleVal = !itemView.user_post_like_checkbox.isChecked
+            itemView.user_post_like_checkbox.isChecked = toggleVal
         }
+        itemView.likes_text.text = (current.likes.size).toString()
     }
 }

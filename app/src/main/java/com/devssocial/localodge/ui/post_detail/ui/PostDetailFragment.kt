@@ -154,7 +154,8 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
                 PostViewHolder.bindItem(
                     postViewItem,
                     post_detail_container,
-                    userLocation
+                    userLocation,
+                    postViewItem.likes.containsKey(postViewModel.userRepo.getCurrentUserId())
                 )
 
                 // listeners
@@ -269,14 +270,7 @@ class PostDetailFragment : Fragment(), PostOptionsListener, ListItemListener {
         }
         updateLikes(postViewItem.likes) {
             if (context == null) return@updateLikes
-            user_post_like.setCompoundDrawables(
-                if (postViewItem.likes.contains(userId)) {
-                    ContextCompat.getDrawable(context!!, R.drawable.ic_favorite_filled)
-                } else {
-                    ContextCompat.getDrawable(context!!, R.drawable.ic_favorite_border)
-                },
-                null, null, null
-            )
+            user_post_like_checkbox.isChecked = postViewItem.likes.contains(userId)
         }
     }
 

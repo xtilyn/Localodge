@@ -291,7 +291,8 @@ class PaymentFragment : Fragment() {
                         PostViewHolder.bindItem(
                             pendingPostViewItem,
                             dh.dialogView.list_item_user_post_container,
-                            it.second
+                            it.second,
+                            false
                         )
                         dh.dialogView.promotion_method.text =
                             PromotionRatingHelper.titles[pendingPost.rating]
