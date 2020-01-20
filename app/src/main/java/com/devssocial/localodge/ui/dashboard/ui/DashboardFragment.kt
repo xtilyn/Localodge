@@ -427,7 +427,6 @@ class DashboardFragment :
                     )
                 }
             }
-            R.id.user_post_like_checkbox,
             R.id.user_post_like -> {
                 postsAdapter.notifyItemChanged(
                     position,

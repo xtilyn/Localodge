@@ -173,6 +173,8 @@
 																				android:background="@drawable/like_selector"
 																				android:button="@null"
 																				android:checked="false"
+																				android:clickable="false"
+																				android:focusable="false"
 																				/>
 
 												<TextView

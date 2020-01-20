@@ -42,7 +42,6 @@ class PostsAdapter(
         holder.itemView.user_post_like.setOnClickListener(onClick)
         holder.itemView.user_post_comment.setOnClickListener(onClick)
         holder.itemView.user_post_more_options.setOnClickListener(onClick)
-        holder.itemView.user_post_like_checkbox.setOnClickListener(onClick)
     }
 
     override fun onBindViewHolder(
