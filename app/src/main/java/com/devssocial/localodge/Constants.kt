@@ -4,13 +4,6 @@ package com.devssocial.localodge
 const val LOCALODGE_SHARED_PREF = "com.localodge.shared_pref"
 const val TRIAL_ACCOUNT_REQUESTED = "trialAccRequested"
 
-// ALGOLIA API
-const val ALGOLIA_APP_ID = "L4UXH3U7Y3"
-const val ALGOLIA_SEARCH_API_KEY = "80571fb1652061854afb2cce4db3b1ae"
-
-// ALGOLIA indices
-const val POSTS_INDEX = "posts"
-
 // firestore collections
 const val COLLECTION_AVATARS = "avatars"
 const val COLLECTION_USERS = "users"
